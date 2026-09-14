@@ -73,6 +73,22 @@ public final class Topic {
         return new Topic(newId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
     }
 
+    public Topic withName(String newName) {
+        return new Topic(this.id, newName, this.slug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withSlug(String newSlug) {
+        return new Topic(this.id, this.name, newSlug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withDescription(String newDescription) {
+        return new Topic(this.id, this.name, this.slug, newDescription, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withDisplayOrder(int newDisplayOrder) {
+        return new Topic(this.id, this.name, this.slug, this.description, newDisplayOrder, this.createdAt);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

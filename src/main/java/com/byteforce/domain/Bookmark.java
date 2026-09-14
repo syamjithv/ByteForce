@@ -54,6 +54,10 @@ public final class Bookmark {
         return new Bookmark(newId, this.userId, this.questionId, this.notes, this.createdAt);
     }
 
+    public Bookmark withNotes(String newNotes) {
+        return new Bookmark(this.id, this.userId, this.questionId, newNotes, this.createdAt);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

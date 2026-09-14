@@ -100,6 +100,36 @@ public final class Question {
                 this.difficulty, this.solution, this.createdAt, this.updatedAt);
     }
 
+    public Question withTitle(String newTitle) {
+        return new Question(this.id, this.topicId, newTitle, this.slug, this.description,
+                this.difficulty, this.solution, this.createdAt, Instant.now());
+    }
+
+    public Question withDescription(String newDescription) {
+        return new Question(this.id, this.topicId, this.title, this.slug, newDescription,
+                this.difficulty, this.solution, this.createdAt, Instant.now());
+    }
+
+    public Question withDifficulty(Difficulty newDifficulty) {
+        return new Question(this.id, this.topicId, this.title, this.slug, this.description,
+                newDifficulty, this.solution, this.createdAt, Instant.now());
+    }
+
+    public Question withSolution(String newSolution) {
+        return new Question(this.id, this.topicId, this.title, this.slug, this.description,
+                this.difficulty, newSolution, this.createdAt, Instant.now());
+    }
+
+    public Question withTopicId(long newTopicId) {
+        return new Question(this.id, newTopicId, this.title, this.slug, this.description,
+                this.difficulty, this.solution, this.createdAt, Instant.now());
+    }
+
+    public Question withSlug(String newSlug) {
+        return new Question(this.id, this.topicId, this.title, newSlug, this.description,
+                this.difficulty, this.solution, this.createdAt, Instant.now());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

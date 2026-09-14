@@ -1,5 +1,6 @@
 package com.byteforce.service;
 
+import com.byteforce.domain.ActivityType;
 import com.byteforce.domain.Role;
 import com.byteforce.domain.User;
 import com.byteforce.exception.AuthenticationException;
@@ -28,15 +29,22 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordHasher passwordHasher;
     private final UserSession userSession;
+    private final ActivityService activityService;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordHasher passwordHasher, UserSession userSession) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordHasher passwordHasher,
+                           UserSession userSession, ActivityService activityService) {
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository must not be null");
         this.passwordHasher = Objects.requireNonNull(passwordHasher, "passwordHasher must not be null");
         this.userSession = Objects.requireNonNull(userSession, "userSession must not be null");
+        this.activityService = activityService;
+    }
+
+    public AuthServiceImpl(UserRepository userRepository, PasswordHasher passwordHasher, UserSession userSession) {
+        this(userRepository, passwordHasher, userSession, null);
     }
 
     public AuthServiceImpl(UserRepository userRepository, PasswordHasher passwordHasher) {
-        this(userRepository, passwordHasher, UserSession.getInstance());
+        this(userRepository, passwordHasher, UserSession.getInstance(), null);
     }
 
     @Override
@@ -74,6 +82,15 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(newUser);
         log.info("Registered new student user '{}' with email '{}'", savedUser.getId(), normalizedEmail);
+
+        if (activityService != null) {
+            try {
+                activityService.recordActivity(savedUser.getId(), ActivityType.REGISTRATION, "Account registered with email: " + normalizedEmail);
+            } catch (Exception e) {
+                log.warn("Failed to record registration activity for user {}", savedUser.getId(), e);
+            }
+        }
+
         return savedUser;
     }
 
@@ -98,6 +115,15 @@ public class AuthServiceImpl implements AuthService {
 
         userSession.login(user);
         log.info("User '{}' authenticated successfully. Session initiated.", user.getId());
+
+        if (activityService != null) {
+            try {
+                activityService.recordActivity(user.getId(), ActivityType.LOGIN, "User logged in: " + normalizedEmail);
+            } catch (Exception e) {
+                log.warn("Failed to record login activity for user {}", user.getId(), e);
+            }
+        }
+
         return user;
     }
 
