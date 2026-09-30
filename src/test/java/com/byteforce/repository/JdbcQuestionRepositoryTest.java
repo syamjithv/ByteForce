@@ -14,7 +14,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -374,5 +378,69 @@ class JdbcQuestionRepositoryTest {
         assertThrows(ByteForceException.class, () -> brokenRepo.count());
         assertThrows(ByteForceException.class, () -> brokenRepo.countByTopicId(1L));
         assertThrows(ByteForceException.class, () -> brokenRepo.countByDifficulty(Difficulty.EASY));
+        assertThrows(ByteForceException.class, () -> brokenRepo.countByQuestionType(com.byteforce.domain.QuestionType.CODING));
+    }
+
+    @Test
+    @DisplayName("Should persist and retrieve all supported QuestionTypes")
+    void shouldPersistAndRetrieveAllQuestionTypes() {
+        for (com.byteforce.domain.QuestionType type : com.byteforce.domain.QuestionType.values()) {
+            Question q = Question.create(defaultTopic.getId(), "Title for " + type,
+                    "slug-type-" + type.name().toLowerCase(), "Desc", Difficulty.MEDIUM, type, "Sol");
+            Question saved = questionRepository.save(q);
+            assertTrue(saved.getId() > 0);
+
+            Optional<Question> found = questionRepository.findById(saved.getId());
+            assertTrue(found.isPresent());
+            assertEquals(type, found.get().getQuestionType());
+        }
+
+        List<Question> mcqs = questionRepository.findByQuestionType(com.byteforce.domain.QuestionType.MCQ);
+        assertEquals(1, mcqs.size());
+        assertEquals("slug-type-mcq", mcqs.get(0).getSlug());
+
+        assertEquals(1, questionRepository.countByQuestionType(com.byteforce.domain.QuestionType.SQL));
+    }
+
+    @Test
+    @DisplayName("Should default raw/legacy database questions to CODING question type")
+    void shouldDefaultLegacyQuestionsToCoding() throws SQLException {
+        long rawId;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO questions (topic_id, title, slug, description, difficulty, solution) VALUES (?, ?, ?, ?, ?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
+            ps.setLong(1, defaultTopic.getId());
+            ps.setString(2, "Legacy Question");
+            ps.setString(3, "legacy-question-slug");
+            ps.setString(4, "Legacy Description");
+            ps.setString(5, "EASY");
+            ps.setString(6, "Legacy Solution");
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                assertTrue(rs.next());
+                rawId = rs.getLong(1);
+            }
+        }
+
+        Optional<Question> retrieved = questionRepository.findById(rawId);
+        assertTrue(retrieved.isPresent());
+        assertEquals(com.byteforce.domain.QuestionType.CODING, retrieved.get().getQuestionType());
+    }
+
+    @Test
+    @DisplayName("Should update QuestionType successfully")
+    void shouldUpdateQuestionTypeSuccessfully() {
+        Question q = Question.create(defaultTopic.getId(), "Original Coding", "orig-coding", "Desc", Difficulty.EASY, "Code");
+        Question saved = questionRepository.save(q);
+        assertEquals(com.byteforce.domain.QuestionType.CODING, saved.getQuestionType());
+
+        Question updated = saved.withQuestionType(com.byteforce.domain.QuestionType.CONCEPTUAL);
+        Question reSaved = questionRepository.save(updated);
+        assertEquals(com.byteforce.domain.QuestionType.CONCEPTUAL, reSaved.getQuestionType());
+
+        Optional<Question> found = questionRepository.findById(saved.getId());
+        assertTrue(found.isPresent());
+        assertEquals(com.byteforce.domain.QuestionType.CONCEPTUAL, found.get().getQuestionType());
     }
 }

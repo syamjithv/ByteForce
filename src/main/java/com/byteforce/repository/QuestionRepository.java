@@ -2,6 +2,7 @@ package com.byteforce.repository;
 
 import com.byteforce.domain.Difficulty;
 import com.byteforce.domain.Question;
+import com.byteforce.domain.QuestionType;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,8 @@ public interface QuestionRepository {
 
     List<Question> findByDifficulty(Difficulty difficulty);
 
+    List<Question> findByQuestionType(QuestionType questionType);
+
     List<Question> findByTopicIdAndDifficulty(long topicId, Difficulty difficulty);
 
     List<Question> search(String keyword);
@@ -38,4 +41,6 @@ public interface QuestionRepository {
     long countByTopicId(long topicId);
 
     long countByDifficulty(Difficulty difficulty);
+
+    long countByQuestionType(QuestionType questionType);
 }

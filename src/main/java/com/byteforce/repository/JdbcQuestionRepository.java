@@ -2,6 +2,7 @@ package com.byteforce.repository;
 
 import com.byteforce.domain.Difficulty;
 import com.byteforce.domain.Question;
+import com.byteforce.domain.QuestionType;
 import com.byteforce.exception.ByteForceException;
 import com.byteforce.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class JdbcQuestionRepository implements QuestionRepository {
     private static final Logger log = LoggerFactory.getLogger(JdbcQuestionRepository.class);
 
     private static final String SELECT_BASE = """
-            SELECT id, topic_id, title, slug, description, difficulty, solution, created_at, updated_at
+            SELECT id, topic_id, title, slug, description, difficulty, question_type, solution, created_at, updated_at
             FROM questions
             """;
 
@@ -104,6 +105,15 @@ public class JdbcQuestionRepository implements QuestionRepository {
     }
 
     @Override
+    public List<Question> findByQuestionType(QuestionType questionType) {
+        if (questionType == null) {
+            return List.of();
+        }
+        String sql = SELECT_BASE + " WHERE question_type = ? ORDER BY id ASC";
+        return queryList(sql, ps -> ps.setString(1, questionType.name()));
+    }
+
+    @Override
     public List<Question> findByTopicIdAndDifficulty(long topicId, Difficulty difficulty) {
         if (topicId <= 0 || difficulty == null) {
             return List.of();
@@ -140,8 +150,8 @@ public class JdbcQuestionRepository implements QuestionRepository {
 
     private Question insert(Question question) {
         String sql = """
-                INSERT INTO questions (topic_id, title, slug, description, difficulty, solution, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO questions (topic_id, title, slug, description, difficulty, question_type, solution, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -150,9 +160,10 @@ public class JdbcQuestionRepository implements QuestionRepository {
             ps.setString(3, question.getSlug());
             ps.setString(4, question.getDescription());
             ps.setString(5, question.getDifficulty().name());
-            ps.setString(6, question.getSolution());
-            ps.setTimestamp(7, Timestamp.from(question.getCreatedAt()));
-            ps.setTimestamp(8, Timestamp.from(question.getUpdatedAt()));
+            ps.setString(6, question.getQuestionType().name());
+            ps.setString(7, question.getSolution());
+            ps.setTimestamp(8, Timestamp.from(question.getCreatedAt()));
+            ps.setTimestamp(9, Timestamp.from(question.getUpdatedAt()));
 
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -174,7 +185,7 @@ public class JdbcQuestionRepository implements QuestionRepository {
     private Question update(Question question) {
         String sql = """
                 UPDATE questions
-                SET topic_id = ?, title = ?, slug = ?, description = ?, difficulty = ?, solution = ?, updated_at = ?
+                SET topic_id = ?, title = ?, slug = ?, description = ?, difficulty = ?, question_type = ?, solution = ?, updated_at = ?
                 WHERE id = ?
                 """;
         try (Connection conn = dataSource.getConnection();
@@ -184,10 +195,11 @@ public class JdbcQuestionRepository implements QuestionRepository {
             ps.setString(3, question.getSlug());
             ps.setString(4, question.getDescription());
             ps.setString(5, question.getDifficulty().name());
-            ps.setString(6, question.getSolution());
+            ps.setString(6, question.getQuestionType().name());
+            ps.setString(7, question.getSolution());
             Instant now = Instant.now();
-            ps.setTimestamp(7, Timestamp.from(now));
-            ps.setLong(8, question.getId());
+            ps.setTimestamp(8, Timestamp.from(now));
+            ps.setLong(9, question.getId());
 
             int updated = ps.executeUpdate();
             if (updated == 0) {
@@ -195,7 +207,7 @@ public class JdbcQuestionRepository implements QuestionRepository {
             }
             return new Question(question.getId(), question.getTopicId(), question.getTitle(),
                     question.getSlug(), question.getDescription(), question.getDifficulty(),
-                    question.getSolution(), question.getCreatedAt(), now);
+                    question.getQuestionType(), question.getSolution(), question.getCreatedAt(), now);
         } catch (SQLException e) {
             if (isDuplicateKeyViolation(e)) {
                 throw new ByteForceException("A question with slug '" + question.getSlug() + "' already exists.", e);
@@ -255,17 +267,7 @@ public class JdbcQuestionRepository implements QuestionRepository {
 
     @Override
     public long count() {
-        String sql = "SELECT COUNT(*) FROM questions";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
-            return 0;
-        } catch (SQLException e) {
-            throw new ByteForceException("Database error while counting questions", e);
-        }
+        return queryCount("SELECT COUNT(*) FROM questions", ps -> {});
     }
 
     @Override
@@ -273,19 +275,7 @@ public class JdbcQuestionRepository implements QuestionRepository {
         if (topicId <= 0) {
             return 0;
         }
-        String sql = "SELECT COUNT(*) FROM questions WHERE topic_id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, topicId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new ByteForceException("Database error while counting questions for topic: " + topicId, e);
-        }
+        return queryCount("SELECT COUNT(*) FROM questions WHERE topic_id = ?", ps -> ps.setLong(1, topicId));
     }
 
     @Override
@@ -293,27 +283,23 @@ public class JdbcQuestionRepository implements QuestionRepository {
         if (difficulty == null) {
             return 0;
         }
-        String sql = "SELECT COUNT(*) FROM questions WHERE difficulty = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, difficulty.name());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new ByteForceException("Database error while counting questions for difficulty: " + difficulty, e);
+        return queryCount("SELECT COUNT(*) FROM questions WHERE difficulty = ?", ps -> ps.setString(1, difficulty.name()));
+    }
+
+    @Override
+    public long countByQuestionType(QuestionType questionType) {
+        if (questionType == null) {
+            return 0;
         }
+        return queryCount("SELECT COUNT(*) FROM questions WHERE question_type = ?", ps -> ps.setString(1, questionType.name()));
     }
 
     @FunctionalInterface
-    private interface StatementSetter {
+    private interface PreparedStatementSetter {
         void setValues(PreparedStatement ps) throws SQLException;
     }
 
-    private List<Question> queryList(String sql, StatementSetter setter) {
+    private List<Question> queryList(String sql, PreparedStatementSetter setter) {
         List<Question> questions = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -326,6 +312,21 @@ public class JdbcQuestionRepository implements QuestionRepository {
             return questions;
         } catch (SQLException e) {
             throw new ByteForceException("Database error while querying questions", e);
+        }
+    }
+
+    private long queryCount(String sql, PreparedStatementSetter setter) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            setter.setValues(ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new ByteForceException("Database error while counting questions", e);
         }
     }
 
@@ -344,13 +345,22 @@ public class JdbcQuestionRepository implements QuestionRepository {
                 log.warn("Unknown difficulty '{}' for question ID {}, defaulting to MEDIUM", difficultyStr, id);
             }
         }
+        String typeStr = rs.getString("question_type");
+        QuestionType questionType = QuestionType.CODING;
+        if (typeStr != null) {
+            try {
+                questionType = QuestionType.valueOf(typeStr.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown question_type '{}' for question ID {}, defaulting to CODING", typeStr, id);
+            }
+        }
         String solution = rs.getString("solution");
         Timestamp createdTs = rs.getTimestamp("created_at");
         Instant createdAt = createdTs != null ? createdTs.toInstant() : Instant.now();
         Timestamp updatedTs = rs.getTimestamp("updated_at");
         Instant updatedAt = updatedTs != null ? updatedTs.toInstant() : Instant.now();
 
-        return new Question(id, topicId, title, slug, description, difficulty, solution, createdAt, updatedAt);
+        return new Question(id, topicId, title, slug, description, difficulty, questionType, solution, createdAt, updatedAt);
     }
 
     private boolean isDuplicateKeyViolation(SQLException e) {

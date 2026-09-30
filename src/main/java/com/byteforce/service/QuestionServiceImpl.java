@@ -2,6 +2,7 @@ package com.byteforce.service;
 
 import com.byteforce.domain.Difficulty;
 import com.byteforce.domain.Question;
+import com.byteforce.domain.QuestionType;
 import com.byteforce.exception.ResourceNotFoundException;
 import com.byteforce.exception.ValidationException;
 import com.byteforce.repository.QuestionRepository;
@@ -31,6 +32,12 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Question createQuestion(long topicId, String title, String slug, String description,
                                    Difficulty difficulty, String solution) {
+        return createQuestion(topicId, title, slug, description, difficulty, QuestionType.CODING, solution);
+    }
+
+    @Override
+    public Question createQuestion(long topicId, String title, String slug, String description,
+                                   Difficulty difficulty, QuestionType questionType, String solution) {
         if (!topicRepository.existsById(topicId)) {
             throw new ValidationException("Cannot create question: Topic not found with ID: " + topicId);
         }
@@ -46,21 +53,32 @@ public class QuestionServiceImpl implements QuestionService {
         if (difficulty == null) {
             throw new ValidationException("Question difficulty must not be null.");
         }
+        if (questionType == null) {
+            throw new ValidationException("Question type must not be null.");
+        }
 
         String normalizedSlug = slug.trim().toLowerCase();
         if (questionRepository.existsBySlug(normalizedSlug)) {
             throw new ValidationException("A question with slug '" + normalizedSlug + "' already exists.");
         }
 
-        Question question = Question.create(topicId, title.trim(), normalizedSlug, description.trim(), difficulty, solution);
+        Question question = Question.create(topicId, title.trim(), normalizedSlug, description.trim(), difficulty, questionType, solution);
         Question saved = questionRepository.save(question);
-        log.info("Created question with ID {} under topic ID {}", saved.getId(), topicId);
+        log.info("Created question with ID {} of type {} under topic ID {}", saved.getId(), questionType, topicId);
         return saved;
     }
 
     @Override
     public Question updateQuestion(long id, long topicId, String title, String slug, String description,
                                    Difficulty difficulty, String solution) {
+        Question existing = questionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with ID: " + id));
+        return updateQuestion(id, topicId, title, slug, description, difficulty, existing.getQuestionType(), solution);
+    }
+
+    @Override
+    public Question updateQuestion(long id, long topicId, String title, String slug, String description,
+                                   Difficulty difficulty, QuestionType questionType, String solution) {
         Question existing = questionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with ID: " + id));
 
@@ -79,6 +97,9 @@ public class QuestionServiceImpl implements QuestionService {
         if (difficulty == null) {
             throw new ValidationException("Question difficulty must not be null.");
         }
+        if (questionType == null) {
+            throw new ValidationException("Question type must not be null.");
+        }
 
         String normalizedSlug = slug.trim().toLowerCase();
         if (!existing.getSlug().equalsIgnoreCase(normalizedSlug) && questionRepository.existsBySlug(normalizedSlug)) {
@@ -91,6 +112,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .withSlug(normalizedSlug)
                 .withDescription(description.trim())
                 .withDifficulty(difficulty)
+                .withQuestionType(questionType)
                 .withSolution(solution);
 
         Question saved = questionRepository.save(updatedQuestion);
@@ -121,6 +143,11 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public List<Question> getQuestionsByDifficulty(Difficulty difficulty) {
         return questionRepository.findByDifficulty(difficulty);
+    }
+
+    @Override
+    public List<Question> getQuestionsByType(QuestionType questionType) {
+        return questionRepository.findByQuestionType(questionType);
     }
 
     @Override

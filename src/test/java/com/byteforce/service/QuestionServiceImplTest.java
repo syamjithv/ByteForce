@@ -176,4 +176,38 @@ class QuestionServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> questionService.deleteQuestion(999L));
         verify(questionRepository, never()).deleteById(anyLong());
     }
+
+    @Test
+    @DisplayName("createQuestion with explicit QuestionType should persist correctly")
+    void createQuestionWithQuestionTypeShouldSucceed() {
+        when(topicRepository.existsById(10L)).thenReturn(true);
+        when(questionRepository.existsBySlug("sql-joins")).thenReturn(false);
+        when(questionRepository.save(any(Question.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Question created = questionService.createQuestion(
+                10L, "SQL Joins", "sql-joins", "Query desc", Difficulty.MEDIUM, com.byteforce.domain.QuestionType.SQL, "SELECT * FROM a JOIN b");
+
+        assertNotNull(created);
+        assertEquals(com.byteforce.domain.QuestionType.SQL, created.getQuestionType());
+        verify(questionRepository).save(any(Question.class));
+    }
+
+    @Test
+    @DisplayName("createQuestion should throw ValidationException when questionType is null")
+    void createQuestionShouldThrowWhenQuestionTypeNull() {
+        when(topicRepository.existsById(10L)).thenReturn(true);
+
+        assertThrows(ValidationException.class, () ->
+                questionService.createQuestion(10L, "Title", "slug", "Desc", Difficulty.EASY, null, "Sol"));
+    }
+
+    @Test
+    @DisplayName("getQuestionsByType should delegate to repository")
+    void getQuestionsByTypeShouldDelegate() {
+        when(questionRepository.findByQuestionType(com.byteforce.domain.QuestionType.MCQ)).thenReturn(List.of(sampleQuestion));
+
+        List<Question> result = questionService.getQuestionsByType(com.byteforce.domain.QuestionType.MCQ);
+        assertEquals(1, result.size());
+        verify(questionRepository).findByQuestionType(com.byteforce.domain.QuestionType.MCQ);
+    }
 }

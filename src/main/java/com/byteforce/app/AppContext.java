@@ -4,9 +4,11 @@ import com.byteforce.config.AppConfig;
 import com.byteforce.persistence.DataSourceFactory;
 import com.byteforce.persistence.DatabaseMigrator;
 import com.byteforce.repository.ActivityRepository;
+import com.byteforce.repository.AssessmentAnswerRepository;
 import com.byteforce.repository.AttemptRepository;
 import com.byteforce.repository.BookmarkRepository;
 import com.byteforce.repository.JdbcActivityRepository;
+import com.byteforce.repository.JdbcAssessmentAnswerRepository;
 import com.byteforce.repository.JdbcAttemptRepository;
 import com.byteforce.repository.JdbcBookmarkRepository;
 import com.byteforce.repository.JdbcQuestionRepository;
@@ -64,6 +66,7 @@ public class AppContext implements AutoCloseable {
     private final BookmarkRepository bookmarkRepository;
     private final AttemptRepository attemptRepository;
     private final ActivityRepository activityRepository;
+    private final AssessmentAnswerRepository assessmentAnswerRepository;
 
     // Services
     private final ActivityService activityService;
@@ -105,6 +108,7 @@ public class AppContext implements AutoCloseable {
         this.bookmarkRepository = new JdbcBookmarkRepository(dataSource);
         this.attemptRepository = new JdbcAttemptRepository(dataSource);
         this.activityRepository = new JdbcActivityRepository(dataSource);
+        this.assessmentAnswerRepository = new JdbcAssessmentAnswerRepository(dataSource);
 
         log.info("Wiring ByteForce services...");
         this.activityService = new ActivityServiceImpl(activityRepository);
@@ -176,6 +180,10 @@ public class AppContext implements AutoCloseable {
 
     public ActivityRepository getActivityRepository() {
         return activityRepository;
+    }
+
+    public AssessmentAnswerRepository getAssessmentAnswerRepository() {
+        return assessmentAnswerRepository;
     }
 
     public ActivityService getActivityService() {

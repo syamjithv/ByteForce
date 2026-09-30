@@ -45,12 +45,12 @@ class FlywayMigrationTest {
     }
 
     @Test
-    @DisplayName("Should apply V1 migration and create all 12 core tables from database-design.md")
+    @DisplayName("Should apply V1 and V2 migrations and create all core tables including assessment_answers")
     void shouldApplyInitialMigrationSuccessfully() throws SQLException {
         int migrationsExecuted = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(1, migrationsExecuted, "Initial V1 migration should execute exactly 1 script");
+        assertEquals(2, migrationsExecuted, "Flyway migrations should execute V1 and V2 scripts");
 
-        // Verify that all 12 planned core entities exist as tables
+        // Verify that all core entities exist as tables
         Set<String> expectedTables = Set.of(
                 "roles",
                 "users",
@@ -63,7 +63,8 @@ class FlywayMigrationTest {
                 "activities",
                 "assessments",
                 "assessment_questions",
-                "assessment_attempts"
+                "assessment_attempts",
+                "assessment_answers"
         );
 
         Set<String> actualTables = new HashSet<>();
@@ -160,10 +161,37 @@ class FlywayMigrationTest {
     @DisplayName("Migration should be idempotent when re-run on an up-to-date schema")
     void migrationShouldBeIdempotent() {
         int firstRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(1, firstRun);
+        assertEquals(2, firstRun);
 
         int secondRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
         assertEquals(0, secondRun, "Subsequent migration run should execute 0 scripts");
+    }
+
+    @Test
+    @DisplayName("Should verify V2 columns on questions, assessments, and assessment_answers")
+    void shouldVerifyV2Enhancements() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            // Verify questions.question_type exists
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT question_type FROM questions WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+
+            // Verify assessments.difficulty and assessments.topic_id exist
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT difficulty, topic_id FROM assessments WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+
+            // Verify assessment_answers columns exist
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(
+                         "SELECT id, assessment_attempt_id, question_id, submitted_answer, marks_awarded, status, answered_at FROM assessment_answers WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+        }
     }
 
     @Test

@@ -4,7 +4,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Immutable domain entity representing a coding question.
+ * Immutable domain entity representing a placement preparation question
+ * (coding, MCQ, SQL, or conceptual).
  */
 public final class Question {
 
@@ -14,12 +15,14 @@ public final class Question {
     private final String slug;
     private final String description;
     private final Difficulty difficulty;
+    private final QuestionType questionType;
     private final String solution;
     private final Instant createdAt;
     private final Instant updatedAt;
 
     public Question(long id, long topicId, String title, String slug, String description,
-                    Difficulty difficulty, String solution, Instant createdAt, Instant updatedAt) {
+                    Difficulty difficulty, QuestionType questionType, String solution,
+                    Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.topicId = topicId;
 
@@ -42,18 +45,35 @@ public final class Question {
         this.description = description.trim();
 
         this.difficulty = Objects.requireNonNull(difficulty, "difficulty must not be null");
+        this.questionType = Objects.requireNonNull(questionType, "questionType must not be null");
         this.solution = solution;
         this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
         this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
     }
 
     /**
-     * Factory for creating a new question (id 0 indicates unsaved).
+     * Backward-compatible constructor defaulting to {@link QuestionType#CODING}.
+     */
+    public Question(long id, long topicId, String title, String slug, String description,
+                    Difficulty difficulty, String solution, Instant createdAt, Instant updatedAt) {
+        this(id, topicId, title, slug, description, difficulty, QuestionType.CODING, solution, createdAt, updatedAt);
+    }
+
+    /**
+     * Factory for creating a new question with a specific question type (id 0 indicates unsaved).
+     */
+    public static Question create(long topicId, String title, String slug, String description,
+                                  Difficulty difficulty, QuestionType questionType, String solution) {
+        Instant now = Instant.now();
+        return new Question(0, topicId, title, slug, description, difficulty, questionType, solution, now, now);
+    }
+
+    /**
+     * Factory for creating a new coding question (id 0 indicates unsaved).
      */
     public static Question create(long topicId, String title, String slug, String description,
                                   Difficulty difficulty, String solution) {
-        Instant now = Instant.now();
-        return new Question(0, topicId, title, slug, description, difficulty, solution, now, now);
+        return create(topicId, title, slug, description, difficulty, QuestionType.CODING, solution);
     }
 
     public long getId() {
@@ -80,6 +100,10 @@ public final class Question {
         return difficulty;
     }
 
+    public QuestionType getQuestionType() {
+        return questionType;
+    }
+
     public String getSolution() {
         return solution;
     }
@@ -97,37 +121,42 @@ public final class Question {
      */
     public Question withId(long newId) {
         return new Question(newId, this.topicId, this.title, this.slug, this.description,
-                this.difficulty, this.solution, this.createdAt, this.updatedAt);
+                this.difficulty, this.questionType, this.solution, this.createdAt, this.updatedAt);
     }
 
     public Question withTitle(String newTitle) {
         return new Question(this.id, this.topicId, newTitle, this.slug, this.description,
-                this.difficulty, this.solution, this.createdAt, Instant.now());
+                this.difficulty, this.questionType, this.solution, this.createdAt, Instant.now());
     }
 
     public Question withDescription(String newDescription) {
         return new Question(this.id, this.topicId, this.title, this.slug, newDescription,
-                this.difficulty, this.solution, this.createdAt, Instant.now());
+                this.difficulty, this.questionType, this.solution, this.createdAt, Instant.now());
     }
 
     public Question withDifficulty(Difficulty newDifficulty) {
         return new Question(this.id, this.topicId, this.title, this.slug, this.description,
-                newDifficulty, this.solution, this.createdAt, Instant.now());
+                newDifficulty, this.questionType, this.solution, this.createdAt, Instant.now());
+    }
+
+    public Question withQuestionType(QuestionType newQuestionType) {
+        return new Question(this.id, this.topicId, this.title, this.slug, this.description,
+                this.difficulty, newQuestionType, this.solution, this.createdAt, Instant.now());
     }
 
     public Question withSolution(String newSolution) {
         return new Question(this.id, this.topicId, this.title, this.slug, this.description,
-                this.difficulty, newSolution, this.createdAt, Instant.now());
+                this.difficulty, this.questionType, newSolution, this.createdAt, Instant.now());
     }
 
     public Question withTopicId(long newTopicId) {
         return new Question(this.id, newTopicId, this.title, this.slug, this.description,
-                this.difficulty, this.solution, this.createdAt, Instant.now());
+                this.difficulty, this.questionType, this.solution, this.createdAt, Instant.now());
     }
 
     public Question withSlug(String newSlug) {
         return new Question(this.id, this.topicId, this.title, newSlug, this.description,
-                this.difficulty, this.solution, this.createdAt, Instant.now());
+                this.difficulty, this.questionType, this.solution, this.createdAt, Instant.now());
     }
 
     @Override
@@ -150,6 +179,7 @@ public final class Question {
                 ", topicId=" + topicId +
                 ", title='" + title + '\'' +
                 ", difficulty=" + difficulty +
+                ", questionType=" + questionType +
                 '}';
     }
 }
