@@ -24,6 +24,7 @@ class ByteForceFrameTest {
         assertEquals(ByteForceFrame.VIEW_LOGIN, frame.getCurrentView());
         assertNotNull(frame.getLoginPanel());
         assertNotNull(frame.getDashboardPanel());
+        assertNotNull(frame.getPracticePanel());
         frame.dispose();
     }
 
@@ -33,11 +34,12 @@ class ByteForceFrameTest {
         ByteForceFrame frame = new ByteForceFrame(mockAuthService);
         assertNotNull(frame);
         assertEquals(ByteForceFrame.VIEW_LOGIN, frame.getCurrentView());
+        assertNotNull(frame.getPracticePanel());
         frame.dispose();
     }
 
     @Test
-    @DisplayName("Card navigation should transition between Login and Dashboard views")
+    @DisplayName("Card navigation should transition between Login, Dashboard, and Practice views")
     void shouldSwitchViewsUsingCardNavigation() {
         ByteForceFrame frame = new ByteForceFrame(mockAuthService);
 
@@ -46,11 +48,17 @@ class ByteForceFrameTest {
         frame.showDashboard();
         assertEquals(ByteForceFrame.VIEW_DASHBOARD, frame.getCurrentView());
 
+        frame.showPractice();
+        assertEquals(ByteForceFrame.VIEW_PRACTICE, frame.getCurrentView());
+
         frame.showLogin();
         assertEquals(ByteForceFrame.VIEW_LOGIN, frame.getCurrentView());
 
         frame.showView(ByteForceFrame.VIEW_DASHBOARD);
         assertEquals(ByteForceFrame.VIEW_DASHBOARD, frame.getCurrentView());
+
+        frame.showView(ByteForceFrame.VIEW_PRACTICE);
+        assertEquals(ByteForceFrame.VIEW_PRACTICE, frame.getCurrentView());
 
         frame.dispose();
     }

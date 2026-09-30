@@ -92,4 +92,20 @@ class DashboardPanelTest {
         verify(mockAuthService).logout();
         assertTrue(logoutCallbackInvoked.get(), "Logout callback should be invoked");
     }
+
+    @Test
+    @DisplayName("Practice button should trigger onStartPractice callback when configured")
+    void shouldTriggerStartPracticeCallbackOnButtonClick() {
+        AtomicBoolean practiceCallbackInvoked = new AtomicBoolean(false);
+        DashboardPanel panel = new DashboardPanel(mockAuthService, () -> {}, () -> practiceCallbackInvoked.set(true));
+
+        User student = User.create("student@byteforce.com", "hash", "Alice Developer", Role.STUDENT);
+        when(mockAuthService.isAuthenticated()).thenReturn(true);
+        when(mockAuthService.getCurrentUser()).thenReturn(Optional.of(student));
+
+        panel.refresh();
+        panel.getPracticeButton().doClick();
+
+        assertTrue(practiceCallbackInvoked.get(), "Start practice callback should be invoked");
+    }
 }

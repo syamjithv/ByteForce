@@ -45,6 +45,7 @@ public class DashboardPanel extends JPanel {
 
     private final AuthService authService;
     private final Runnable onLogout;
+    private final Runnable onStartPractice;
 
     private final JLabel welcomeLabel;
     private final JLabel studentNameValueLabel;
@@ -54,13 +55,18 @@ public class DashboardPanel extends JPanel {
     private final JButton practiceButton;
 
     public DashboardPanel() {
-        this(null, null);
+        this(null, null, null);
     }
 
     public DashboardPanel(AuthService authService, Runnable onLogout) {
+        this(authService, onLogout, null);
+    }
+
+    public DashboardPanel(AuthService authService, Runnable onLogout, Runnable onStartPractice) {
         super(new BorderLayout());
         this.authService = authService;
         this.onLogout = onLogout;
+        this.onStartPractice = onStartPractice;
 
         setBackground(BG_PAGE);
 
@@ -161,7 +167,7 @@ public class DashboardPanel extends JPanel {
         practiceDesc.setForeground(COLOR_TEXT_MUTED);
         practiceDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        practiceButton = new JButton("Practice Questions (Milestone 2)");
+        practiceButton = new JButton("Practice Questions");
         practiceButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         practiceButton.setForeground(Color.WHITE);
         practiceButton.setBackground(COLOR_PRIMARY);
@@ -174,12 +180,16 @@ public class DashboardPanel extends JPanel {
         practiceButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         practiceButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "The Practice module is scheduled for implementation in Milestone 2.",
-                    "Practice Workflow",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            if (onStartPractice != null) {
+                onStartPractice.run();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "The Practice module is scheduled for implementation in Milestone 2.",
+                        "Practice Workflow",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
         });
 
         practiceCard.add(practiceTitle);
