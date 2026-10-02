@@ -12,7 +12,11 @@ public interface TopicService {
 
     Topic createTopic(String name, String slug, String description, int displayOrder);
 
+    Topic createTopic(String subjectId, String name, String slug, String description, int displayOrder);
+
     Topic updateTopic(long id, String name, String slug, String description, int displayOrder);
+
+    Topic updateTopic(long id, String subjectId, String name, String slug, String description, int displayOrder);
 
     Optional<Topic> getTopicById(long id);
 
@@ -20,5 +24,9 @@ public interface TopicService {
 
     List<Topic> getAllTopics();
 
+    List<Topic> getTopicsForSubject(String subjectId);
+
     void deleteTopic(long id);
+
+    long getTotalTopicCount();
 }

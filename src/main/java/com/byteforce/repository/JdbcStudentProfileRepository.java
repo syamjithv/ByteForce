@@ -19,13 +19,14 @@ import java.util.UUID;
 
 /**
  * Production-ready JDBC implementation of {@link StudentProfileRepository}.
+ * Manages persistence for student profiles including avatar data.
  */
 public class JdbcStudentProfileRepository implements StudentProfileRepository {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcStudentProfileRepository.class);
 
     private static final String SELECT_BASE = """
-            SELECT id, user_id, full_name, phone, college, graduation_year, created_at, updated_at
+            SELECT id, user_id, full_name, phone, college, graduation_year, avatar_url, created_at, updated_at
             FROM student_profiles
             """;
 
@@ -88,8 +89,8 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
 
     private StudentProfile insert(StudentProfile profile) {
         String sql = """
-                INSERT INTO student_profiles (id, user_id, full_name, phone, college, graduation_year, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO student_profiles (id, user_id, full_name, phone, college, graduation_year, avatar_url, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -103,8 +104,9 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
             } else {
                 ps.setNull(6, Types.INTEGER);
             }
-            ps.setTimestamp(7, Timestamp.from(profile.getCreatedAt()));
-            ps.setTimestamp(8, Timestamp.from(profile.getUpdatedAt()));
+            ps.setString(7, profile.getAvatarUrl());
+            ps.setTimestamp(8, Timestamp.from(profile.getCreatedAt()));
+            ps.setTimestamp(9, Timestamp.from(profile.getUpdatedAt()));
 
             ps.executeUpdate();
             return profile;
@@ -116,7 +118,7 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
     private StudentProfile update(StudentProfile profile) {
         String sql = """
                 UPDATE student_profiles
-                SET full_name = ?, phone = ?, college = ?, graduation_year = ?, updated_at = ?
+                SET full_name = ?, phone = ?, college = ?, graduation_year = ?, avatar_url = ?, updated_at = ?
                 WHERE user_id = ?
                 """;
         try (Connection conn = dataSource.getConnection();
@@ -130,8 +132,9 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
-            ps.setTimestamp(5, Timestamp.from(now));
-            ps.setString(6, profile.getUserId().toString());
+            ps.setString(5, profile.getAvatarUrl());
+            ps.setTimestamp(6, Timestamp.from(now));
+            ps.setString(7, profile.getUserId().toString());
 
             int updated = ps.executeUpdate();
             if (updated == 0) {
@@ -139,7 +142,7 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
             }
             return new StudentProfile(profile.getId(), profile.getUserId(), profile.getFullName(),
                     profile.getPhone(), profile.getCollege(), profile.getGraduationYear(),
-                    profile.getCreatedAt(), now);
+                    profile.getAvatarUrl(), profile.getCreatedAt(), now);
         } catch (SQLException e) {
             throw new ByteForceException("Database error while updating student profile for user: " + profile.getUserId(), e);
         }
@@ -186,12 +189,14 @@ public class JdbcStudentProfileRepository implements StudentProfileRepository {
         int year = rs.getInt("graduation_year");
         Integer graduationYear = rs.wasNull() ? null : year;
 
+        String avatarUrl = rs.getString("avatar_url");
+
         Timestamp createdTs = rs.getTimestamp("created_at");
         Instant createdAt = createdTs != null ? createdTs.toInstant() : Instant.now();
 
         Timestamp updatedTs = rs.getTimestamp("updated_at");
         Instant updatedAt = updatedTs != null ? updatedTs.toInstant() : Instant.now();
 
-        return new StudentProfile(id, userId, fullName, phone, college, graduationYear, createdAt, updatedAt);
+        return new StudentProfile(id, userId, fullName, phone, college, graduationYear, avatarUrl, createdAt, updatedAt);
     }
 }

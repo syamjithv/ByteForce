@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Cards View Fragment -->
+<div th:fragment="cardsContent" class="remember-cards-view">
+    <!-- Filter Controls Bar -->
+    <div class="card" style="padding: 18px 22px; margin-bottom: 24px; background-color: var(--bf-white);">
+        <!-- Subject Filter Pills -->
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin-bottom: 8px;">Filter by Subject</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <a th:href="@{/remember(view='cards', subject='all', type=${selectedType})}"
+                   class="btn btn-sm"
+                   th:classappend="${selectedSubject == 'all' ? 'btn-primary' : 'btn-outline'}"
+                   style="border-radius: 9999px;">
+                    All Subjects
+                </a>
+                <a th:each="subj : ${subjects}"
+                   th:href="@{/remember(view='cards', subject=${subj.id}, type=${selectedType})}"
+                   class="btn btn-sm"
+                   th:classappend="${selectedSubject == subj.id ? 'btn-primary' : 'btn-outline'}"
+                   style="border-radius: 9999px;"
+                   th:text="${subj.name}">
+                    Subject Name
+                </a>
+            </div>
+        </div>
+
+        <!-- Type Filter Pills -->
+        <div>
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin-bottom: 8px;">Filter by Revision Type</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <a th:href="@{/remember(view='cards', subject=${selectedSubject}, type='all')}"
+                   class="btn btn-sm"
+                   th:classappend="${selectedType == 'all' ? 'btn-secondary' : 'btn-ghost'}"
+                   style="border-radius: 9999px;">
+                    All Types
+                </a>
+                <a th:each="t : ${types}"
+                   th:href="@{/remember(view='cards', subject=${selectedSubject}, type=${t.name()})}"
+                   class="btn btn-sm"
+                   th:classappend="${selectedType == t.name() ? 'btn-secondary' : 'btn-ghost'}"
+                   style="border-radius: 9999px;">
+                    <span th:text="${t.icon}" style="margin-right: 4px;">💡</span>
+                    <span th:text="${t.displayName}">Key Fact</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Counter -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding: 0 4px;">
+        <div style="font-size: 0.875rem; color: var(--bf-slate-500);">
+            Showing <strong th:text="${totalCount}" style="color: var(--bf-navy-900);">0</strong> revision items
+        </div>
+        <a th:if="${selectedSubject != 'all' || selectedType != 'all'}"
+           th:href="@{/remember(view='cards')}"
+           class="btn btn-ghost btn-sm"
+           style="font-size: 0.8125rem; color: var(--bf-primary);">
+            Reset Filters ↺
+        </a>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${items.isEmpty()}" class="card" style="text-align: center; padding: 48px 24px;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">⚡</div>
+        <h3 style="font-size: 1.25rem; color: var(--bf-navy-900); margin-bottom: 6px;">No revision items found</h3>
+        <p style="color: var(--bf-slate-500); font-size: 0.9375rem; max-width: 480px; margin: 0 auto 20px auto;">
+            No Remember items match your selected subject or category filters. Reset filters or explore concepts in the Learn curriculum.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 12px;">
+            <a th:href="@{/remember(view='cards')}" class="btn btn-primary btn-sm">Clear Filters</a>
+            <a th:href="@{/learn}" class="btn btn-outline btn-sm">Browse Learn Concepts</a>
+        </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div th:if="${!items.isEmpty()}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-bottom: 32px;">
+        <div th:each="card : ${items}" class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px; border-left: 4px solid var(--bf-primary); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+            <div>
+                <!-- Top metadata row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+                    <span class="badge"
+                          th:classappend="${card.type.name() == 'KEY_FACT' ? 'badge-primary' : (card.type.name() == 'COMMON_CONFUSION' ? 'badge-hard' : (card.type.name() == 'FORMULA' ? 'badge-easy' : 'badge-purple'))}">
+                        <span th:text="${card.type.icon}" style="margin-right: 3px;">💡</span>
+                        <span th:text="${card.type.displayName}">KEY FACT</span>
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--bf-slate-500); font-weight: 500;" th:text="${card.subjectName}">Subject</span>
+                </div>
+
+                <!-- Concept Title -->
+                <h3 style="font-size: 1.125rem; margin-bottom: 8px; color: var(--bf-navy-900);">
+                    <a th:href="@{/learn/concept/{id}(id=${card.conceptId})}" style="color: inherit; text-decoration: none;" onmouseover="this.style.color='var(--bf-primary)'" onmouseout="this.style.color='inherit'" th:text="${card.conceptTitle}">
+                        Concept Title
+                    </a>
+                </h3>
+
+                <!-- Revision Content -->
+                <p style="color: var(--bf-navy-900); font-size: 0.9375rem; line-height: 1.55; margin-bottom: 12px;" th:text="${card.content}">
+                    Quick revision item text content goes here.
+                </p>
+            </div>
+
+            <!-- Card Action Footer -->
+            <div style="border-top: 1px solid var(--bf-slate-100); padding-top: 12px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; color: var(--bf-slate-400);" th:text="${card.topicName}">Topic Name</span>
+                <a th:href="@{/learn/concept/{id}(id=${card.conceptId})}" class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 0.8125rem;">
+                    Study Concept →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brain Maps Discovery Banner at bottom of Cards -->
+    <div class="card" style="background: linear-gradient(135deg, var(--bf-navy-900) 0%, #1e3a8a 100%); color: var(--bf-white); padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border: none; box-shadow: var(--bf-shadow-md);">
+        <div style="max-width: 600px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span style="font-size: 1.25rem;">🧠</span>
+                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-gold-300);">Knowledge Network</span>
+            </div>
+            <h3 style="font-size: 1.25rem; color: var(--bf-white); margin-bottom: 4px;">Explore Concept Connections with Brain Maps</h3>
+            <p style="color: var(--bf-slate-300); font-size: 0.875rem; margin: 0; line-height: 1.5;">
+                See how concepts connect across topics. Discover prerequisites, next topics to learn, and commonly confused placement questions.
+            </p>
+        </div>
+        <a th:href="@{/remember(view='brain-maps')}" class="btn btn-gold btn-sm" style="font-weight: 700;">
+            Explore Brain Maps →
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

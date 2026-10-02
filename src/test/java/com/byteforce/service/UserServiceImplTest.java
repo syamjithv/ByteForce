@@ -227,4 +227,20 @@ class UserServiceImplTest {
         assertFalse(userService.existsByEmail(null));
         assertFalse(userService.existsByEmail("  "));
     }
+
+    @Test
+    @DisplayName("updateAvatar should save avatar data URL and record activity")
+    void updateAvatarShouldSaveAndRecordActivity() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(sampleUser));
+        StudentProfile existing = StudentProfile.create(userId, "John Doe", null, null, null);
+        when(studentProfileRepository.findByUserId(userId)).thenReturn(Optional.of(existing));
+        when(studentProfileRepository.save(any(StudentProfile.class))).thenAnswer(i -> i.getArgument(0));
+
+        StudentProfile result = userService.updateAvatar(userId, "data:image/png;base64,abc123");
+
+        assertEquals("data:image/png;base64,abc123", result.getAvatarUrl());
+        assertTrue(result.hasCustomAvatar());
+        verify(studentProfileRepository).save(any(StudentProfile.class));
+        verify(activityService).recordActivity(eq(userId), eq(ActivityType.PROFILE_UPDATED), eq("Avatar picture updated"));
+    }
 }

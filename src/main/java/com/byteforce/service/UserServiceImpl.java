@@ -121,8 +121,8 @@ public class UserServiceImpl implements UserService {
 
         StudentProfile toSave = existing
                 .withFullName(fullName.trim())
-                .withPhone(phone != null ? phone.trim() : null)
-                .withCollege(college != null ? college.trim() : null)
+                .withPhone(phone != null && !phone.isBlank() ? phone.trim() : null)
+                .withCollege(college != null && !college.isBlank() ? college.trim() : null)
                 .withGraduationYear(graduationYear);
 
         StudentProfile saved = studentProfileRepository.save(toSave);
@@ -133,6 +133,37 @@ public class UserServiceImpl implements UserService {
                 activityService.recordActivity(userId, ActivityType.PROFILE_UPDATED, "Profile details updated: " + fullName.trim());
             } catch (Exception e) {
                 log.warn("Failed to record profile update activity for user {}", userId, e);
+            }
+        }
+
+        return saved;
+    }
+
+    @Override
+    public StudentProfile updateAvatar(UUID userId, String avatarUrl) {
+        if (userId == null) {
+            throw new ValidationException("User ID must not be null.");
+        }
+        if (studentProfileRepository == null) {
+            throw new ValidationException("StudentProfileRepository is not configured.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        StudentProfile existing = studentProfileRepository.findByUserId(userId)
+                .orElseGet(() -> StudentProfile.create(userId, user.getFullName(), null, null, null));
+
+        StudentProfile toSave = existing.withAvatarUrl(avatarUrl != null && !avatarUrl.isBlank() ? avatarUrl.trim() : null);
+        StudentProfile saved = studentProfileRepository.save(toSave);
+        log.info("Updated avatar for user ID: {}", userId);
+
+        if (activityService != null) {
+            try {
+                String action = (avatarUrl != null && !avatarUrl.isBlank()) ? "Avatar picture updated" : "Avatar picture removed";
+                activityService.recordActivity(userId, ActivityType.PROFILE_UPDATED, action);
+            } catch (Exception e) {
+                log.warn("Failed to record avatar update activity for user {}", userId, e);
             }
         }
 

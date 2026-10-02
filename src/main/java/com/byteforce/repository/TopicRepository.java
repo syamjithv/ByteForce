@@ -18,6 +18,8 @@ public interface TopicRepository {
 
     List<Topic> findAll();
 
+    List<Topic> findBySubjectId(String subjectId);
+
     Topic save(Topic topic);
 
     boolean deleteById(long id);

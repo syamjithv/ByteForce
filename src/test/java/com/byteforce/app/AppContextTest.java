@@ -66,6 +66,13 @@ class AppContextTest {
         assertNotNull(appContext.getQuestionService());
         assertNotNull(appContext.getBookmarkService());
         assertNotNull(appContext.getAttemptService());
+        assertNotNull(appContext.getAssessmentService());
+        assertNotNull(appContext.getSubjectRepository());
+        assertNotNull(appContext.getConceptRepository());
+        assertNotNull(appContext.getLearningResourceRepository());
+        assertNotNull(appContext.getLearnRepository());
+        assertNotNull(appContext.getLearnService());
+        assertNotNull(appContext.getTrackService());
     }
 
     @Test

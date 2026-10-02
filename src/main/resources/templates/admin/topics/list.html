@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage Topics')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-topics')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar('Manage Topics')}"></header>
+
+        <main class="app-content" style="max-width: 1200px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <div th:replace="~{admin/fragments :: adminHeader('Topics', 'Sub-disciplines grouped under placement subjects containing individual concepts and practice questions.', '/admin/topics/new', 'Add Topic')}"></div>
+
+            <!-- Subject Filter Bar -->
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-md, 8px); border: 1px solid var(--bf-slate-200); padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800);">Filter by Subject:</span>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a th:href="@{/admin/topics}" class="btn btn-sm" th:classappend="${selectedSubjectId == null || selectedSubjectId == '' ? 'btn-primary' : 'btn-outline'}" style="padding: 4px 12px; font-size: 0.8125rem;">All Subjects</a>
+                    <a th:each="s : ${subjects}" th:href="@{/admin/topics(subjectId=${s.id})}" class="btn btn-sm" th:classappend="${selectedSubjectId == s.id ? 'btn-primary' : 'btn-outline'}" style="padding: 4px 12px; font-size: 0.8125rem;" th:text="${s.name}">Subject</a>
+                </div>
+            </div>
+
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); overflow: hidden; box-shadow: var(--bf-shadow-sm);">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: var(--bf-slate-50); border-bottom: 1px solid var(--bf-slate-200); color: var(--bf-slate-500); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                                <th style="padding: 14px 20px;">ID</th>
+                                <th style="padding: 14px 20px;">Topic Name</th>
+                                <th style="padding: 14px 20px;">Slug</th>
+                                <th style="padding: 14px 20px;">Subject</th>
+                                <th style="padding: 14px 20px;">Order</th>
+                                <th style="padding: 14px 20px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${topics.empty}">
+                                <td colspan="6" style="padding: 32px 20px; text-align: center; color: var(--bf-slate-400);">No topics found. Click "Add Topic" to create one.</td>
+                            </tr>
+                            <tr th:each="t : ${topics}" style="border-bottom: 1px solid var(--bf-slate-100); transition: background 0.15s;" onmouseover="this.style.background='var(--bf-slate-50)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 14px 20px; color: var(--bf-slate-400); font-weight: 600;" th:text="${t.id}">1</td>
+                                <td style="padding: 14px 20px; font-weight: 600; color: var(--bf-navy-900);">
+                                    <span th:text="${t.name}">Arrays & Two Pointers</span>
+                                </td>
+                                <td style="padding: 14px 20px;">
+                                    <code style="background: var(--bf-slate-100); color: var(--bf-navy-800); padding: 2px 6px; border-radius: 4px; font-size: 0.8125rem;" th:text="${t.slug}">arrays-two-pointers</code>
+                                </td>
+                                <td style="padding: 14px 20px;">
+                                    <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: var(--bf-primary); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem;" th:text="${t.subjectId != null ? t.subjectId : 'Unassigned'}">data-structures</span>
+                                </td>
+                                <td style="padding: 14px 20px; color: var(--bf-slate-500);" th:text="${t.displayOrder}">1</td>
+                                <td style="padding: 14px 20px; text-align: right; white-space: nowrap;">
+                                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                        <a th:href="@{'/admin/concepts?topicId=' + ${t.id}}" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.75rem;">Concepts</a>
+                                        <a th:href="@{'/admin/topics/' + ${t.id} + '/edit'}" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.75rem;">Edit</a>
+                                        <form th:action="@{'/admin/topics/' + ${t.id} + '/delete'}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this topic? This can only be done if no questions are attached.');">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="padding: 4px 10px; font-size: 0.75rem;">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

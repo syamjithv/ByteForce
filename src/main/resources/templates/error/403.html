@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Access Denied (403)')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Access Denied')}"></header>
+        <main class="app-content">
+            <div class="card" style="max-width: 600px; margin: 40px auto; text-align: center; padding: 40px 24px; border-top: 4px solid var(--bf-danger);">
+                <div style="font-size: 3rem; font-weight: 800; color: var(--bf-danger); margin-bottom: 12px;">403</div>
+                <h1 style="font-size: 1.5rem; margin-bottom: 12px; color: var(--bf-navy-900);">Access Denied</h1>
+                <p style="color: var(--bf-slate-600); margin-bottom: 24px; font-size: 1rem;"
+                   th:text="${errorMessage != null ? errorMessage : 'Administrator privileges are required to access this console. Your current account does not have sufficient administrative permissions.'}">
+                    Administrator privileges are required to access this area.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <a th:href="@{/dashboard}" class="btn btn-primary btn-sm">Return to Dashboard</a>
+                    <a th:href="@{/learn}" class="btn btn-secondary btn-sm">Browse Learning Content</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('')}"></nav>
+    <main class="public-container" style="padding-top: 60px; padding-bottom: 80px;">
+        <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 48px 24px; border-top: 4px solid var(--bf-danger);">
+            <div style="font-size: 3.5rem; font-weight: 800; color: var(--bf-danger); margin-bottom: 12px;">403</div>
+            <h1 style="font-size: 1.75rem; margin-bottom: 12px; color: var(--bf-navy-900);">Access Denied</h1>
+            <p style="color: var(--bf-slate-600); margin-bottom: 28px; font-size: 1.0625rem;">
+                Administrator privileges are required to access the ByteForce administrative console. Please sign in with an administrator account.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a th:href="@{/login}" class="btn btn-primary">Sign In as Admin</a>
+                <a th:href="@{/}" class="btn btn-secondary">Return Home</a>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+</body>
+</html>

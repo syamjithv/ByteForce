@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Placement Mock Tests & Assessments')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('assessments')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Timed Mock Assessments')}"></header>
+        <main class="app-content">
+            <div th:replace="~{assessments/catalog :: assessmentsCatalog}"></div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('assessments')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <div th:replace="~{assessments/catalog :: assessmentsCatalog}"></div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+</body>
+</html>

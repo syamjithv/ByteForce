@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Account')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: publicNav('register')}"></nav>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <!-- Official ByteForce Logo -->
+            <div class="auth-logo">
+                <a th:href="@{/}" class="bf-brand-logo">
+                    <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce — Practice. Prepare. Get Placed." />
+                </a>
+            </div>
+            <p style="font-size: 0.8125rem; font-weight: 700; color: var(--bf-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px;">Practice. Prepare. Get Placed.</p>
+            <h1 class="auth-title">Create your account</h1>
+            <p class="auth-subtitle">Join ByteForce to start your technical placement preparation.</p>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Validation error occurred.</span>
+        </div>
+
+        <form th:action="@{/register}" method="post">
+            <input type="hidden" name="returnUrl" th:value="${returnUrl}" />
+
+            <div class="form-group">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" id="fullName" name="fullName" class="form-control" th:value="${fullName}" placeholder="e.g. John Doe" required autofocus />
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" th:value="${email}" placeholder="student@example.com" required />
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="At least 8 characters" required />
+                <p class="form-hint">Must contain at least 8 characters, including letters, digits, and a special character.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Re-enter password" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                Create Account
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <div>
+                Already have an account?
+                <a th:href="@{/login(returnUrl=${returnUrl})}" style="font-weight: 700; color: var(--bf-primary);">
+                    Sign In
+                </a>
+            </div>
+            <div style="margin-top: 12px;">
+                <a th:href="@{/}" class="back-to-home-link">
+                    ← Back to ByteForce
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+
+</body>
+</html>

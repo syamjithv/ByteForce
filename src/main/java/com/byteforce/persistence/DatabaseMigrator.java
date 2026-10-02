@@ -64,6 +64,7 @@ public final class DatabaseMigrator {
                     .cleanDisabled(true)
                     .load();
 
+            flyway.repair();
             MigrateResult result = flyway.migrate();
             int migrationsExecuted = result.migrationsExecuted;
             log.info("Flyway migration completed successfully. Migrations applied: {}, Target schema version: {}",

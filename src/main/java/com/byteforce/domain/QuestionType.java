@@ -7,5 +7,6 @@ public enum QuestionType {
     CODING,
     MCQ,
     SQL,
-    CONCEPTUAL
+    CONCEPTUAL,
+    APTITUDE
 }

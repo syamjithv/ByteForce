@@ -9,14 +9,16 @@ import java.util.Objects;
 public final class Topic {
 
     private final long id;
+    private final String subjectId;
     private final String name;
     private final String slug;
     private final String description;
     private final int displayOrder;
     private final Instant createdAt;
 
-    public Topic(long id, String name, String slug, String description, int displayOrder, Instant createdAt) {
+    public Topic(long id, String subjectId, String name, String slug, String description, int displayOrder, Instant createdAt) {
         this.id = id;
+        this.subjectId = subjectId != null && !subjectId.isBlank() ? subjectId.trim().toLowerCase() : null;
 
         Objects.requireNonNull(name, "name must not be null");
         if (name.isBlank()) {
@@ -35,15 +37,30 @@ public final class Topic {
         this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
     }
 
+    public Topic(long id, String name, String slug, String description, int displayOrder, Instant createdAt) {
+        this(id, null, name, slug, description, displayOrder, createdAt);
+    }
+
+    /**
+     * Factory for creating a new topic with subject relationship (id 0 indicates unsaved).
+     */
+    public static Topic create(String subjectId, String name, String slug, String description, int displayOrder) {
+        return new Topic(0, subjectId, name, slug, description, displayOrder, Instant.now());
+    }
+
     /**
      * Factory for creating a new topic (id 0 indicates unsaved).
      */
     public static Topic create(String name, String slug, String description, int displayOrder) {
-        return new Topic(0, name, slug, description, displayOrder, Instant.now());
+        return create(null, name, slug, description, displayOrder);
     }
 
     public long getId() {
         return id;
+    }
+
+    public String getSubjectId() {
+        return subjectId;
     }
 
     public String getName() {
@@ -70,23 +87,27 @@ public final class Topic {
      * Returns a copy with the database-assigned id.
      */
     public Topic withId(long newId) {
-        return new Topic(newId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
+        return new Topic(newId, this.subjectId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withSubjectId(String newSubjectId) {
+        return new Topic(this.id, newSubjectId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
     }
 
     public Topic withName(String newName) {
-        return new Topic(this.id, newName, this.slug, this.description, this.displayOrder, this.createdAt);
+        return new Topic(this.id, this.subjectId, newName, this.slug, this.description, this.displayOrder, this.createdAt);
     }
 
     public Topic withSlug(String newSlug) {
-        return new Topic(this.id, this.name, newSlug, this.description, this.displayOrder, this.createdAt);
+        return new Topic(this.id, this.subjectId, this.name, newSlug, this.description, this.displayOrder, this.createdAt);
     }
 
     public Topic withDescription(String newDescription) {
-        return new Topic(this.id, this.name, this.slug, newDescription, this.displayOrder, this.createdAt);
+        return new Topic(this.id, this.subjectId, this.name, this.slug, newDescription, this.displayOrder, this.createdAt);
     }
 
     public Topic withDisplayOrder(int newDisplayOrder) {
-        return new Topic(this.id, this.name, this.slug, this.description, newDisplayOrder, this.createdAt);
+        return new Topic(this.id, this.subjectId, this.name, this.slug, this.description, newDisplayOrder, this.createdAt);
     }
 
     @Override
@@ -106,6 +127,7 @@ public final class Topic {
     public String toString() {
         return "Topic{" +
                 "id=" + id +
+                ", subjectId='" + subjectId + '\'' +
                 ", name='" + name + '\'' +
                 ", slug='" + slug + '\'' +
                 ", displayOrder=" + displayOrder +

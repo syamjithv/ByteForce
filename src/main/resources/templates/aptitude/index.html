@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quantitative & Logical Aptitude — ByteForce')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('aptitude')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Aptitude & Logical Reasoning')}"></header>
+        <main class="app-content">
+            <div th:replace="~{this :: aptitudeMainContent}"></div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('aptitude')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <div th:replace="~{this :: aptitudeMainContent}"></div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+<!-- Main Content Template Fragment -->
+<th:block th:fragment="aptitudeMainContent">
+    <!-- Header -->
+    <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 8px; background-color: rgba(37, 99, 235, 0.1); color: var(--bf-primary); font-size: 1.25rem;">📐</span>
+            <h1 style="font-size: 1.875rem; color: var(--bf-navy-900); margin: 0;">Quantitative &amp; Logical Aptitude</h1>
+        </div>
+        <p style="color: var(--bf-slate-600); font-size: 1rem; max-width: 800px; margin: 0;">
+            Master quantitative problem solving, logical deductions, and verbal ability required for technical placement entrance tests and campus placement rounds.
+        </p>
+    </div>
+
+    <!-- Category Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 28px;">
+        <!-- Quantitative Card -->
+        <a th:href="@{/aptitude(category='QUANTITATIVE')}"
+           class="card"
+           style="text-decoration: none; padding: 20px; transition: transform 0.15s ease, border-color 0.15s ease;"
+           th:styleappend="${selectedCategory == 'QUANTITATIVE' ? 'border: 2px solid var(--bf-primary); background-color: var(--bf-white);' : 'background-color: var(--bf-white);'}"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <span style="font-size: 1.5rem;">🔢</span>
+                <span class="badge badge-primary" th:text="${quantCount + ' Questions'}">0 Questions</span>
+            </div>
+            <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin-bottom: 4px;">Quantitative Aptitude</h3>
+            <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin: 0; line-height: 1.5;">
+                Arithmetic, percentages, profit &amp; loss, time &amp; work, speed-distance, and numbers.
+            </p>
+        </a>
+
+        <!-- Logical Reasoning Card -->
+        <a th:href="@{/aptitude(category='LOGICAL')}"
+           class="card"
+           style="text-decoration: none; padding: 20px; transition: transform 0.15s ease, border-color 0.15s ease;"
+           th:styleappend="${selectedCategory == 'LOGICAL' ? 'border: 2px solid var(--bf-primary); background-color: var(--bf-white);' : 'background-color: var(--bf-white);'}"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <span style="font-size: 1.5rem;">🧩</span>
+                <span class="badge badge-purple" th:text="${logicalCount + ' Questions'}">0 Questions</span>
+            </div>
+            <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin-bottom: 4px;">Logical Reasoning</h3>
+            <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin: 0; line-height: 1.5;">
+                Blood relations, syllogisms, series, coding-decoding, direction sense, and seating puzzles.
+            </p>
+        </a>
+
+        <!-- Verbal Ability Card -->
+        <a th:href="@{/aptitude(category='VERBAL')}"
+           class="card"
+           style="text-decoration: none; padding: 20px; transition: transform 0.15s ease, border-color 0.15s ease;"
+           th:styleappend="${selectedCategory == 'VERBAL' ? 'border: 2px solid var(--bf-primary); background-color: var(--bf-white);' : 'background-color: var(--bf-white);'}"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <span style="font-size: 1.5rem;">📖</span>
+                <span class="badge badge-easy" th:text="${verbalCount + ' Questions'}">0 Questions</span>
+            </div>
+            <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin-bottom: 4px;">Verbal Ability</h3>
+            <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin: 0; line-height: 1.5;">
+                Reading comprehension, sentence completion, vocabulary, idioms, and grammatical correction.
+            </p>
+        </a>
+    </div>
+
+    <!-- Filter Buttons Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <a th:href="@{/aptitude}"
+               class="btn btn-sm"
+               th:classappend="${selectedCategory == 'all' ? 'btn-primary' : 'btn-outline'}"
+               style="border-radius: 9999px;">
+                All Categories (<span th:text="${totalCount}">0</span>)
+            </a>
+            <a th:each="cat : ${categories}"
+               th:href="@{/aptitude(category=${cat.name()})}"
+               class="btn btn-sm"
+               th:classappend="${selectedCategory == cat.name() ? 'btn-primary' : 'btn-outline'}"
+               style="border-radius: 9999px;"
+               th:text="${cat.displayName}">
+                Category
+            </a>
+        </div>
+
+        <div style="font-size: 0.875rem; color: var(--bf-slate-500);">
+            Showing <strong th:text="${questions.size()}" style="color: var(--bf-navy-900);">0</strong> questions
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${questions.isEmpty()}" class="card" style="text-align: center; padding: 48px 24px; background-color: var(--bf-white);">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">📐</div>
+        <h3 style="font-size: 1.25rem; color: var(--bf-navy-900); margin-bottom: 6px;">No aptitude questions found</h3>
+        <p style="color: var(--bf-slate-500); font-size: 0.9375rem; max-width: 480px; margin: 0 auto 20px auto;">
+            No questions are currently available under this category. Reset filters to view all questions.
+        </p>
+        <a th:href="@{/aptitude}" class="btn btn-primary btn-sm">View All Questions</a>
+    </div>
+
+    <!-- Question Cards List -->
+    <div th:if="${!questions.isEmpty()}" style="display: flex; flex-direction: column; gap: 20px;">
+        <div th:each="q, iter : ${questions}" class="card" style="background-color: var(--bf-white); padding: 24px; border: 1px solid var(--bf-slate-200); box-shadow: var(--bf-shadow-sm);">
+            <!-- Card Header: Category, Topic, Difficulty -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge"
+                          th:classappend="${q.category.name() == 'QUANTITATIVE' ? 'badge-primary' : (q.category.name() == 'LOGICAL' ? 'badge-purple' : 'badge-easy')}"
+                          th:text="${q.category.displayName}">
+                        Quantitative
+                    </span>
+                    <span style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-slate-600);" th:text="${q.topic}">
+                        Topic
+                    </span>
+                </div>
+                <span class="badge"
+                      th:classappend="${q.difficulty.name() == 'EASY' ? 'badge-easy' : (q.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                      th:text="${q.difficulty}">
+                    MEDIUM
+                </span>
+            </div>
+
+            <!-- Question Statement -->
+            <div style="margin-bottom: 18px;">
+                <div style="font-size: 1.0625rem; font-weight: 600; color: var(--bf-navy-900); line-height: 1.6;" th:text="${'Q' + (iter.index + 1) + '. ' + q.question}">
+                    Question statement goes here...
+                </div>
+            </div>
+
+            <!-- Options Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 18px;">
+                <div style="padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); font-size: 0.875rem; color: var(--bf-navy-900);">
+                    <strong style="color: var(--bf-primary); margin-right: 6px;">A.</strong>
+                    <span th:text="${q.optionA}">Option A</span>
+                </div>
+                <div style="padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); font-size: 0.875rem; color: var(--bf-navy-900);">
+                    <strong style="color: var(--bf-primary); margin-right: 6px;">B.</strong>
+                    <span th:text="${q.optionB}">Option B</span>
+                </div>
+                <div style="padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); font-size: 0.875rem; color: var(--bf-navy-900);">
+                    <strong style="color: var(--bf-primary); margin-right: 6px;">C.</strong>
+                    <span th:text="${q.optionC}">Option C</span>
+                </div>
+                <div style="padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); font-size: 0.875rem; color: var(--bf-navy-900);">
+                    <strong style="color: var(--bf-primary); margin-right: 6px;">D.</strong>
+                    <span th:text="${q.optionD}">Option D</span>
+                </div>
+            </div>
+
+            <!-- Reveal Answer & Explanation Dropdown -->
+            <details style="background-color: var(--bf-slate-50); border-radius: var(--bf-radius-md); border: 1px solid var(--bf-slate-200); padding: 12px 16px;">
+                <summary style="font-size: 0.875rem; font-weight: 600; color: var(--bf-primary); cursor: pointer; user-select: none;">
+                    💡 Reveal Correct Answer &amp; Step-by-Step Solution
+                </summary>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bf-slate-200);">
+                    <div style="margin-bottom: 8px;">
+                        <span style="font-size: 0.875rem; font-weight: 700; color: var(--bf-success);">Correct Answer: </span>
+                        <strong style="font-size: 0.9375rem; color: var(--bf-navy-900);" th:text="${'Option ' + q.correctAnswer}">Option B</strong>
+                    </div>
+                    <div th:if="${q.explanation != null && !q.explanation.isBlank()}">
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-400); margin-bottom: 4px;">Explanation</div>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-700); line-height: 1.6; margin: 0; white-space: pre-line;" th:text="${q.explanation}">
+                            Detailed mathematical calculation or reasoning explanation...
+                        </p>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

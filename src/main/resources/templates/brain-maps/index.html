@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Brain Maps — Concept Knowledge Network')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('remember')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Remember — Knowledge Network')}"></header>
+        <main class="app-content">
+            <div th:replace="~{remember/brain-maps :: brainMapsContent}"></div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('remember')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <div th:replace="~{remember/brain-maps :: brainMapsContent}"></div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+</body>
+</html>

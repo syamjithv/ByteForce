@@ -47,6 +47,9 @@ class DashboardPanelTest {
         assertNotNull(panel.getStudentEmailValueLabel());
         assertNotNull(panel.getLogoutButton());
         assertNotNull(panel.getPracticeButton());
+        assertNotNull(panel.getAssessmentsButton());
+        assertNotNull(panel.getLearnButton());
+        assertNotNull(panel.getTrackButton());
     }
 
     @Test
@@ -64,6 +67,9 @@ class DashboardPanelTest {
         assertEquals("STUDENT", dashboardPanel.getStudentRoleValueLabel().getText());
         assertTrue(dashboardPanel.getLogoutButton().isEnabled());
         assertTrue(dashboardPanel.getPracticeButton().isEnabled());
+        assertTrue(dashboardPanel.getAssessmentsButton().isEnabled());
+        assertTrue(dashboardPanel.getLearnButton().isEnabled());
+        assertTrue(dashboardPanel.getTrackButton().isEnabled());
     }
 
     @Test
@@ -77,6 +83,9 @@ class DashboardPanelTest {
         assertEquals("Not authenticated", dashboardPanel.getStudentNameValueLabel().getText());
         assertFalse(dashboardPanel.getLogoutButton().isEnabled());
         assertFalse(dashboardPanel.getPracticeButton().isEnabled());
+        assertFalse(dashboardPanel.getAssessmentsButton().isEnabled());
+        assertFalse(dashboardPanel.getLearnButton().isEnabled());
+        assertFalse(dashboardPanel.getTrackButton().isEnabled());
     }
 
     @Test
@@ -107,5 +116,53 @@ class DashboardPanelTest {
         panel.getPracticeButton().doClick();
 
         assertTrue(practiceCallbackInvoked.get(), "Start practice callback should be invoked");
+    }
+
+    @Test
+    @DisplayName("Assessments button should trigger onStartAssessments callback when configured")
+    void shouldTriggerStartAssessmentsCallbackOnButtonClick() {
+        AtomicBoolean assessmentsCallbackInvoked = new AtomicBoolean(false);
+        DashboardPanel panel = new DashboardPanel(mockAuthService, () -> {}, () -> {}, () -> assessmentsCallbackInvoked.set(true));
+
+        User student = User.create("student@byteforce.com", "hash", "Alice Developer", Role.STUDENT);
+        when(mockAuthService.isAuthenticated()).thenReturn(true);
+        when(mockAuthService.getCurrentUser()).thenReturn(Optional.of(student));
+
+        panel.refresh();
+        panel.getAssessmentsButton().doClick();
+
+        assertTrue(assessmentsCallbackInvoked.get(), "Start assessments callback should be invoked");
+    }
+
+    @Test
+    @DisplayName("Learn button should trigger onStartLearn callback when configured")
+    void shouldTriggerStartLearnCallbackOnButtonClick() {
+        AtomicBoolean learnCallbackInvoked = new AtomicBoolean(false);
+        DashboardPanel panel = new DashboardPanel(mockAuthService, () -> {}, () -> {}, () -> {}, () -> learnCallbackInvoked.set(true));
+
+        User student = User.create("student@byteforce.com", "hash", "Alice Developer", Role.STUDENT);
+        when(mockAuthService.isAuthenticated()).thenReturn(true);
+        when(mockAuthService.getCurrentUser()).thenReturn(Optional.of(student));
+
+        panel.refresh();
+        panel.getLearnButton().doClick();
+
+        assertTrue(learnCallbackInvoked.get(), "Start learn callback should be invoked");
+    }
+
+    @Test
+    @DisplayName("Track button should trigger onStartTrack callback when configured")
+    void shouldTriggerStartTrackCallbackOnButtonClick() {
+        AtomicBoolean trackCallbackInvoked = new AtomicBoolean(false);
+        DashboardPanel panel = new DashboardPanel(mockAuthService, () -> {}, () -> {}, () -> {}, () -> {}, () -> trackCallbackInvoked.set(true));
+
+        User student = User.create("student@byteforce.com", "hash", "Alice Developer", Role.STUDENT);
+        when(mockAuthService.isAuthenticated()).thenReturn(true);
+        when(mockAuthService.getCurrentUser()).thenReturn(Optional.of(student));
+
+        panel.refresh();
+        panel.getTrackButton().doClick();
+
+        assertTrue(trackCallbackInvoked.get(), "Start track callback should be invoked");
     }
 }

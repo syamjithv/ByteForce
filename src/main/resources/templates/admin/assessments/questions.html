@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-assessments')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar(${pageTitle})}"></header>
+
+        <main class="app-content" style="max-width: 1000px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <a th:href="@{/admin/assessments}" style="color: var(--bf-slate-500); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 4px;">
+                        ← Back to Assessments
+                    </a>
+                    <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${'Manage Questions — ' + assessment.title}">Manage Questions</h2>
+                    <p style="color: var(--bf-slate-500); font-size: 0.875rem;">
+                        Target Duration: <strong th:text="${assessment.durationMinutes + ' mins'}">45 mins</strong> |
+                        Target Total Marks: <strong th:text="${assessment.totalMarks + ' pts'}">50 pts</strong>
+                    </p>
+                </div>
+                <div>
+                    <a th:href="@{'/assessments/' + ${assessment.id}}" target="_blank" class="btn btn-outline btn-sm">Preview Student View</a>
+                </div>
+            </div>
+
+            <!-- Current Assigned Questions Card -->
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); margin-bottom: 32px; overflow: hidden; box-shadow: var(--bf-shadow-sm);">
+                <div style="padding: 18px 24px; background: var(--bf-slate-50); border-bottom: 1px solid var(--bf-slate-200); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900);">
+                        Assigned Questions (<span th:text="${assignedQuestions.size()}">0</span>)
+                    </h3>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: var(--bf-slate-50); border-bottom: 1px solid var(--bf-slate-200); color: var(--bf-slate-500); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                                <th style="padding: 12px 20px;">#</th>
+                                <th style="padding: 12px 20px;">Question Title</th>
+                                <th style="padding: 12px 20px;">Type</th>
+                                <th style="padding: 12px 20px;">Difficulty</th>
+                                <th style="padding: 12px 20px;">Marks</th>
+                                <th style="padding: 12px 20px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${assignedQuestions.empty}">
+                                <td colspan="6" style="padding: 32px 20px; text-align: center; color: var(--bf-slate-400);">No questions assigned yet. Attach questions using the form below.</td>
+                            </tr>
+                            <tr th:each="q, iterStat : ${assignedQuestions}" style="border-bottom: 1px solid var(--bf-slate-100);">
+                                <td style="padding: 12px 20px; font-weight: 600; color: var(--bf-slate-500);" th:text="${iterStat.count}">1</td>
+                                <td style="padding: 12px 20px; font-weight: 600; color: var(--bf-navy-900);">
+                                    <span th:text="${q.title}">Two Sum</span>
+                                </td>
+                                <td style="padding: 12px 20px;">
+                                    <span class="badge" style="background: rgba(100, 116, 139, 0.1); color: var(--bf-slate-700); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;" th:text="${q.questionType}">CODING</span>
+                                </td>
+                                <td style="padding: 12px 20px;">
+                                    <span class="badge" th:classappend="${q.difficulty.name() == 'EASY' ? 'badge-success' : (q.difficulty.name() == 'MEDIUM' ? 'badge-warning' : 'badge-danger')}"
+                                          style="padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;" th:text="${q.difficulty}">EASY</span>
+                                </td>
+                                <td style="padding: 12px 20px; font-weight: 700; color: var(--bf-navy-800);" th:text="${(questionMarks.get(q.id) != null ? questionMarks.get(q.id) : 10) + ' pts'}">10 pts</td>
+                                <td style="padding: 12px 20px; text-align: right;">
+                                    <form th:action="@{'/admin/assessments/' + ${assessment.id} + '/questions/' + ${q.id} + '/remove'}" method="post" style="display: inline;" onsubmit="return confirm('Remove this question from the assessment?');">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="padding: 4px 10px; font-size: 0.75rem;">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Attach New Question Form -->
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 28px; box-shadow: var(--bf-shadow-sm);">
+                <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 6px;">Attach Question from Question Bank</h3>
+                <p style="color: var(--bf-slate-500); font-size: 0.875rem; margin-bottom: 20px;">Select an existing question from your ByteForce question bank to add to this mock test.</p>
+
+                <div th:if="${availableQuestions.empty}" style="padding: 16px; background: var(--bf-slate-50); border: 1px dashed var(--bf-slate-300); border-radius: 8px; text-align: center; color: var(--bf-slate-600); font-size: 0.875rem;">
+                    All questions in the question bank are already assigned to this assessment, or the question bank is empty.
+                    <a th:href="@{/admin/questions/new}" style="color: var(--bf-primary); font-weight: 600;">Create a new question</a>.
+                </div>
+
+                <form th:if="${!availableQuestions.empty}" th:action="@{'/admin/assessments/' + ${assessment.id} + '/questions/add'}" method="post">
+                    <!-- Question Selection -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Select Question <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <select name="questionId" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                            <option value="">-- Choose question to attach --</option>
+                            <option th:each="aq : ${availableQuestions}" th:value="${aq.id}" th:text="${aq.title + ' [' + aq.questionType + ', ' + aq.difficulty + ']'}"></option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                                Marks Allocated <span style="color: var(--bf-danger);">*</span>
+                            </label>
+                            <input type="number" name="marks" value="10" required min="1"
+                                   style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                                Sequence / Order
+                            </label>
+                            <input type="number" name="questionOrder" th:value="${assignedQuestions.size() + 1}" required min="1"
+                                   style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Attach Question to Assessment</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

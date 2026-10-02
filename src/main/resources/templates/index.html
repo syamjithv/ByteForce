@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Practice. Prepare. Get Placed.')}"></head>
+<body>
+
+<!-- Public Navbar -->
+<nav th:replace="~{fragments/layout :: publicNav('home')}"></nav>
+
+<!-- Notification banner if logged out -->
+<div th:if="${param.loggedOut}" class="public-container" style="margin-top: 16px;">
+    <div class="alert alert-info">
+        <span>✓ You have been signed out safely. Come back anytime to continue your placement preparation!</span>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="public-container">
+        <div class="hero-tag">
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg th:replace="~{fragments/icons :: spark}"></svg>
+                <span>ByteForce Placement Engine</span>
+            </span>
+            <span>•</span>
+            <span>Technical Placement Readiness</span>
+        </div>
+
+        <h1 class="hero-title">
+            Practice. Prepare. <br><span class="highlight">Get Placed.</span>
+        </h1>
+
+        <p class="hero-desc">
+            A placement-readiness platform that brings the technical placement journey into one place.
+            Build deep CS fundamentals, practice interview coding questions, and take timed placement mock tests.
+        </p>
+
+        <div class="hero-cta-group">
+            <th:block th:if="${currentUser == null}">
+                <a th:href="@{/register}" class="btn btn-primary btn-lg">
+                    <span>Create Free Account</span>
+                    <span>→</span>
+                </a>
+                <a th:href="@{/learn}" class="btn btn-secondary btn-lg">
+                    <span>Explore ByteForce</span>
+                </a>
+                <a th:href="@{/login}" class="btn btn-outline-navy btn-lg">
+                    <span>Sign In</span>
+                </a>
+            </th:block>
+            <th:block th:if="${currentUser != null}">
+                <a th:href="@{/dashboard}" class="btn btn-primary btn-lg">
+                    <span>Go to Student Dashboard</span>
+                    <span>→</span>
+                </a>
+                <a th:href="@{/practice}" class="btn btn-secondary btn-lg">
+                    <span>Resume Practice</span>
+                </a>
+            </th:block>
+        </div>
+    </div>
+</section>
+
+<!-- Five Core Pillars Section -->
+<section class="pillars-section">
+    <div class="public-container">
+        <div class="section-header">
+            <h2 class="section-title">The Complete Placement Journey</h2>
+            <p class="section-subtitle">
+                Everything engineering students need to bridge the gap from classroom theory to campus placement success.
+            </p>
+        </div>
+
+        <div class="pillars-grid">
+            <!-- 1. LEARN -->
+            <div class="pillar-card">
+                <div class="pillar-icon learn-icon">
+                    <svg th:replace="~{fragments/icons :: learn}"></svg>
+                </div>
+                <h3 class="pillar-title">Learn</h3>
+                <p class="pillar-desc">
+                    Build strong Computer Science fundamentals. Study core subjects, structured placement topics, and high-yield concepts with curated explanations and code examples.
+                </p>
+                <a th:href="@{/learn}" class="btn btn-outline btn-sm">Explore Curriculum →</a>
+            </div>
+
+            <!-- 2. PRACTICE -->
+            <div class="pillar-card">
+                <div class="pillar-icon practice-icon">
+                    <svg th:replace="~{fragments/icons :: practice}"></svg>
+                </div>
+                <h3 class="pillar-title">Practice</h3>
+                <p class="pillar-desc">
+                    Practice coding and placement questions. Filter by topic and difficulty, solve MCQs, SQL queries, and algorithmic code with instant solution verification.
+                </p>
+                <a th:href="@{/practice}" class="btn btn-outline btn-sm">Browse Questions →</a>
+            </div>
+
+            <!-- 3. ASSESS -->
+            <div class="pillar-card">
+                <div class="pillar-icon assess-icon">
+                    <svg th:replace="~{fragments/icons :: assessments}"></svg>
+                </div>
+                <h3 class="pillar-title">Assess</h3>
+                <p class="pillar-desc">
+                    Take timed assessments and placement mock tests. Experience real exam pressure with question navigation, countdown timers, and detailed answer reviews.
+                </p>
+                <a th:href="@{/assessments}" class="btn btn-outline btn-sm">View Mock Tests →</a>
+            </div>
+
+            <!-- 4. TRACK -->
+            <div class="pillar-card">
+                <div class="pillar-icon track-icon">
+                    <svg th:replace="~{fragments/icons :: track}"></svg>
+                </div>
+                <h3 class="pillar-title">Track</h3>
+                <p class="pillar-desc">
+                    Understand your preparation progress and weak areas. Measure solved counts, accuracy percentages, topic-wise strengths, and honest assessment analytics.
+                </p>
+                <th:block th:if="${currentUser != null}">
+                    <a th:href="@{/track}" class="btn btn-outline btn-sm">View Your Progress →</a>
+                </th:block>
+                <th:block th:if="${currentUser == null}">
+                    <a th:href="@{/auth-required(returnUrl='/track', feature='tracking personalized placement analytics')}" class="btn btn-outline btn-sm">Track Progress →</a>
+                </th:block>
+            </div>
+
+            <!-- 5. INTERVIEW -->
+            <div class="pillar-card">
+                <div class="pillar-icon interview-icon">
+                    <svg th:replace="~{fragments/icons :: interview}"></svg>
+                </div>
+                <h3 class="pillar-title">Interview</h3>
+                <p class="pillar-desc">
+                    Prepare for technical and HR interviews. Master technical problem breakdown, behavioral response frameworks (STAR method), and company round expectations.
+                </p>
+                <a th:href="@{/interview}" class="btn btn-outline btn-sm">Interview Guides →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section style="background-color: var(--bf-navy-900); color: var(--bf-white); padding: 64px 0; margin-top: 40px; text-align: center;">
+    <div class="public-container">
+        <h2 style="font-size: 2.25rem; color: var(--bf-white); margin-bottom: 14px;">Ready to start your placement preparation?</h2>
+        <p style="font-size: 1.125rem; color: var(--bf-slate-300); max-width: 640px; margin: 0 auto 28px auto;">
+            Join your peers preparing with curated CS learning, targeted problem-solving, and realistic timed assessments.
+        </p>
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <th:block th:if="${currentUser == null}">
+                <a th:href="@{/register}" class="btn btn-primary btn-lg">Start Preparing Free</a>
+                <a th:href="@{/login}" class="btn btn-secondary btn-lg">Sign In to Account</a>
+            </th:block>
+            <th:block th:if="${currentUser != null}">
+                <a th:href="@{/dashboard}" class="btn btn-primary btn-lg">Open Your Dashboard</a>
+            </th:block>
+        </div>
+    </div>
+</section>
+
+<!-- Public Footer -->
+<footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+
+</body>
+</html>

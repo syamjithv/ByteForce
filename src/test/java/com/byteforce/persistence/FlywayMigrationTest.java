@@ -45,10 +45,10 @@ class FlywayMigrationTest {
     }
 
     @Test
-    @DisplayName("Should apply V1 and V2 migrations and create all core tables including assessment_answers")
+    @DisplayName("Should apply V1 through V7 migrations and create all core tables including staged_questions")
     void shouldApplyInitialMigrationSuccessfully() throws SQLException {
         int migrationsExecuted = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(2, migrationsExecuted, "Flyway migrations should execute V1 and V2 scripts");
+        assertEquals(7, migrationsExecuted, "Flyway migrations should execute V1 through V7 scripts");
 
         // Verify that all core entities exist as tables
         Set<String> expectedTables = Set.of(
@@ -64,7 +64,14 @@ class FlywayMigrationTest {
                 "assessments",
                 "assessment_questions",
                 "assessment_attempts",
-                "assessment_answers"
+                "assessment_answers",
+                "subjects",
+                "concepts",
+                "learning_resources",
+                "remember_items",
+                "concept_relationships",
+                "aptitude_questions",
+                "staged_questions"
         );
 
         Set<String> actualTables = new HashSet<>();
@@ -161,7 +168,7 @@ class FlywayMigrationTest {
     @DisplayName("Migration should be idempotent when re-run on an up-to-date schema")
     void migrationShouldBeIdempotent() {
         int firstRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(2, firstRun);
+        assertEquals(7, firstRun);
 
         int secondRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
         assertEquals(0, secondRun, "Subsequent migration run should execute 0 scripts");
@@ -190,6 +197,121 @@ class FlywayMigrationTest {
                  ResultSet rs = stmt.executeQuery(
                          "SELECT id, assessment_attempt_id, question_id, submitted_answer, marks_awarded, status, answered_at FROM assessment_answers WHERE 1=0")) {
                 assertNotNull(rs.getMetaData());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V4 enhancements: avatar_url exists, mascot column is removed, and Learn tables exist")
+    void shouldVerifyV4EnhancementsAndMascotRemoval() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            // Verify avatar_url exists
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT avatar_url FROM student_profiles WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+
+            // Verify mascot column has been dropped
+            boolean mascotColumnFound = false;
+            try (ResultSet cols = conn.getMetaData().getColumns(null, null, "student_profiles", "mascot")) {
+                if (cols.next()) {
+                    mascotColumnFound = true;
+                }
+            }
+            org.junit.jupiter.api.Assertions.assertFalse(mascotColumnFound, "Mascot column should be removed by V4 migration");
+
+            // Verify topics.subject_id exists
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT subject_id FROM topics WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+
+            // Verify subjects, concepts, learning_resources queries work
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, name, description FROM subjects WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, topic_id, title, key_points, example FROM concepts WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, concept_id, title, resource_type, url FROM learning_resources WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V5 enhancements: remember_items and concept_relationships tables and schema")
+    void shouldVerifyV5RememberAndBrainMapsTables() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            // Verify remember_items table structure
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, concept_id, type, content, display_order, active, created_at, updated_at FROM remember_items WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(8, rs.getMetaData().getColumnCount());
+            }
+
+            // Verify concept_relationships table structure
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, source_concept_id, target_concept_id, relationship_type, description, display_order, created_at, updated_at FROM concept_relationships WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(8, rs.getMetaData().getColumnCount());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V6 enhancements: aptitude_questions table and schema")
+    void shouldVerifyV6AptitudeTable() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, category, topic, difficulty, question, option_a, option_b, option_c, option_d, correct_answer, explanation, active, created_at, updated_at FROM aptitude_questions WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertTrue(rs.getMetaData().getColumnCount() >= 14);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V7 enhancements: provenance columns, staged_questions table, and topic extensions")
+    void shouldVerifyV7ProvenanceAndStaging() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            // Verify provenance columns on questions table
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT source_repo, source_url, license, author, attribution, review_status FROM questions WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(6, rs.getMetaData().getColumnCount());
+            }
+
+            // Verify provenance columns on aptitude_questions table
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT source_repo, source_url, license, author, attribution, review_status FROM aptitude_questions WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(6, rs.getMetaData().getColumnCount());
+            }
+
+            // Verify staged_questions table
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, batch_id, source_repo, source_path, license, author, attribution, category_or_subject, topic, difficulty, question_type, question_text, option_a, option_b, option_c, option_d, correct_answer, solution, status, rejection_reason, content_hash, target_table, target_id, created_at FROM staged_questions WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(24, rs.getMetaData().getColumnCount());
+            }
+
+            // Verify new subjects exist
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM subjects WHERE id IN ('computer-networks', 'computer-organization', 'theory-of-computation')")) {
+                assertTrue(rs.next());
+                assertEquals(3, rs.getInt(1));
             }
         }
     }

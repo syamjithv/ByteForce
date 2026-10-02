@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Reusable Learn Catalog Fragment -->
+<div th:fragment="learnCatalog" class="learn-catalog-root">
+    <!-- Header with Search -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 28px;">
+        <div>
+            <h1 style="font-size: 2rem; margin-bottom: 6px;">Placement Learning Curriculum</h1>
+            <p style="color: var(--bf-slate-500); font-size: 1rem;">
+                Study fundamental Computer Science subjects and interview concepts curated for technical placements.
+            </p>
+        </div>
+        <form th:action="@{/learn/search}" method="get" style="display: flex; gap: 8px;">
+            <input type="text" name="q" placeholder="Search concepts (e.g. Array, OOP)..." class="form-control" style="width: 280px;" required />
+            <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg th:replace="~{fragments/icons :: search}"></svg>
+                <span>Search</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Subjects Grid -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div th:each="subject : ${subjects}" class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div>
+                    <h2 style="font-size: 1.375rem; margin-bottom: 6px;" th:text="${subject.name}">Data Structures</h2>
+                    <p style="color: var(--bf-slate-500); font-size: 0.9375rem;" th:text="${subject.description}">Description</p>
+                </div>
+                <span class="badge badge-primary" th:text="${subject.topics.size() + ' Topic(s)'}">2 Topics</span>
+            </div>
+
+            <div style="margin-top: 16px;">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-400); margin-bottom: 10px;">Topics Covered</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <a th:each="topic : ${subject.topics}"
+                       th:href="@{/learn/topic/{id}(id=${topic.id})}"
+                       class="btn btn-secondary btn-sm"
+                       style="background-color: var(--bf-slate-100); border-color: var(--bf-slate-200); font-weight: 600;">
+                        <span th:text="${topic.name}">Arrays</span>
+                        <span style="color: var(--bf-primary); margin-left: 4px;">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

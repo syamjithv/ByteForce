@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,6 +47,9 @@ public class DashboardPanel extends JPanel {
     private final AuthService authService;
     private final Runnable onLogout;
     private final Runnable onStartPractice;
+    private final Runnable onStartAssessments;
+    private final Runnable onStartLearn;
+    private final Runnable onStartTrack;
 
     private final JLabel welcomeLabel;
     private final JLabel studentNameValueLabel;
@@ -53,20 +57,38 @@ public class DashboardPanel extends JPanel {
     private final JLabel studentRoleValueLabel;
     private final JButton logoutButton;
     private final JButton practiceButton;
+    private final JButton assessmentsButton;
+    private final JButton learnButton;
+    private final JButton trackButton;
 
     public DashboardPanel() {
-        this(null, null, null);
+        this(null, null, null, null, null, null);
     }
 
     public DashboardPanel(AuthService authService, Runnable onLogout) {
-        this(authService, onLogout, null);
+        this(authService, onLogout, null, null, null, null);
     }
 
     public DashboardPanel(AuthService authService, Runnable onLogout, Runnable onStartPractice) {
+        this(authService, onLogout, onStartPractice, null, null, null);
+    }
+
+    public DashboardPanel(AuthService authService, Runnable onLogout, Runnable onStartPractice, Runnable onStartAssessments) {
+        this(authService, onLogout, onStartPractice, onStartAssessments, null, null);
+    }
+
+    public DashboardPanel(AuthService authService, Runnable onLogout, Runnable onStartPractice, Runnable onStartAssessments, Runnable onStartLearn) {
+        this(authService, onLogout, onStartPractice, onStartAssessments, onStartLearn, null);
+    }
+
+    public DashboardPanel(AuthService authService, Runnable onLogout, Runnable onStartPractice, Runnable onStartAssessments, Runnable onStartLearn, Runnable onStartTrack) {
         super(new BorderLayout());
         this.authService = authService;
         this.onLogout = onLogout;
         this.onStartPractice = onStartPractice;
+        this.onStartAssessments = onStartAssessments;
+        this.onStartLearn = onStartLearn;
+        this.onStartTrack = onStartTrack;
 
         setBackground(BG_PAGE);
 
@@ -199,8 +221,176 @@ public class DashboardPanel extends JPanel {
         practiceCard.add(practiceButton);
 
         contentContainer.add(practiceCard);
+        contentContainer.add(Box.createRigidArea(new Dimension(0, 24)));
 
-        add(contentContainer, BorderLayout.CENTER);
+        // Assessments & Mock Tests Card
+        JPanel assessmentsCard = new JPanel();
+        assessmentsCard.setLayout(new BoxLayout(assessmentsCard, BoxLayout.Y_AXIS));
+        assessmentsCard.setBackground(BG_CARD);
+        assessmentsCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_CARD, 1, true),
+                BorderFactory.createEmptyBorder(24, 28, 24, 28)
+        ));
+        assessmentsCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        assessmentsCard.setMaximumSize(new Dimension(800, 160));
+
+        JLabel assessmentsTitle = new JLabel("Assessments & Mock Tests");
+        assessmentsTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        assessmentsTitle.setForeground(COLOR_TEXT_MAIN);
+        assessmentsTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel assessmentsDesc = new JLabel("Take timed placement mock tests, evaluate your score, and review detailed solutions.");
+        assessmentsDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        assessmentsDesc.setForeground(COLOR_TEXT_MUTED);
+        assessmentsDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        assessmentsButton = new JButton("Take Assessments");
+        assessmentsButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        assessmentsButton.setForeground(Color.WHITE);
+        assessmentsButton.setBackground(COLOR_PRIMARY);
+        assessmentsButton.setOpaque(true);
+        assessmentsButton.setBorderPainted(false);
+        assessmentsButton.setFocusPainted(false);
+        assessmentsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        assessmentsButton.setPreferredSize(new Dimension(260, 38));
+        assessmentsButton.setMaximumSize(new Dimension(260, 38));
+        assessmentsButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        assessmentsButton.addActionListener(e -> {
+            if (onStartAssessments != null) {
+                onStartAssessments.run();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Assessments module is currently unavailable.",
+                        "Assessments Workflow",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        });
+
+        assessmentsCard.add(assessmentsTitle);
+        assessmentsCard.add(Box.createRigidArea(new Dimension(0, 6)));
+        assessmentsCard.add(assessmentsDesc);
+        assessmentsCard.add(Box.createRigidArea(new Dimension(0, 16)));
+        assessmentsCard.add(assessmentsButton);
+
+        contentContainer.add(assessmentsCard);
+        contentContainer.add(Box.createRigidArea(new Dimension(0, 24)));
+
+        // Learn & Master Concepts Card
+        JPanel learnCard = new JPanel();
+        learnCard.setLayout(new BoxLayout(learnCard, BoxLayout.Y_AXIS));
+        learnCard.setBackground(BG_CARD);
+        learnCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_CARD, 1, true),
+                BorderFactory.createEmptyBorder(24, 28, 24, 28)
+        ));
+        learnCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        learnCard.setMaximumSize(new Dimension(800, 160));
+
+        JLabel learnTitle = new JLabel("Learn & Master Concepts");
+        learnTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        learnTitle.setForeground(COLOR_TEXT_MAIN);
+        learnTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel learnDesc = new JLabel("Study core CS subjects, fundamental placement topics, and concepts with curated resources.");
+        learnDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        learnDesc.setForeground(COLOR_TEXT_MUTED);
+        learnDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        learnButton = new JButton("Explore Concepts");
+        learnButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        learnButton.setForeground(Color.WHITE);
+        learnButton.setBackground(COLOR_PRIMARY);
+        learnButton.setOpaque(true);
+        learnButton.setBorderPainted(false);
+        learnButton.setFocusPainted(false);
+        learnButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        learnButton.setPreferredSize(new Dimension(260, 38));
+        learnButton.setMaximumSize(new Dimension(260, 38));
+        learnButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        learnButton.addActionListener(e -> {
+            if (onStartLearn != null) {
+                onStartLearn.run();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Learn module is currently unavailable.",
+                        "Learn Workflow",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        });
+
+        learnCard.add(learnTitle);
+        learnCard.add(Box.createRigidArea(new Dimension(0, 6)));
+        learnCard.add(learnDesc);
+        learnCard.add(Box.createRigidArea(new Dimension(0, 16)));
+        learnCard.add(learnButton);
+
+        contentContainer.add(learnCard);
+        contentContainer.add(Box.createRigidArea(new Dimension(0, 24)));
+
+        // Track Progress & Analytics Card
+        JPanel trackCard = new JPanel();
+        trackCard.setLayout(new BoxLayout(trackCard, BoxLayout.Y_AXIS));
+        trackCard.setBackground(BG_CARD);
+        trackCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_CARD, 1, true),
+                BorderFactory.createEmptyBorder(24, 28, 24, 28)
+        ));
+        trackCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        trackCard.setMaximumSize(new Dimension(800, 160));
+
+        JLabel trackTitle = new JLabel("Track & Analyze Preparation");
+        trackTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        trackTitle.setForeground(COLOR_TEXT_MAIN);
+        trackTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel trackDesc = new JLabel("Analyze your preparation status, accuracy rates, topic strengths, and areas to improve.");
+        trackDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        trackDesc.setForeground(COLOR_TEXT_MUTED);
+        trackDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        trackButton = new JButton("View Progress");
+        trackButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        trackButton.setForeground(Color.WHITE);
+        trackButton.setBackground(COLOR_PRIMARY);
+        trackButton.setOpaque(true);
+        trackButton.setBorderPainted(false);
+        trackButton.setFocusPainted(false);
+        trackButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        trackButton.setPreferredSize(new Dimension(260, 38));
+        trackButton.setMaximumSize(new Dimension(260, 38));
+        trackButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        trackButton.addActionListener(e -> {
+            if (onStartTrack != null) {
+                onStartTrack.run();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Track module is currently unavailable.",
+                        "Track Workflow",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        });
+
+        trackCard.add(trackTitle);
+        trackCard.add(Box.createRigidArea(new Dimension(0, 6)));
+        trackCard.add(trackDesc);
+        trackCard.add(Box.createRigidArea(new Dimension(0, 16)));
+        trackCard.add(trackButton);
+
+        contentContainer.add(trackCard);
+
+        JScrollPane scrollPane = new JScrollPane(contentContainer);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
 
         refresh();
     }
@@ -239,6 +429,9 @@ public class DashboardPanel extends JPanel {
                 studentRoleValueLabel.setText(user.getRole() != null ? user.getRole().name() : "STUDENT");
                 logoutButton.setEnabled(true);
                 practiceButton.setEnabled(true);
+                assessmentsButton.setEnabled(true);
+                learnButton.setEnabled(true);
+                trackButton.setEnabled(true);
                 log.info("Dashboard refreshed for user: {}", user.getEmail());
                 return;
             }
@@ -251,6 +444,9 @@ public class DashboardPanel extends JPanel {
         studentRoleValueLabel.setText("-");
         logoutButton.setEnabled(false);
         practiceButton.setEnabled(false);
+        assessmentsButton.setEnabled(false);
+        learnButton.setEnabled(false);
+        trackButton.setEnabled(false);
     }
 
     private void handleLogout() {
@@ -286,5 +482,17 @@ public class DashboardPanel extends JPanel {
 
     public JButton getPracticeButton() {
         return practiceButton;
+    }
+
+    public JButton getAssessmentsButton() {
+        return assessmentsButton;
+    }
+
+    public JButton getLearnButton() {
+        return learnButton;
+    }
+
+    public JButton getTrackButton() {
+        return trackButton;
     }
 }

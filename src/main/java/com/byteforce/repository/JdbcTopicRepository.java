@@ -27,7 +27,7 @@ public class JdbcTopicRepository implements TopicRepository {
     private static final Logger log = LoggerFactory.getLogger(JdbcTopicRepository.class);
 
     private static final String SELECT_BASE = """
-            SELECT id, name, slug, description, display_order, created_at
+            SELECT id, subject_id, name, slug, description, display_order, created_at
             FROM topics
             """;
 
@@ -116,6 +116,27 @@ public class JdbcTopicRepository implements TopicRepository {
     }
 
     @Override
+    public List<Topic> findBySubjectId(String subjectId) {
+        if (subjectId == null || subjectId.isBlank()) {
+            return List.of();
+        }
+        String sql = SELECT_BASE + " WHERE subject_id = ? ORDER BY display_order ASC, name ASC";
+        List<Topic> topics = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, subjectId.trim().toLowerCase());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    topics.add(mapRowToTopic(rs));
+                }
+            }
+            return topics;
+        } catch (SQLException e) {
+            throw new ByteForceException("Database error while fetching topics for subject: " + subjectId, e);
+        }
+    }
+
+    @Override
     public Topic save(Topic topic) {
         Objects.requireNonNull(topic, "topic must not be null");
         if (topic.getId() <= 0) {
@@ -127,16 +148,17 @@ public class JdbcTopicRepository implements TopicRepository {
 
     private Topic insert(Topic topic) {
         String sql = """
-                INSERT INTO topics (name, slug, description, display_order, created_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO topics (subject_id, name, slug, description, display_order, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, topic.getName());
-            ps.setString(2, topic.getSlug());
-            ps.setString(3, topic.getDescription());
-            ps.setInt(4, topic.getDisplayOrder());
-            ps.setTimestamp(5, Timestamp.from(topic.getCreatedAt()));
+            ps.setString(1, topic.getSubjectId());
+            ps.setString(2, topic.getName());
+            ps.setString(3, topic.getSlug());
+            ps.setString(4, topic.getDescription());
+            ps.setInt(5, topic.getDisplayOrder());
+            ps.setTimestamp(6, Timestamp.from(topic.getCreatedAt()));
 
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -158,16 +180,17 @@ public class JdbcTopicRepository implements TopicRepository {
     private Topic update(Topic topic) {
         String sql = """
                 UPDATE topics
-                SET name = ?, slug = ?, description = ?, display_order = ?
+                SET subject_id = ?, name = ?, slug = ?, description = ?, display_order = ?
                 WHERE id = ?
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, topic.getName());
-            ps.setString(2, topic.getSlug());
-            ps.setString(3, topic.getDescription());
-            ps.setInt(4, topic.getDisplayOrder());
-            ps.setLong(5, topic.getId());
+            ps.setString(1, topic.getSubjectId());
+            ps.setString(2, topic.getName());
+            ps.setString(3, topic.getSlug());
+            ps.setString(4, topic.getDescription());
+            ps.setInt(5, topic.getDisplayOrder());
+            ps.setLong(6, topic.getId());
 
             int updated = ps.executeUpdate();
             if (updated == 0) {
@@ -265,6 +288,7 @@ public class JdbcTopicRepository implements TopicRepository {
 
     private Topic mapRowToTopic(ResultSet rs) throws SQLException {
         long id = rs.getLong("id");
+        String subjectId = rs.getString("subject_id");
         String name = rs.getString("name");
         String slug = rs.getString("slug");
         String description = rs.getString("description");
@@ -272,7 +296,7 @@ public class JdbcTopicRepository implements TopicRepository {
         Timestamp createdTs = rs.getTimestamp("created_at");
         Instant createdAt = createdTs != null ? createdTs.toInstant() : Instant.now();
 
-        return new Topic(id, name, slug, description, displayOrder, createdAt);
+        return new Topic(id, subjectId, name, slug, description, displayOrder, createdAt);
     }
 
     private boolean isDuplicateKeyViolation(SQLException e) {

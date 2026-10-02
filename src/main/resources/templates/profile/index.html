@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Account & Profile')}"></head>
+<body>
+
+<div class="app-layout">
+    <!-- Authenticated Sidebar -->
+    <aside th:replace="~{fragments/layout :: appSidebar('profile')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Account & Profile')}"></header>
+
+        <main class="app-content">
+            <!-- Global Flash Messages -->
+            <div th:if="${profileSuccessMessage}" class="alert alert-success" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <svg th:replace="~{fragments/icons :: checkCircle}"></svg>
+                <span th:text="${profileSuccessMessage}">Profile updated successfully.</span>
+            </div>
+            <div th:if="${profileErrorMessage}" class="alert alert-danger" style="margin-bottom: 20px;">
+                <span th:text="${profileErrorMessage}">Error updating profile.</span>
+            </div>
+
+            <div th:if="${avatarSuccessMessage}" class="alert alert-success" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <svg th:replace="~{fragments/icons :: checkCircle}"></svg>
+                <span th:text="${avatarSuccessMessage}">Avatar updated successfully.</span>
+            </div>
+            <div th:if="${avatarErrorMessage}" class="alert alert-danger" style="margin-bottom: 20px;">
+                <span th:text="${avatarErrorMessage}">Error updating avatar.</span>
+            </div>
+
+            <div th:if="${passwordSuccessMessage}" class="alert alert-success" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <svg th:replace="~{fragments/icons :: checkCircle}"></svg>
+                <span th:text="${passwordSuccessMessage}">Password changed successfully.</span>
+            </div>
+            <div th:if="${passwordErrorMessage}" class="alert alert-danger" style="margin-bottom: 20px;">
+                <span th:text="${passwordErrorMessage}">Error changing password.</span>
+            </div>
+
+            <!-- Profile Hero Header Card -->
+            <div class="card profile-hero-card" style="margin-bottom: 28px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: var(--bf-white); border: none; padding: 32px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
+                    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                        <!-- Large Avatar Container -->
+                        <div style="position: relative;">
+                            <div th:replace="~{fragments/avatar :: renderAvatar(${profile}, 'avatar-xl')}"></div>
+                        </div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                                <h1 style="font-size: 2rem; color: #ffffff; margin: 0;" th:text="${user.fullName}">Student Name</h1>
+                                <span class="badge badge-gold" th:text="${user.role}">STUDENT</span>
+                            </div>
+                            <div style="font-size: 1rem; color: #94a3b8; margin-bottom: 8px;" th:text="${user.email}">student@byteforce.com</div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 0.875rem; color: #cbd5e1; flex-wrap: wrap;">
+                                <span th:if="${profile.college != null && !profile.college.isBlank()}" style="display: flex; align-items: center; gap: 6px;">
+                                    🏛️ <span th:text="${profile.college}">University</span>
+                                </span>
+                                <span th:if="${profile.graduationYear != null}" style="display: flex; align-items: center; gap: 6px;">
+                                    🎓 Class of <span th:text="${profile.graduationYear}">2026</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    📅 Active Student Account
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="#avatar-section" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: #ffffff; border-color: rgba(255,255,255,0.2);">Change Picture</a>
+                        <a href="#security-section" class="btn btn-primary btn-sm" style="background-color: var(--bf-primary); border-color: #3b82f6;">Change Password</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Settings Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 32px;">
+
+                <!-- 1. Personal & Academic Profile Card -->
+                <div class="card" id="personal-info">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--bf-slate-200); padding-bottom: 12px;">
+                        <span style="color: var(--bf-primary); display: inline-flex;"><svg th:replace="~{fragments/icons :: user}"></svg></span>
+                        <h2 style="font-size: 1.25rem; margin: 0; color: var(--bf-navy-900);">Personal & Academic Information</h2>
+                    </div>
+
+                    <form th:action="@{/profile/update}" method="post">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label for="fullName" class="form-label">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" th:value="${user.fullName}" class="form-control" required />
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label for="email" class="form-label">Account Email (Verified)</label>
+                            <input type="email" id="email" th:value="${user.email}" class="form-control" disabled style="background-color: var(--bf-slate-100); color: var(--bf-slate-500); cursor: not-allowed;" />
+                            <small style="color: var(--bf-slate-400); font-size: 0.75rem; margin-top: 4px; display: block;">Email is bound to your ByteForce authentication identity.</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label for="college" class="form-label">College / University</label>
+                            <input type="text" id="college" name="college" th:value="${profile.college}" placeholder="e.g. Stanford University or National Institute of Technology" class="form-control" />
+                        </div>
+
+                        <div style="grid-template-columns: 1fr 1fr; display: grid; gap: 12px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label for="graduationYear" class="form-label">Graduation Year</label>
+                                <input type="number" id="graduationYear" name="graduationYear" th:value="${profile.graduationYear}" placeholder="e.g. 2026" min="2020" max="2035" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="text" id="phone" name="phone" th:value="${profile.phone}" placeholder="e.g. +1-555-0199" class="form-control" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Save Profile Details</button>
+                    </form>
+                </div>
+
+                <!-- 2. Profile Picture Upload Card -->
+                <div class="card" id="avatar-section">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--bf-slate-200); padding-bottom: 12px;">
+                        <span style="color: var(--bf-primary); display: inline-flex;"><svg th:replace="~{fragments/icons :: practice}"></svg></span>
+                        <h2 style="font-size: 1.25rem; margin: 0; color: var(--bf-navy-900);">Profile Picture</h2>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                        <!-- Live preview box -->
+                        <div id="avatarPreviewContainer" style="width: 88px; height: 88px; border-radius: 50%; overflow: hidden; border: 3px solid var(--bf-slate-200); display: flex; align-items: center; justify-content: center; background-color: var(--bf-slate-100); flex-shrink: 0;">
+                            <img id="avatarPreviewImg" th:if="${profile.avatarUrl != null && !profile.avatarUrl.isBlank()}" th:src="${profile.avatarUrl}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div id="avatarFallback" th:if="${profile.avatarUrl == null || profile.avatarUrl.isBlank()}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--bf-slate-400);">
+                                <svg th:replace="~{fragments/icons :: user}"></svg>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-weight: 600; color: var(--bf-navy-900); font-size: 0.9375rem; margin-bottom: 4px;">
+                                <span th:text="${profile.hasCustomAvatar() ? 'Custom Photo Active' : 'Default Avatar Active'}">Default Avatar</span>
+                            </div>
+                            <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin: 0; line-height: 1.4;">
+                                Upload a PNG, JPG, or WebP photo. Images are securely scaled and stored for seamless cloud deployment.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <form th:action="@{/profile/avatar}" method="post" enctype="multipart/form-data" style="margin-bottom: 16px;">
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label for="avatarFileInput" class="form-label">Choose Image File (Max 2 MB)</label>
+                            <input type="file" id="avatarFileInput" name="avatarFile" accept="image/png, image/jpeg, image/jpg, image/webp" class="form-control" required onchange="previewSelectedAvatar(this);" />
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-primary btn-sm" style="flex: 1;">Upload & Save Picture</button>
+                        </div>
+                    </form>
+
+                    <!-- Remove Form if custom avatar exists -->
+                    <form th:if="${profile.hasCustomAvatar()}" th:action="@{/profile/avatar/remove}" method="post" style="border-top: 1px solid var(--bf-slate-100); padding-top: 14px;">
+                        <button type="submit" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Remove your custom photo and reset to default avatar?');">
+                            Remove Picture & Use Default Avatar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4. Security & Change Password -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div class="card" id="security-section">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--bf-slate-200); padding-bottom: 12px;">
+                        <span style="color: var(--bf-primary); display: inline-flex;"><svg th:replace="~{fragments/icons :: checkCircle}"></svg></span>
+                        <h2 style="font-size: 1.25rem; margin: 0; color: var(--bf-navy-900);">Security & Password Change</h2>
+                    </div>
+
+                    <form th:action="@{/profile/password}" method="post">
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label for="currentPassword" class="form-label">Current Password *</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control" required placeholder="Enter current password" />
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label for="newPassword" class="form-label">New Password *</label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" required placeholder="Enter new strong password" />
+                            <small style="color: var(--bf-slate-500); font-size: 0.75rem; margin-top: 4px; display: block;">
+                                Must contain at least 8 characters, with lowercase, uppercase, number, and special symbol.
+                            </small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="confirmPassword" class="form-label">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required placeholder="Re-enter new password" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Update Account Password</button>
+                    </form>
+                </div>
+
+                <!-- 5. Account Diagnostics & Metadata Card -->
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--bf-slate-200); padding-bottom: 12px;">
+                        <span style="color: var(--bf-primary); display: inline-flex;"><svg th:replace="~{fragments/icons :: dashboard}"></svg></span>
+                        <h2 style="font-size: 1.25rem; margin: 0; color: var(--bf-navy-900);">Account Overview</h2>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9375rem;">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--bf-slate-100); padding-bottom: 10px;">
+                            <span style="color: var(--bf-slate-500);">Account ID</span>
+                            <span style="font-family: monospace; font-weight: 600; color: var(--bf-navy-900);" th:text="${#strings.substring(user.id.toString(), 0, 8) + '...'}">abcd-1234</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--bf-slate-100); padding-bottom: 10px;">
+                            <span style="color: var(--bf-slate-500);">Primary Email</span>
+                            <span style="font-weight: 600; color: var(--bf-navy-900);" th:text="${user.email}">student@byteforce.com</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--bf-slate-100); padding-bottom: 10px;">
+                            <span style="color: var(--bf-slate-500);">System Role</span>
+                            <span class="badge badge-primary" th:text="${user.role}">STUDENT</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--bf-slate-100); padding-bottom: 10px;">
+                            <span style="color: var(--bf-slate-500);">Registration Timestamp</span>
+                            <span style="font-weight: 500; color: var(--bf-navy-900);" th:text="${user.createdAt}">2026-10-01</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--bf-slate-500);">Security Encryption</span>
+                            <span style="font-weight: 600; color: #16a34a;">BCrypt Cost 12 (Hardened)</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px; padding: 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md);">
+                        <div style="font-size: 0.8125rem; color: var(--bf-slate-600); line-height: 1.5;">
+                            🛡️ <strong>Placement Privacy Notice:</strong> Your practice attempts, assessment submissions, and preparation metrics are securely bound to your authenticated identity.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function previewSelectedAvatar(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var container = document.getElementById('avatarPreviewContainer');
+            container.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; object-fit: cover;" alt="Preview" />';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+
+</body>
+</html>

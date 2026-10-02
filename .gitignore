@@ -29,3 +29,6 @@ logs/
 *.env
 local.properties
 application-local.properties
+
+data/
+scratch/

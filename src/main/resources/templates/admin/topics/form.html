@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-topics')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar(${pageTitle})}"></header>
+
+        <main class="app-content" style="max-width: 800px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <div style="margin-bottom: 24px;">
+                <a th:href="@{/admin/topics}" style="color: var(--bf-slate-500); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                    ← Back to Topics
+                </a>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${isNew ? 'Create New Topic' : 'Edit Topic'}">Topic Form</h2>
+            </div>
+
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 32px; box-shadow: var(--bf-shadow-sm);">
+                <form th:action="@{/admin/topics/save}" method="post">
+                    <input type="hidden" name="id" th:value="${topic.id}" />
+
+                    <!-- Associated Subject -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Associated Subject <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <select name="subjectId" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                            <option value="">-- Select Subject --</option>
+                            <option th:each="s : ${subjects}" th:value="${s.id}" th:text="${s.name + ' (' + s.id + ')'}" th:selected="${topic.subjectId == s.id}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Topic Name -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Topic Name <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="text" name="name" th:value="${topic.name}" required
+                               placeholder="e.g. Dynamic Programming"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <!-- Slug -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Slug <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="text" name="slug" th:value="${topic.slug}" required
+                               placeholder="e.g. dynamic-programming"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; font-family: var(--bf-font-mono);" />
+                    </div>
+
+                    <!-- Description -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Description
+                        </label>
+                        <textarea name="description" rows="3" placeholder="Overview of concepts and placement scope for this topic..."
+                                  style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; resize: vertical;"
+                                  th:text="${topic.description}"></textarea>
+                    </div>
+
+                    <!-- Display Order -->
+                    <div style="margin-bottom: 28px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Display Order
+                        </label>
+                        <input type="number" name="displayOrder" th:value="${topic.displayOrder}"
+                               style="width: 140px; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 12px; border-top: 1px solid var(--bf-slate-200); padding-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Save Topic</button>
+                        <a th:href="@{/admin/topics}" class="btn btn-ghost" style="padding: 10px 20px;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

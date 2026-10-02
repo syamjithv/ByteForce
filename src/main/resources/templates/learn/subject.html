@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${subject.name} + ' — Placement Learning')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('learn')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar(${subject.name})}"></header>
+        <main class="app-content">
+            <div style="margin-bottom: 24px;">
+                <a th:href="@{/learn}" class="btn btn-secondary btn-sm">← Back to All Subjects</a>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <span class="badge badge-primary" style="margin-bottom: 8px;">SUBJECT</span>
+                <h1 style="font-size: 2rem; margin-bottom: 8px;" th:text="${subject.name}">Subject Name</h1>
+                <p style="color: var(--bf-slate-600); font-size: 1.0625rem;" th:text="${subject.description}">Description</p>
+            </div>
+            <h2 style="font-size: 1.25rem; margin-bottom: 16px;">Topics in this Subject</h2>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div th:each="topic : ${topics}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 6px;" th:text="${topic.name}">Topic Name</h3>
+                        <p style="color: var(--bf-slate-600); font-size: 0.9375rem;" th:text="${topic.description}">Topic Description</p>
+                    </div>
+                    <a th:href="@{/learn/topic/{id}(id=${topic.id})}" class="btn btn-primary btn-sm">
+                        View Concepts →
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('learn')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <div style="margin-bottom: 24px;">
+            <a th:href="@{/learn}" class="btn btn-secondary btn-sm">← Back to All Subjects</a>
+        </div>
+        <div class="card" style="margin-bottom: 24px;">
+            <span class="badge badge-primary" style="margin-bottom: 8px;">SUBJECT</span>
+            <h1 style="font-size: 2.25rem; margin-bottom: 8px;" th:text="${subject.name}">Subject Name</h1>
+            <p style="color: var(--bf-slate-600); font-size: 1.0625rem;" th:text="${subject.description}">Description</p>
+        </div>
+        <h2 style="font-size: 1.375rem; margin-bottom: 16px;">Topics in this Subject</h2>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div th:each="topic : ${topics}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 6px;" th:text="${topic.name}">Topic Name</h3>
+                    <p style="color: var(--bf-slate-600); font-size: 0.9375rem;" th:text="${topic.description}">Topic Description</p>
+                </div>
+                <a th:href="@{/learn/topic/{id}(id=${topic.id})}" class="btn btn-primary btn-sm">
+                    View Concepts →
+                </a>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+</body>
+</html>

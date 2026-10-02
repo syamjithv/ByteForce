@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service interface for User profile management and account operations.
+ * Service interface for User profile management, avatar, and account operations.
  */
 public interface UserService {
 
@@ -20,6 +20,8 @@ public interface UserService {
     Optional<StudentProfile> getStudentProfile(UUID userId);
 
     StudentProfile updateStudentProfile(UUID userId, String fullName, String phone, String college, Integer graduationYear);
+
+    StudentProfile updateAvatar(UUID userId, String avatarUrl);
 
     void changePassword(UUID userId, String oldPassword, String newPassword);
 

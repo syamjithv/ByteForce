@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-resources')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar(${pageTitle})}"></header>
+
+        <main class="app-content" style="max-width: 800px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <div style="margin-bottom: 24px;">
+                <a th:href="@{/admin/resources}" style="color: var(--bf-slate-500); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                    ← Back to Resources
+                </a>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${isNew ? 'Add Learning Resource' : 'Edit Resource'}">Resource Form</h2>
+            </div>
+
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 32px; box-shadow: var(--bf-shadow-sm);">
+                <form th:action="@{/admin/resources/save}" method="post">
+                    <input type="hidden" name="id" th:value="${resource.id}" />
+
+                    <!-- Associated Concept -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Associated Concept <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <select name="conceptId" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                            <option value="">-- Select Concept --</option>
+                            <option th:each="c : ${concepts}" th:value="${c.id}" th:text="${c.title + ' (#' + c.id + ')'}" th:selected="${resource.conceptId == c.id}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Resource Title -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Resource Title <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="text" name="title" th:value="${resource.title}" required
+                               placeholder="e.g. In-Depth Guide to Prefix Sums"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <!-- Resource Type -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Resource Type <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <select name="type" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                            <option th:each="t : ${resourceTypes}" th:value="${t}" th:text="${t}" th:selected="${resource.type == t}"></option>
+                        </select>
+                    </div>
+
+                    <!-- URL -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Resource URL <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="url" name="url" th:value="${resource.url}" required
+                               placeholder="https://example.com/guide"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                        <p style="font-size: 0.75rem; color: var(--bf-slate-500); margin-top: 4px;">Must start with http:// or https://</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div style="margin-bottom: 28px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Description / Summary
+                        </label>
+                        <textarea name="description" rows="3" placeholder="Brief note on what this resource provides..."
+                                  style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; resize: vertical;"
+                                  th:text="${resource.description}"></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 12px; border-top: 1px solid var(--bf-slate-200); padding-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Save Resource</button>
+                        <a th:href="@{/admin/resources}" class="btn btn-ghost" style="padding: 10px 20px;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

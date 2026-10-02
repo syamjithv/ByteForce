@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Assessment Results — ' + ${assessment.title})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('assessments')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Assessment Results')}"></header>
+
+        <main class="app-content">
+            <div style="max-width: 720px; margin: 0 auto;">
+                <div class="card" style="padding: 36px;">
+                    <!-- Completion Banner -->
+                    <div class="alert alert-success" style="margin-bottom: 24px;">
+                        <span style="font-size: 1.25rem;">✓</span>
+                        <div>
+                            <strong>Assessment Submitted Successfully!</strong> Your test attempt has been evaluated and permanently recorded.
+                        </div>
+                    </div>
+
+                    <h1 style="font-size: 1.75rem; margin-bottom: 6px; color: var(--bf-navy-900);" th:text="${assessment.title}">
+                        Mock Test Title
+                    </h1>
+                    <p style="font-size: 0.9375rem; color: var(--bf-slate-500); margin-bottom: 24px;">
+                        Official Placement Test Evaluation Report
+                    </p>
+
+                    <!-- Score Card -->
+                    <div style="background: linear-gradient(135deg, #1e40af 0%, #0f172a 100%); color: var(--bf-white); border-radius: var(--bf-radius-lg); padding: 28px; text-align: center; margin-bottom: 28px;">
+                        <div style="font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; color: #93c5fd; margin-bottom: 6px;">Your Final Score</div>
+                        <div style="font-size: 3rem; font-weight: 800; font-family: var(--bf-font-heading); color: var(--bf-white);">
+                            <span th:text="${attempt.score}">0</span> / <span th:text="${assessment.totalMarks}">100</span>
+                        </div>
+                        <div style="font-size: 1.125rem; color: #bfdbfe; font-weight: 600; margin-top: 4px;">
+                            Percentage: <span th:text="${percentage + '%'}">0.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Breakdown -->
+                    <div class="stats-grid" style="margin-bottom: 32px;">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Questions</div>
+                            <div class="stat-value" th:text="${totalQuestions}">5</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Solved Correct</div>
+                            <div class="stat-value val-success" th:text="${correctCount}">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Incorrect</div>
+                            <div class="stat-value val-danger" th:text="${failedCount}">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Skipped</div>
+                            <div class="stat-value val-warning" th:text="${skippedCount}">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <a th:href="@{/assessments/review/{id}(id=${attempt.id})}" class="btn btn-primary btn-lg" style="flex: 1;">
+                            Review Answers & Explanations →
+                        </a>
+                        <a th:href="@{/assessments}" class="btn btn-secondary btn-lg">
+                            Assessments Catalog
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn btn-ghost btn-lg">
+                            Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

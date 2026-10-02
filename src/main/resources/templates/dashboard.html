@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Student Dashboard')}"></head>
+<body>
+
+<div class="app-layout">
+    <!-- Authenticated Sidebar -->
+    <aside th:replace="~{fragments/layout :: appSidebar('dashboard')}"></aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Dashboard')}"></header>
+
+        <main class="app-content">
+            <!-- Welcome Alert if fresh sign-up -->
+            <div th:if="${welcome}" class="alert alert-success" style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+                <svg th:replace="~{fragments/icons :: checkCircle}"></svg>
+                <span><strong>Welcome to ByteForce, <span th:text="${user.fullName}">Student</span>!</strong> Your placement preparation journey begins today.</span>
+            </div>
+
+            <!-- Greeting Card -->
+            <div class="card" style="margin-bottom: 28px; background: linear-gradient(135deg, #1e40af 0%, #0f172a 100%); color: var(--bf-white); border: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <a th:href="@{/profile}" style="text-decoration: none;" title="Edit Profile & Avatar">
+                            <div th:replace="~{fragments/avatar :: renderAvatar(${currentProfile}, 'avatar-lg')}"></div>
+                        </a>
+                        <div>
+                            <div style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #93c5fd; margin-bottom: 6px;">Placement Readiness Overview</div>
+                            <h2 style="font-size: 2rem; color: var(--bf-white); margin-bottom: 8px;">
+                                <span th:text="${greeting}">Good morning</span>, <span th:text="${user.fullName}">Student</span>!
+                            </h2>
+                            <p style="color: #cbd5e1; font-size: 1rem; max-width: 600px; margin: 0;">
+                                Continue your placement preparation. Select a module below to study concepts, solve coding problems, or take timed mock tests.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <a th:href="@{/practice}" class="btn btn-primary" style="background-color: #2563eb; border-color: #3b82f6;">Start Practice</a>
+                        <a th:href="@{/assessments}" class="btn btn-secondary" style="background-color: rgba(255,255,255,0.15); color: #ffffff; border-color: rgba(255,255,255,0.2);">Mock Tests</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Pillar Cards Grid -->
+            <h3 style="font-size: 1.25rem; margin-bottom: 16px;">Preparation Modules</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                <!-- Learn -->
+                <div class="card card-clickable" onclick="location.href='/learn';">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: var(--bf-radius-md); background-color: var(--bf-primary-light); color: var(--bf-primary); display: flex; align-items: center; justify-content: center;">
+                            <svg th:replace="~{fragments/icons :: learn}"></svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.125rem;">Learn Concepts</h4>
+                            <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Core CS Fundamentals</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 14px;">
+                        Master Data Structures, Operating Systems, DBMS, and OOP with curated takeaways.
+                    </p>
+                    <a th:href="@{/learn}" class="btn btn-outline btn-sm">Explore Curriculum →</a>
+                </div>
+
+                <!-- Practice -->
+                <div class="card card-clickable" onclick="location.href='/practice';">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: var(--bf-radius-md); background-color: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center;">
+                            <svg th:replace="~{fragments/icons :: practice}"></svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.125rem;">Practice Questions</h4>
+                            <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Coding & MCQs</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 14px;">
+                        Filter by topic and difficulty, solve interview questions, and verify solutions.
+                    </p>
+                    <a th:href="@{/practice}" class="btn btn-outline btn-sm">Solve Questions →</a>
+                </div>
+
+                <!-- Assess -->
+                <div class="card card-clickable" onclick="location.href='/assessments';">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: var(--bf-radius-md); background-color: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center;">
+                            <svg th:replace="~{fragments/icons :: assessments}"></svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.125rem;">Mock Tests</h4>
+                            <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Timed Placement Tests</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 14px;">
+                        Take timed diagnostic assessments and review question-by-question scoring.
+                    </p>
+                    <a th:href="@{/assessments}" class="btn btn-outline btn-sm">View Tests →</a>
+                </div>
+
+                <!-- Track -->
+                <div class="card card-clickable" onclick="location.href='/track';">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: var(--bf-radius-md); background-color: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center;">
+                            <svg th:replace="~{fragments/icons :: track}"></svg>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.125rem;">Progress & Track</h4>
+                            <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Readiness Analytics</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 14px;">
+                        Analyze question accuracy, topic performance, and diagnostic weak areas.
+                    </p>
+                    <a th:href="@{/track}" class="btn btn-outline btn-sm">View Analytics →</a>
+                </div>
+            </div>
+
+            <!-- Preparation Status & Analytics (With Honest Empty States) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <!-- Real Stats Overview -->
+                <div class="card">
+                    <h3 style="font-size: 1.125rem; margin-bottom: 14px;">Preparation Metrics</h3>
+                    <div class="stats-grid" style="margin-bottom: 0;">
+                        <div class="stat-card">
+                            <div class="stat-label">Attempted</div>
+                            <div class="stat-value" th:text="${progress.totalAttempts()}">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Solved</div>
+                            <div class="stat-value val-success" th:text="${progress.solvedCount()}">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Accuracy</div>
+                            <div class="stat-value val-primary" th:text="${#numbers.formatDecimal(progress.accuracyPercentage(), 1, 1) + '%'}">0.0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Tests Taken</div>
+                            <div class="stat-value val-warning" th:text="${progress.assessmentsCompleted()}">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Honest Empty Notice for New User -->
+                    <div th:if="${isNewStudent}" class="empty-state" style="margin-top: 16px; padding: 24px;">
+                        <div class="empty-state-icon">
+                            <svg th:replace="~{fragments/icons :: spark}"></svg>
+                        </div>
+                        <h4 class="empty-state-title">Your preparation journey starts here.</h4>
+                        <p class="empty-state-desc">
+                            Complete your first practice session or take a mock test to start building your placement readiness metrics.
+                        </p>
+                        <a th:href="@{/practice}" class="btn btn-primary btn-sm">Begin Practice Session</a>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Timeline -->
+                <div class="card">
+                    <h3 style="font-size: 1.125rem; margin-bottom: 14px;">Recent Activity History</h3>
+                    <div th:if="${recentActivities == null || recentActivities.isEmpty()}" class="empty-state" style="padding: 24px;">
+                        <div class="empty-state-icon">
+                            <svg th:replace="~{fragments/icons :: document}"></svg>
+                        </div>
+                        <h4 class="empty-state-title">No recent activity recorded.</h4>
+                        <p class="empty-state-desc">
+                            As you solve practice questions, take mock assessments, and bookmark problems, your real activity timeline will appear here.
+                        </p>
+                    </div>
+
+                    <div th:if="${recentActivities != null && !recentActivities.isEmpty()}" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div th:each="act : ${recentActivities}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background-color: var(--bf-slate-50); border-radius: var(--bf-radius-md); border: 1px solid var(--bf-slate-200);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="badge badge-primary" style="font-size: 0.6875rem;" th:text="${act.activityType}">ACTIVITY</span>
+                                <span style="font-size: 0.875rem; color: var(--bf-navy-800);" th:text="${act.description}">Description</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Next Step -->
+            <div class="card" style="background-color: var(--bf-primary-light); border-color: var(--bf-primary-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--bf-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Recommended Next Step</div>
+                        <h4 style="font-size: 1.125rem; color: var(--bf-navy-900); margin-bottom: 4px;">Take the Technical Placement Readiness Mock Test</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-navy-700);">Test your knowledge in a timed test simulation across DSA, SQL, OOP, and Operating Systems.</p>
+                    </div>
+                    <a th:href="@{/assessments}" class="btn btn-primary">Take Mock Assessment →</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

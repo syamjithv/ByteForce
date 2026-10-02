@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Reusable Practice Catalog Fragment -->
+<div th:fragment="practiceCatalog" class="practice-catalog-root">
+    <!-- Top Header -->
+    <div style="margin-bottom: 28px;">
+        <h1 style="font-size: 2rem; margin-bottom: 6px;">Practice Questions</h1>
+        <p style="color: var(--bf-slate-500); font-size: 1rem;">
+            Solve curated placement coding problems, MCQs, SQL queries, and conceptual interview questions.
+        </p>
+    </div>
+
+    <!-- Filters & Start Practice Bar -->
+    <div class="card" style="margin-bottom: 32px; background-color: var(--bf-white);">
+        <form th:action="@{/practice}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) auto; gap: 16px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="topicId" class="form-label">Select Topic</label>
+                <select id="topicId" name="topicId" class="form-control">
+                    <option value="">All Topics</option>
+                    <option th:each="t : ${topics}"
+                            th:value="${t.id}"
+                            th:text="${t.name}"
+                            th:selected="${selectedTopicId != null && selectedTopicId == t.id}">Topic</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="difficulty" class="form-label">Select Difficulty</label>
+                <select id="difficulty" name="difficulty" class="form-control">
+                    <option value="">All Difficulties</option>
+                    <option th:each="d : ${difficulties}"
+                            th:value="${d.name()}"
+                            th:text="${d.name()}"
+                            th:selected="${selectedDifficulty != null && selectedDifficulty == d.name()}">EASY</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-secondary">Filter</button>
+                <a th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty})}" class="btn btn-primary">
+                    Start Practice Session →
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Questions Catalog Grid -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 1.25rem;">
+            Questions Catalog
+            <span style="font-size: 0.875rem; color: var(--bf-slate-500); font-weight: normal;">
+                (<span th:text="${totalAvailable}">0</span> questions)
+            </span>
+        </h2>
+    </div>
+
+    <div th:if="${previewQuestions.isEmpty()}" class="empty-state">
+        <div class="empty-state-icon">
+            <svg th:replace="~{fragments/icons :: document}"></svg>
+        </div>
+        <h3 class="empty-state-title">No questions found</h3>
+        <p class="empty-state-desc">Try clearing or changing your filters to see more placement questions.</p>
+        <a th:href="@{/practice}" class="btn btn-secondary btn-sm">Reset Filters</a>
+    </div>
+
+    <div th:if="${!previewQuestions.isEmpty()}" style="display: flex; flex-direction: column; gap: 14px;">
+        <div th:each="q, iterStat : ${previewQuestions}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span class="badge"
+                          th:classappend="${q.difficulty.name() == 'EASY' ? 'badge-easy' : (q.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                          th:text="${q.difficulty}">EASY</span>
+                    <span class="badge badge-purple" th:text="${q.questionType}">CODING</span>
+                </div>
+                <h3 style="font-size: 1.125rem; margin-bottom: 4px;" th:text="${q.title}">Two Sum</h3>
+                <p style="font-size: 0.875rem; color: var(--bf-slate-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 700px;"
+                   th:text="${q.description}">Short description</p>
+            </div>
+
+            <div>
+                <a th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty}, index=${iterStat.index})}"
+                   class="btn btn-outline btn-sm">
+                    Solve Question →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

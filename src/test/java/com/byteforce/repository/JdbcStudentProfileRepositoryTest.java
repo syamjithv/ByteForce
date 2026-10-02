@@ -161,4 +161,29 @@ class JdbcStudentProfileRepositoryTest {
         assertThrows(ByteForceException.class, () -> brokenRepo.existsByUserId(UUID.randomUUID()));
         assertThrows(ByteForceException.class, () -> brokenRepo.deleteByUserId(UUID.randomUUID()));
     }
+
+    @Test
+    @DisplayName("Should persist and update avatarUrl successfully")
+    void shouldPersistAvatarUrlSuccessfully() {
+        StudentProfile initial = profileRepository.findByUserId(defaultUser.getId()).orElseThrow();
+        assertNull(initial.getAvatarUrl());
+        assertFalse(initial.hasCustomAvatar());
+
+        String fakeDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+        StudentProfile withAvatar = initial.withAvatarUrl(fakeDataUrl);
+
+        profileRepository.save(withAvatar);
+
+        StudentProfile reloaded = profileRepository.findByUserId(defaultUser.getId()).orElseThrow();
+        assertEquals(fakeDataUrl, reloaded.getAvatarUrl());
+        assertTrue(reloaded.hasCustomAvatar());
+
+        // Remove avatar
+        StudentProfile removedAvatar = reloaded.withAvatarUrl(null);
+        profileRepository.save(removedAvatar);
+
+        StudentProfile reloadedAfterRemove = profileRepository.findByUserId(defaultUser.getId()).orElseThrow();
+        assertNull(reloadedAfterRemove.getAvatarUrl());
+        assertFalse(reloadedAfterRemove.hasCustomAvatar());
+    }
 }

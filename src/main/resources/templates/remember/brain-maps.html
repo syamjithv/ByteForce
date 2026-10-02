@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Brain Maps View Fragment -->
+<div th:fragment="brainMapsContent" class="remember-brain-maps-view">
+    <!-- Sub-header & Back link -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--bf-navy-900); margin: 0 0 4px 0;">
+                Brain Maps — Knowledge Network
+            </h2>
+            <p style="color: var(--bf-slate-500); font-size: 0.875rem; margin: 0;">
+                Navigate curriculum relationships: prerequisites, unlocked concepts, related topics, and interview traps.
+            </p>
+        </div>
+        <a th:href="@{/remember(view='cards')}" class="btn btn-outline btn-sm">
+            ← Back to Revision Cards
+        </a>
+    </div>
+
+    <!-- Explorer Grid: Concept Navigator (Left) + Brain Map View (Right) -->
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start;">
+
+        <!-- Left Column: Curriculum Hierarchy Navigator -->
+        <div class="card" style="padding: 16px; max-height: 800px; overflow-y: auto; background-color: var(--bf-white);">
+            <h3 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-navy-900); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Curriculum Nodes</span>
+            </h3>
+
+            <div th:if="${curriculumHierarchy == null || curriculumHierarchy.isEmpty()}" style="color: var(--bf-slate-400); font-size: 0.875rem;">
+                No curriculum concepts available.
+            </div>
+
+            <div th:each="entry : ${curriculumHierarchy}" style="margin-bottom: 16px;">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--bf-primary); letter-spacing: 0.04em; margin-bottom: 6px;"
+                     th:text="${entry.key}">
+                    Subject
+                </div>
+
+                <div th:each="topicEntry : ${entry.value}" style="margin-left: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-slate-700); margin-bottom: 4px;"
+                         th:text="${topicEntry.key.name}">
+                        Topic Name
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 3px; margin-left: 8px;">
+                        <a th:each="c : ${topicEntry.value}"
+                           th:href="@{/remember(view='brain-maps', conceptId=${c.id})}"
+                           style="font-size: 0.8125rem; padding: 5px 8px; border-radius: 4px; text-decoration: none; display: block;"
+                           th:styleappend="${selectedConcept != null && selectedConcept.id == c.id ? 'background-color: var(--bf-primary); color: white; font-weight: 600;' : 'color: var(--bf-slate-600);'}"
+                           th:text="${c.title}">
+                            Concept Title
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Brain Map Node Visualizer -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- Empty State if no concept selected -->
+            <div th:if="${selectedConcept == null}" class="card" style="text-align: center; padding: 48px 24px; background-color: var(--bf-white);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">🧠</div>
+                <h3 style="font-size: 1.25rem; color: var(--bf-navy-900); margin-bottom: 6px;">Select a concept to explore</h3>
+                <p style="color: var(--bf-slate-500); font-size: 0.9375rem;">
+                    Choose any concept from the curriculum navigator on the left to see its prerequisites, dependent topics, and knowledge connections.
+                </p>
+            </div>
+
+            <!-- Active Concept Showcase Card -->
+            <div th:if="${selectedConcept != null}" class="card" style="border: 2px solid var(--bf-primary); background-color: var(--bf-white);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <span class="badge badge-primary">ACTIVE NODE</span>
+                            <span style="font-size: 0.8125rem; color: var(--bf-slate-500);" th:if="${selectedSubject != null}" th:text="${selectedSubject.name + ' › ' + (selectedTopic != null ? selectedTopic.name : '')}">Breadcrumb</span>
+                        </div>
+                        <h2 style="font-size: 1.5rem; color: var(--bf-navy-900); margin: 0 0 6px 0;" th:text="${selectedConcept.title}">
+                            Active Concept Title
+                        </h2>
+                    </div>
+                    <a th:href="@{/learn/concept/{id}(id=${selectedConcept.id})}" class="btn btn-primary btn-sm">
+                        Study Full Concept →
+                    </a>
+                </div>
+
+                <p style="color: var(--bf-slate-600); font-size: 0.9375rem; line-height: 1.5; margin: 0;" th:text="${selectedConcept.shortExplanation}">
+                    Short explanation of the currently selected concept.
+                </p>
+            </div>
+
+            <!-- Network Connections Section -->
+            <div th:if="${selectedConcept != null}">
+
+                <!-- Clean Empty State if no relationships -->
+                <div th:if="${relatedConcepts.isEmpty()}" class="card" style="text-align: center; padding: 36px 20px; background-color: var(--bf-white);">
+                    <div style="font-size: 1.8rem; margin-bottom: 8px;">🔗</div>
+                    <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin-bottom: 4px;">No connections mapped yet</h3>
+                    <p style="color: var(--bf-slate-500); font-size: 0.875rem; margin: 0 0 16px 0;">
+                        This concept is currently a standalone curriculum node. More relationships will be mapped as the curriculum expands.
+                    </p>
+                    <a th:href="@{/learn/concept/{id}(id=${selectedConcept.id})}" class="btn btn-outline btn-sm">
+                        Review Concept Content
+                    </a>
+                </div>
+
+                <!-- Structured Relationship Sections -->
+                <div th:if="${!relatedConcepts.isEmpty()}" style="display: flex; flex-direction: column; gap: 20px;">
+
+                    <!-- 1. Prerequisites (Learn First) -->
+                    <div th:if="${prerequisites != null && !prerequisites.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                            <span class="badge badge-hard">PREREQUISITES</span>
+                            <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Required Foundation Before This Concept</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                            <div th:each="rel : ${prerequisites}" class="card" style="padding: 14px; background-color: var(--bf-white);">
+                                <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Prerequisite Concept</h4>
+                                <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 8px;" th:text="${rel.description}">Note</p>
+                                <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 12px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <a th:href="@{/remember(view='brain-maps', conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        View in Map 🧠
+                                    </a>
+                                    <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        Study →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Successors / Unlocked Concepts (What comes next) -->
+                    <div th:if="${successors != null && !successors.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                            <span class="badge badge-primary">NEXT CONCEPTS</span>
+                            <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Topics Unlocked by Mastering This Concept</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                            <div th:each="rel : ${successors}" class="card" style="padding: 14px; background-color: var(--bf-white);">
+                                <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Next Concept</h4>
+                                <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 8px;" th:text="${rel.description}">Note</p>
+                                <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 12px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <a th:href="@{/remember(view='brain-maps', conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        View in Map 🧠
+                                    </a>
+                                    <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        Study →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Related Concepts (Adjacent Knowledge) -->
+                    <div th:if="${relatedNodes != null && !relatedNodes.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                            <span class="badge badge-easy">RELATED</span>
+                            <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Adjacent &amp; Complementary Knowledge</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                            <div th:each="rel : ${relatedNodes}" class="card" style="padding: 14px; background-color: var(--bf-white);">
+                                <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Related Concept</h4>
+                                <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 8px;" th:text="${rel.description}">Note</p>
+                                <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 12px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <a th:href="@{/remember(view='brain-maps', conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        View in Map 🧠
+                                    </a>
+                                    <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        Study →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Commonly Confused Concepts -->
+                    <div th:if="${confusedNodes != null && !confusedNodes.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                            <span class="badge badge-purple">⚠️ COMMONLY CONFUSED</span>
+                            <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Common Interview Traps &amp; Distinctions</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                            <div th:each="rel : ${confusedNodes}" class="card" style="padding: 14px; background-color: var(--bf-white); border-left: 3px solid #8b5cf6;">
+                                <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Confused Concept</h4>
+                                <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: #6d28d9; font-weight: 500; margin-bottom: 8px;" th:text="${rel.description}">Distinction Note</p>
+                                <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 12px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <a th:href="@{/remember(view='brain-maps', conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        View in Map 🧠
+                                    </a>
+                                    <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 3px 8px;">
+                                        Study →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

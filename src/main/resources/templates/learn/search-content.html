@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="searchContent" class="search-content-root">
+    <!-- Back to curriculum -->
+    <div style="margin-bottom: 24px;">
+        <a th:href="@{/learn}" class="btn btn-secondary btn-sm">← Back to All Subjects</a>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card" style="margin-bottom: 24px;">
+        <form th:action="@{/learn/search}" method="get" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <input type="text" name="q" th:value="${query}" placeholder="Search CS concepts..." class="form-control" style="flex: 1; min-width: 240px;" required />
+            <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg th:replace="~{fragments/icons :: search}"></svg>
+                <span>Search</span>
+            </button>
+        </form>
+    </div>
+
+    <h2 style="font-size: 1.25rem; margin-bottom: 16px;">
+        Search Results for "<span th:text="${query}">query</span>"
+        <span style="font-size: 0.9375rem; color: var(--bf-slate-500); font-weight: normal;">(<span th:text="${resultCount}">0</span> found)</span>
+    </h2>
+
+    <div th:if="${results.isEmpty()}" class="empty-state">
+        <div class="empty-state-icon">
+            <svg th:replace="~{fragments/icons :: search}"></svg>
+        </div>
+        <h3 class="empty-state-title">No matching concepts found</h3>
+        <p class="empty-state-desc">Try searching with other terms such as Array, Tree, Binary Search, SQL, or Concurrency.</p>
+        <a th:href="@{/learn}" class="btn btn-secondary btn-sm">Return to All Subjects</a>
+    </div>
+
+    <div th:if="${!results.isEmpty()}" style="display: flex; flex-direction: column; gap: 16px;">
+        <div th:each="concept : ${results}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                    <h3 style="font-size: 1.25rem;" th:text="${concept.title}">Concept Title</h3>
+                    <span class="badge badge-primary" th:text="${concept.topicName}">Topic</span>
+                </div>
+                <p style="color: var(--bf-slate-600); font-size: 0.9375rem;" th:text="${concept.shortExplanation}">Explanation</p>
+            </div>
+            <a th:href="@{/learn/concept/{id}(id=${concept.id})}" class="btn btn-primary btn-sm">
+                Study Concept →
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

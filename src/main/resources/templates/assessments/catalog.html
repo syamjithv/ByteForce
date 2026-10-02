@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Reusable Assessments Catalog Body -->
+<div th:fragment="assessmentsCatalog" class="assessments-catalog-root">
+    <div style="margin-bottom: 28px;">
+        <h1 style="font-size: 2rem; margin-bottom: 6px;">Placement Mock Assessments</h1>
+        <p style="color: var(--bf-slate-500); font-size: 1rem;">
+            Evaluate your technical placement readiness under simulated exam conditions with timed mock tests.
+        </p>
+    </div>
+
+    <div th:if="${assessments.isEmpty()}" class="empty-state">
+        <div class="empty-state-icon">
+            <svg th:replace="~{fragments/icons :: assessments}"></svg>
+        </div>
+        <h3 class="empty-state-title">No assessments available right now</h3>
+        <p class="empty-state-desc">New placement tests are scheduled periodically. Check back soon or practice questions in the meantime.</p>
+        <a th:href="@{/practice}" class="btn btn-primary btn-sm">Explore Practice Questions</a>
+    </div>
+
+    <div th:if="${!assessments.isEmpty()}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        <div th:each="a : ${assessments}" class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span class="badge"
+                          th:classappend="${a.difficulty.name() == 'EASY' ? 'badge-easy' : (a.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                          th:text="${a.difficulty}">MEDIUM</span>
+                    <span style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-primary); display: inline-flex; align-items: center; gap: 4px;">
+                        <svg th:replace="~{fragments/icons :: clock}"></svg>
+                        <span th:text="${a.durationMinutes}">60</span> Mins
+                    </span>
+                </div>
+
+                <h3 style="font-size: 1.25rem; margin-bottom: 8px; color: var(--bf-navy-900);" th:text="${a.title}">Test Title</h3>
+                <p style="font-size: 0.875rem; color: var(--bf-slate-600); line-height: 1.5; margin-bottom: 16px;" th:text="${a.description}">Description</p>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 20px; font-size: 0.8125rem; color: var(--bf-slate-500); align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span style="color: var(--bf-gold-600); font-size: 0.9rem;">★</span>
+                        <span>Total Marks: <strong th:text="${a.totalMarks}" style="color: var(--bf-navy-900);">100</strong></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <svg th:replace="~{fragments/icons :: document}"></svg>
+                        <span>Questions: <strong th:text="${questionCounts.get(a.id)}" style="color: var(--bf-navy-900);">5</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <a th:href="@{/assessments/briefing/{id}(id=${a.id})}" class="btn btn-primary btn-block">
+                    View Test Briefing →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

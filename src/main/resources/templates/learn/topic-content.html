@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="topicContent" class="topic-content-root">
+    <!-- Breadcrumb & Back -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <a th:href="@{/learn}" class="btn btn-secondary btn-sm">← Back to All Subjects</a>
+        <span style="font-size: 0.875rem; color: var(--bf-slate-400);">
+            Learn &gt; <span th:text="${topic.name}" style="color: var(--bf-navy-800); font-weight: 600;">Topic</span>
+        </span>
+    </div>
+
+    <!-- Topic Header Card -->
+    <div class="card" style="margin-bottom: 28px;">
+        <span class="badge badge-primary" style="margin-bottom: 8px;">PLACEMENT TOPIC</span>
+        <h1 style="font-size: 2rem; margin-bottom: 6px;" th:text="${topic.name}">Arrays</h1>
+        <p style="color: var(--bf-slate-500); font-size: 1rem;" th:text="${topic.description}">Topic description</p>
+    </div>
+
+    <!-- Concepts List -->
+    <h3 style="font-size: 1.25rem; margin-bottom: 16px;">Core Placement Concepts</h3>
+    <div th:if="${concepts.isEmpty()}" class="empty-state">
+        <p>No concepts added for this topic yet.</p>
+    </div>
+
+    <div th:if="${!concepts.isEmpty()}" style="display: flex; flex-direction: column; gap: 16px;">
+        <div th:each="concept : ${concepts}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                    <h3 style="font-size: 1.25rem;" th:text="${concept.title}">Array Traversal</h3>
+                    <span class="badge badge-neutral" th:text="${concept.resources.size() + ' Resource(s)'}">2 Resources</span>
+                </div>
+                <p style="color: var(--bf-slate-600); font-size: 0.9375rem;" th:text="${concept.shortExplanation}">Explanation</p>
+            </div>
+            <a th:href="@{/learn/concept/{id}(id=${concept.id})}" class="btn btn-primary btn-sm">
+                Study Concept →
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

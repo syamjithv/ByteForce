@@ -29,6 +29,11 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public Topic createTopic(String name, String slug, String description, int displayOrder) {
+        return createTopic(null, name, slug, description, displayOrder);
+    }
+
+    @Override
+    public Topic createTopic(String subjectId, String name, String slug, String description, int displayOrder) {
         if (name == null || name.isBlank()) {
             throw new ValidationException("Topic name must not be blank.");
         }
@@ -46,14 +51,21 @@ public class TopicServiceImpl implements TopicService {
             throw new ValidationException("A topic with slug '" + normalizedSlug + "' already exists.");
         }
 
-        Topic topic = Topic.create(normalizedName, normalizedSlug, description != null ? description.trim() : null, displayOrder);
+        Topic topic = Topic.create(subjectId, normalizedName, normalizedSlug, description != null ? description.trim() : null, displayOrder);
         Topic saved = topicRepository.save(topic);
-        log.info("Created new topic with ID {} and slug '{}'", saved.getId(), saved.getSlug());
+        log.info("Created new topic with ID {} and slug '{}' for subject '{}'", saved.getId(), saved.getSlug(), subjectId);
         return saved;
     }
 
     @Override
     public Topic updateTopic(long id, String name, String slug, String description, int displayOrder) {
+        Topic existing = topicRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Topic not found with ID: " + id));
+        return updateTopic(id, existing.getSubjectId(), name, slug, description, displayOrder);
+    }
+
+    @Override
+    public Topic updateTopic(long id, String subjectId, String name, String slug, String description, int displayOrder) {
         if (name == null || name.isBlank()) {
             throw new ValidationException("Topic name must not be blank.");
         }
@@ -75,6 +87,7 @@ public class TopicServiceImpl implements TopicService {
         }
 
         Topic updatedTopic = existing
+                .withSubjectId(subjectId)
                 .withName(normalizedName)
                 .withSlug(normalizedSlug)
                 .withDescription(description != null ? description.trim() : null)
@@ -101,6 +114,14 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
+    public List<Topic> getTopicsForSubject(String subjectId) {
+        if (subjectId == null || subjectId.isBlank()) {
+            return List.of();
+        }
+        return topicRepository.findBySubjectId(subjectId.trim().toLowerCase());
+    }
+
+    @Override
     public void deleteTopic(long id) {
         Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found with ID: " + id));
@@ -112,5 +133,10 @@ public class TopicServiceImpl implements TopicService {
 
         topicRepository.deleteById(id);
         log.info("Deleted topic with ID {}", id);
+    }
+
+    @Override
+    public long getTotalTopicCount() {
+        return topicRepository.count();
     }
 }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-questions')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar(${pageTitle})}"></header>
+
+        <main class="app-content" style="max-width: 850px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <div style="margin-bottom: 24px;">
+                <a th:href="@{/admin/questions}" style="color: var(--bf-slate-500); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                    ← Back to Question Bank
+                </a>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${isNew ? 'Create New Question' : 'Edit Question'}">Question Form</h2>
+            </div>
+
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 32px; box-shadow: var(--bf-shadow-sm);">
+                <form th:action="@{/admin/questions/save}" method="post">
+                    <input type="hidden" name="id" th:value="${question.id}" />
+
+                    <!-- Topic -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Associated Topic <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <select name="topicId" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                            <option value="">-- Select Topic --</option>
+                            <option th:each="t : ${topics}" th:value="${t.id}" th:text="${t.name}" th:selected="${question.topicId == t.id}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Title -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Question Title <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="text" name="title" th:value="${question.title}" required
+                               placeholder="e.g. Invert a Binary Tree"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <!-- Slug -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Slug <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <input type="text" name="slug" th:value="${question.slug}" required
+                               placeholder="e.g. invert-binary-tree"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; font-family: var(--bf-font-mono);" />
+                    </div>
+
+                    <!-- Row: Difficulty & Question Type -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                                Difficulty <span style="color: var(--bf-danger);">*</span>
+                            </label>
+                            <select name="difficulty" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                                <option th:each="d : ${difficulties}" th:value="${d}" th:text="${d}" th:selected="${question.difficulty == d}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                                Question Type <span style="color: var(--bf-danger);">*</span>
+                            </label>
+                            <select name="questionType" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; background: var(--bf-white);">
+                                <option th:each="qt : ${questionTypes}" th:value="${qt}" th:text="${qt}" th:selected="${question.questionType == qt}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Description / Problem Statement -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Description / Problem Statement / Prompt <span style="color: var(--bf-danger);">*</span>
+                        </label>
+                        <textarea name="description" rows="7" required
+                                  placeholder="Provide the complete problem statement, input/output formats, examples, and for MCQs include the options (A, B, C, D)..."
+                                  style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; resize: vertical;"
+                                  th:text="${question.description}"></textarea>
+                    </div>
+
+                    <!-- Solution / Correct Answer -->
+                    <div style="margin-bottom: 28px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">
+                            Reference Solution / Code / Answer Explanation
+                        </label>
+                        <textarea name="solution" rows="7"
+                                  placeholder="// For coding: reference Java method&#10;// For MCQ: correct option letter and explanation&#10;// For SQL: reference query"
+                                  style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.875rem; font-family: var(--bf-font-mono); resize: vertical; background: var(--bf-slate-50);"
+                                  th:text="${question.solution}"></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 12px; border-top: 1px solid var(--bf-slate-200); padding-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Save Question</button>
+                        <a th:href="@{/admin/questions}" class="btn btn-ghost" style="padding: 10px 20px;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

@@ -14,14 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class QuestionTypeTest {
 
     @Test
-    @DisplayName("QuestionType enum should contain all 4 placement question categories")
+    @DisplayName("QuestionType enum should contain all 5 placement question categories")
     void shouldContainAllQuestionTypes() {
         QuestionType[] types = QuestionType.values();
-        assertEquals(4, types.length);
+        assertEquals(5, types.length);
         assertNotNull(QuestionType.valueOf("CODING"));
         assertNotNull(QuestionType.valueOf("MCQ"));
         assertNotNull(QuestionType.valueOf("SQL"));
         assertNotNull(QuestionType.valueOf("CONCEPTUAL"));
+        assertNotNull(QuestionType.valueOf("APTITUDE"));
     }
 
     @Test

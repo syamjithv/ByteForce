@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Placement Track & Progress Analytics')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('track')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Track & Preparation Analytics')}"></header>
+
+        <main class="app-content">
+            <!-- Header -->
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 8px; background-color: rgba(37, 99, 235, 0.1); color: var(--bf-primary); font-size: 1.25rem;">📊</span>
+                    <h1 style="font-size: 1.875rem; color: var(--bf-navy-900); margin: 0;">Placement Preparation Progress</h1>
+                </div>
+                <p style="color: var(--bf-slate-600); font-size: 1rem; max-width: 820px; margin: 0;">
+                    Real-time performance analytics, topic mastery levels, difficulty distribution, and diagnostic weak areas.
+                </p>
+            </div>
+
+            <!-- Readiness Index Banner (Overview Summary) -->
+            <div class="card" style="background: linear-gradient(135deg, var(--bf-navy-900) 0%, #1e3a8a 100%); color: var(--bf-white); padding: 26px 30px; margin-bottom: 26px; border: none; box-shadow: var(--bf-shadow-md);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+                    <div style="flex: 1; min-width: 260px;">
+                        <span class="badge" style="background: rgba(251, 191, 36, 0.2); color: var(--bf-gold-300); border: 1px solid rgba(251, 191, 36, 0.3); margin-bottom: 8px;">PLACEMENT READINESS INDEX</span>
+                        <h2 style="font-size: 1.5rem; color: var(--bf-white); margin-bottom: 8px;">Overall Technical Preparedness</h2>
+                        <p style="color: var(--bf-slate-300); font-size: 0.875rem; line-height: 1.5; margin: 0 0 14px 0;">
+                            A composite index reflecting practice problem coverage, overall accuracy, and completed mock assessment scores.
+                        </p>
+                        <!-- Progress bar -->
+                        <div style="height: 10px; width: 100%; max-width: 440px; background: rgba(255,255,255,0.15); border-radius: 9999px; overflow: hidden; margin-bottom: 6px;">
+                            <div th:style="'height: 100%; width: ' + ${readinessScore} + '%; background: linear-gradient(90deg, #f59e0b, #10b981); border-radius: 9999px; transition: width 0.4s ease;'"></div>
+                        </div>
+                        <div style="font-size: 0.8125rem; color: var(--bf-slate-300);">
+                            <span th:text="${readinessScore}">0</span>% Placement Ready
+                        </div>
+                    </div>
+
+                    <!-- Right Circular / Gauge Stat Box -->
+                    <div style="text-align: center; background: rgba(255,255,255,0.06); padding: 18px 24px; border-radius: var(--bf-radius-lg); border: 1px solid rgba(255,255,255,0.1); min-width: 140px;">
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-gold-300); line-height: 1;" th:text="${readinessScore + '%'}">0%</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-300); margin-top: 6px;">
+                            <span th:if="${readinessScore >= 75}">Placement Ready</span>
+                            <span th:if="${readinessScore >= 40 && readinessScore < 75}">On Track</span>
+                            <span th:if="${readinessScore < 40}">Building Foundation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metric Statistics Grid -->
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; color: var(--bf-navy-900);">Overall Preparation Metrics</h2>
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 26px;">
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Total Attempted</div>
+                    <div class="stat-value" th:text="${overall.totalAttempts()}">0</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Solved Problems</div>
+                    <div class="stat-value val-success" th:text="${overall.solvedCount()}">0</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Failed / Need Review</div>
+                    <div class="stat-value val-danger" th:text="${overall.failedCount()}">0</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Overall Accuracy</div>
+                    <div class="stat-value val-primary" th:text="${#numbers.formatDecimal(overall.accuracyPercentage(), 1, 1) + '%'}">0.0%</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Mock Assessments</div>
+                    <div class="stat-value" style="color: #6366f1;" th:text="${overall.assessmentsCompleted()}">0</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-white);">
+                    <div class="stat-label">Bookmarked Qs</div>
+                    <div class="stat-value" style="color: #d97706;" th:text="${overall.bookmarkedCount()}">0</div>
+                </div>
+            </div>
+
+            <!-- Honest Empty State if no activity -->
+            <div th:if="${!hasActivity}" class="card" style="text-align: center; padding: 48px 24px; margin-bottom: 26px; background-color: var(--bf-white);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">🌱</div>
+                <h3 style="font-size: 1.25rem; color: var(--bf-navy-900); margin-bottom: 6px;">Your preparation journey starts here</h3>
+                <p style="color: var(--bf-slate-500); font-size: 0.9375rem; max-width: 520px; margin: 0 auto 20px auto;">
+                    Solve practice questions, attempt mock tests, or explore aptitude problems to generate your personalized placement analytics and diagnostic weak area reports.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <a th:href="@{/practice}" class="btn btn-primary btn-sm">Start Practice Problem Session</a>
+                    <a th:href="@{/assessments}" class="btn btn-outline btn-sm">Take a Mock Assessment</a>
+                    <a th:href="@{/aptitude}" class="btn btn-ghost btn-sm">Practice Aptitude</a>
+                </div>
+            </div>
+
+            <!-- Two-Column Analytics: Topic Mastery Chart + Difficulty Breakdown -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 26px;">
+                <!-- Chart A: Topic Mastery Level (Horizontal Progress Bars) -->
+                <div class="card" style="background-color: var(--bf-white);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin: 0;">Topic Mastery Breakdown</h3>
+                        <span style="font-size: 0.75rem; color: var(--bf-slate-400); font-weight: 600;">ACCURACY %</span>
+                    </div>
+
+                    <div th:if="${topicPerformances.isEmpty()}" style="color: var(--bf-slate-500); font-size: 0.875rem; font-style: italic; padding: 24px 0; text-align: center;">
+                        No topic attempts recorded yet. Practice questions to see topic-level mastery.
+                    </div>
+
+                    <div th:if="${!topicPerformances.isEmpty()}" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div th:each="tp : ${topicPerformances}">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="font-size: 0.875rem; color: var(--bf-navy-900);" th:text="${tp.topicName()}">Topic</strong>
+                                <span style="font-size: 0.8125rem; font-weight: 700;"
+                                      th:style="${tp.accuracyPercentage() >= 75 ? 'color: var(--bf-success);' : (tp.accuracyPercentage() >= 50 ? 'color: var(--bf-warning);' : 'color: var(--bf-danger);')}"
+                                      th:text="${#numbers.formatDecimal(tp.accuracyPercentage(), 1, 1) + '%'}">80.0%</span>
+                            </div>
+                            <!-- Bar Container -->
+                            <div style="height: 10px; width: 100%; background-color: var(--bf-slate-100); border-radius: 9999px; overflow: hidden; margin-bottom: 4px;">
+                                <div th:style="'height: 100%; width: ' + ${tp.accuracyPercentage()} + '%; border-radius: 9999px; background-color: ' + (${tp.accuracyPercentage() >= 75 ? 'var(--bf-success)' : (tp.accuracyPercentage() >= 50 ? 'var(--bf-warning)' : 'var(--bf-danger)')})"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--bf-slate-400);">
+                                <span><strong th:text="${tp.solvedCount()}">0</strong> of <strong th:text="${tp.totalAttempts()}">0</strong> solved</span>
+                                <span><span th:text="${tp.failedCount()}">0</span> failed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart B: Difficulty Distribution (Easy / Medium / Hard) -->
+                <div class="card" style="background-color: var(--bf-white);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin: 0;">Difficulty Distribution</h3>
+                        <span style="font-size: 0.75rem; color: var(--bf-slate-400); font-weight: 600;">SOLVED / ATTEMPTED</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 18px;">
+                        <!-- Easy -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="badge badge-easy">EASY</span>
+                                    <span style="font-size: 0.8125rem; color: var(--bf-slate-600);">
+                                        <strong th:text="${difficultyDistribution.easySolved()}">0</strong> / <span th:text="${difficultyDistribution.easyTotal()}">0</span> Solved
+                                    </span>
+                                </div>
+                                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--bf-success);"
+                                      th:text="${#numbers.formatDecimal(difficultyDistribution.easyAccuracy(), 1, 1) + '%'}">0.0%</span>
+                            </div>
+                            <div style="height: 10px; width: 100%; background-color: var(--bf-slate-100); border-radius: 9999px; overflow: hidden;">
+                                <div th:style="'height: 100%; width: ' + ${difficultyDistribution.easyAccuracy()} + '%; background-color: var(--bf-success); border-radius: 9999px;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Medium -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="badge badge-medium">MEDIUM</span>
+                                    <span style="font-size: 0.8125rem; color: var(--bf-slate-600);">
+                                        <strong th:text="${difficultyDistribution.mediumSolved()}">0</strong> / <span th:text="${difficultyDistribution.mediumTotal()}">0</span> Solved
+                                    </span>
+                                </div>
+                                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--bf-warning);"
+                                      th:text="${#numbers.formatDecimal(difficultyDistribution.mediumAccuracy(), 1, 1) + '%'}">0.0%</span>
+                            </div>
+                            <div style="height: 10px; width: 100%; background-color: var(--bf-slate-100); border-radius: 9999px; overflow: hidden;">
+                                <div th:style="'height: 100%; width: ' + ${difficultyDistribution.mediumAccuracy()} + '%; background-color: var(--bf-warning); border-radius: 9999px;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Hard -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="badge badge-hard">HARD</span>
+                                    <span style="font-size: 0.8125rem; color: var(--bf-slate-600);">
+                                        <strong th:text="${difficultyDistribution.hardSolved()}">0</strong> / <span th:text="${difficultyDistribution.hardTotal()}">0</span> Solved
+                                    </span>
+                                </div>
+                                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--bf-danger);"
+                                      th:text="${#numbers.formatDecimal(difficultyDistribution.hardAccuracy(), 1, 1) + '%'}">0.0%</span>
+                            </div>
+                            <div style="height: 10px; width: 100%; background-color: var(--bf-slate-100); border-radius: 9999px; overflow: hidden;">
+                                <div th:style="'height: 100%; width: ' + ${difficultyDistribution.hardAccuracy()} + '%; background-color: var(--bf-danger); border-radius: 9999px;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnostic Areas to Improve (Weak Areas) -->
+            <div class="card" style="margin-bottom: 26px; background-color: var(--bf-white);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 1.25rem;">🎯</span>
+                    <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin: 0;">Diagnostic Areas for Improvement</h3>
+                </div>
+
+                <div th:if="${weakAreas.isEmpty()}" style="color: var(--bf-slate-500); font-size: 0.875rem; font-style: italic; padding: 12px 0;">
+                    <span th:if="${hasActivity}">🎉 Excellent work! No weak topics detected. All practiced topics maintain healthy accuracy above 70%.</span>
+                    <span th:if="${!hasActivity}">Complete at least 3 practice questions across topics to detect areas needing diagnostic review.</span>
+                </div>
+
+                <div th:if="${!weakAreas.isEmpty()}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+                    <div th:each="w : ${weakAreas}" style="padding: 14px 18px; background-color: var(--bf-warning-bg); border: 1px solid var(--bf-warning-border); border-radius: var(--bf-radius-md); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #92400e; font-size: 0.9375rem; display: block; margin-bottom: 2px;" th:text="${w.topicName()}">Topic</strong>
+                            <div style="font-size: 0.8125rem; color: #78350f;">
+                                Solved <span th:text="${w.solvedCount()}">0</span> of <span th:text="${w.totalAttempts()}">0</span> (<span th:text="${#numbers.formatDecimal(w.accuracyPercentage(), 1, 1) + '%'}">0%</span>)
+                            </div>
+                        </div>
+                        <a th:href="@{/practice(topicId=${w.topicId()})}" class="btn btn-gold btn-sm" style="font-size: 0.75rem; padding: 4px 10px;">
+                            Practice Now →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column: Completed Assessment History & Activity Stream -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <!-- Completed Assessment History -->
+                <div class="card" style="background-color: var(--bf-white);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin: 0;">Completed Assessments</h3>
+                        <a th:href="@{/assessments}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem;">View All →</a>
+                    </div>
+
+                    <div th:if="${assessmentHistory.isEmpty()}" style="color: var(--bf-slate-500); font-size: 0.875rem; font-style: italic; padding: 20px 0; text-align: center;">
+                        No mock assessments completed yet. Take a timed test to record performance scores.
+                    </div>
+
+                    <div th:if="${!assessmentHistory.isEmpty()}" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div th:each="a : ${assessmentHistory}" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md);">
+                            <div>
+                                <strong style="font-size: 0.875rem; color: var(--bf-navy-900); display: block;" th:text="${a.assessmentTitle()}">Test Title</strong>
+                                <span style="font-size: 0.75rem; color: var(--bf-slate-400);" th:text="${#temporals.format(a.completedAt(), 'dd MMM yyyy, HH:mm')}">Date</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge" th:classappend="${a.percentage() >= 50 ? 'badge-easy' : 'badge-hard'}" th:text="${a.score() + ' / ' + a.totalMarks() + ' (' + #numbers.formatDecimal(a.percentage(), 1, 0) + '%)'}">
+                                    40 / 50 (80%)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Timeline -->
+                <div class="card" style="background-color: var(--bf-white);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h3 style="font-size: 1.125rem; color: var(--bf-navy-900); margin: 0;">Recent Preparation Activity</h3>
+                    </div>
+
+                    <div th:if="${activities.isEmpty()}" style="color: var(--bf-slate-500); font-size: 0.875rem; font-style: italic; padding: 20px 0; text-align: center;">
+                        No recent activity logged yet.
+                    </div>
+
+                    <div th:if="${!activities.isEmpty()}" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;">
+                        <div th:each="act : ${activities}" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--bf-slate-100);">
+                            <span style="font-size: 1.1rem; line-height: 1;">📌</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.8125rem; color: var(--bf-navy-900); font-weight: 500;" th:text="${act.description()}">Activity detail</div>
+                                <div style="font-size: 0.6875rem; color: var(--bf-slate-400);" th:text="${#temporals.format(act.createdAt(), 'dd MMM yyyy, HH:mm')}">Timestamp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>
