@@ -45,6 +45,29 @@ public final class ConceptRelationship {
         this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
     }
 
+    private ConceptRelationship(long id,
+                                long sourceConceptId,
+                                long targetConceptId,
+                                ConceptRelationshipType relationshipType,
+                                String description,
+                                int displayOrder,
+                                Instant createdAt,
+                                Instant updatedAt,
+                                boolean formEmpty) {
+        this.id = id;
+        this.sourceConceptId = sourceConceptId;
+        this.targetConceptId = targetConceptId;
+        this.relationshipType = relationshipType != null ? relationshipType : ConceptRelationshipType.PREREQUISITE;
+        this.description = description != null ? description.trim() : "";
+        this.displayOrder = displayOrder;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+        this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
+    }
+
+    public static ConceptRelationship empty() {
+        return new ConceptRelationship(0, 0, 0, ConceptRelationshipType.PREREQUISITE, "", 0, Instant.now(), Instant.now(), true);
+    }
+
     public static ConceptRelationship create(long sourceConceptId,
                                             long targetConceptId,
                                             ConceptRelationshipType relationshipType,

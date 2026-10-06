@@ -57,7 +57,7 @@ public class AdminLearnController {
 
     @GetMapping("/subjects/new")
     public String newSubjectForm(Model model) {
-        model.addAttribute("subject", new Subject("", "", "", 0, List.of()));
+        model.addAttribute("subject", Subject.empty());
         model.addAttribute("isNew", true);
         model.addAttribute("activeTab", "admin-subjects");
         model.addAttribute("pageTitle", "Add New Subject");
@@ -147,7 +147,7 @@ public class AdminLearnController {
 
     @GetMapping("/topics/new")
     public String newTopicForm(@RequestParam(value = "subjectId", required = false) String subjectId, Model model) {
-        Topic topic = Topic.create(subjectId != null ? subjectId : "", "", "", "", 0);
+        Topic topic = Topic.empty(subjectId);
         model.addAttribute("topic", topic);
         model.addAttribute("subjects", learnService.getAllSubjects());
         model.addAttribute("isNew", true);
@@ -238,7 +238,7 @@ public class AdminLearnController {
 
     @GetMapping("/concepts/new")
     public String newConceptForm(@RequestParam(value = "topicId", required = false) Long topicId, Model model) {
-        Concept concept = Concept.create(0, topicId != null ? topicId : 0, "", "", "", List.of(), "", List.of());
+        Concept concept = Concept.empty(topicId != null ? topicId : 0L);
         model.addAttribute("concept", concept);
         model.addAttribute("keyPointsText", "");
         model.addAttribute("topics", topicService.getAllTopics());
@@ -355,7 +355,7 @@ public class AdminLearnController {
 
     @GetMapping("/resources/new")
     public String newResourceForm(@RequestParam(value = "conceptId", required = false) Long conceptId, Model model) {
-        LearningResource resource = LearningResource.create(0, conceptId != null ? conceptId : 0L, "", ResourceType.ARTICLE, "", "");
+        LearningResource resource = LearningResource.empty(conceptId != null ? conceptId : 0L);
         model.addAttribute("resource", resource);
         model.addAttribute("concepts", learnService.getAllConcepts());
         model.addAttribute("resourceTypes", ResourceType.values());

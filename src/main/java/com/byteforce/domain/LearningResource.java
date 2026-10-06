@@ -36,6 +36,19 @@ public final class LearningResource {
         this.description = description != null ? description.trim() : "";
     }
 
+    private LearningResource(long id, long conceptId, String title, ResourceType resourceType, String url, String description, boolean formEmpty) {
+        this.id = id;
+        this.conceptId = conceptId;
+        this.title = title != null ? title.trim() : "";
+        this.resourceType = resourceType != null ? resourceType : ResourceType.ARTICLE;
+        this.url = url != null ? url.trim() : "";
+        this.description = description != null ? description.trim() : "";
+    }
+
+    public static LearningResource empty(long conceptId) {
+        return new LearningResource(0, conceptId, "", ResourceType.ARTICLE, "", "", true);
+    }
+
     public LearningResource(String title, ResourceType resourceType, String url, String description) {
         this(0, 0, title, resourceType, url, description);
     }

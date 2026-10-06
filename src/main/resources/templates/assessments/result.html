@@ -11,10 +11,18 @@
 
         <main class="app-content">
             <div style="max-width: 720px; margin: 0 auto;">
+                <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+                    <a th:href="@{/assessments}">Assess</a>
+                    <span class="separator">/</span>
+                    <span th:text="${assessment.title}">Assessment</span>
+                    <span class="separator">/</span>
+                    <span class="current">Results</span>
+                </nav>
+
                 <div class="card" style="padding: 36px;">
                     <!-- Completion Banner -->
-                    <div class="alert alert-success" style="margin-bottom: 24px;">
-                        <span style="font-size: 1.25rem;">✓</span>
+                    <div class="alert alert-success" style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                        <svg th:replace="~{fragments/icons :: checkCircle}"></svg>
                         <div>
                             <strong>Assessment Submitted Successfully!</strong> Your test attempt has been evaluated and permanently recorded.
                         </div>

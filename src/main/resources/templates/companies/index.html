@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Prepare by Company')}"></head>
+<body>
+
+<div class="app-layout">
+    <!-- Authenticated Student Sidebar -->
+    <aside th:replace="~{fragments/layout :: appSidebar('companies')}"></aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Companies')}"></header>
+
+        <div class="app-content">
+            <!-- Catalog Header -->
+            <div class="company-catalog-header">
+                <h1 class="company-catalog-title">Prepare by Company</h1>
+                <p class="company-catalog-subtitle">Focus your preparation around the companies you're targeting.</p>
+            </div>
+
+            <!-- 3-Column Catalog Grid (DataCamp-Inspired Visual Hierarchy) -->
+            <div class="company-catalog-grid">
+                <div class="company-card" th:each="card : ${companyCards}">
+                    <!-- 1. Real Company Logo (Fixed height zone, object-fit contain, aspect ratio preserved) -->
+                    <div class="company-logo-zone">
+                        <img th:src="@{${card.company.logoPath}}" th:alt="${card.company.name}" class="company-brand-img" />
+                    </div>
+
+                    <!-- 2. Company Name -->
+                    <h3 class="company-card-name" th:text="${card.company.name}">Company Name</h3>
+
+                    <!-- 3. Concise Preparation Bullets -->
+                    <ul class="company-bullets-list">
+                        <li class="company-bullet-item" th:each="pt : ${card.preparationPoints}">
+                            <span class="company-bullet-dot" aria-hidden="true"></span>
+                            <span th:text="${pt}">Preparation Point</span>
+                        </li>
+                    </ul>
+
+                    <!-- 4. Two-Level CTA Hierarchy (Secondary Text Link + Primary Navy/Blue Button) -->
+                    <div class="company-card-actions">
+                        <a th:href="@{/companies/{slug}(slug=${card.company.slug})}" class="company-secondary-link">
+                            <span>View preparation</span>
+                            <span>&rarr;</span>
+                        </a>
+                        <a th:href="@{/companies/{slug}(slug=${card.company.slug})}" class="company-primary-btn">
+                            View Preparation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

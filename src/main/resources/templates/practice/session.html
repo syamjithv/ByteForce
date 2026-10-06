@@ -10,6 +10,15 @@
         <header th:replace="~{fragments/layout :: appTopbar('Practice Mode')}"></header>
 
         <main class="app-content">
+            <!-- Breadcrumbs -->
+            <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+                <a th:href="@{/practice}">Practice</a>
+                <span class="separator">/</span>
+                <span th:text="${topicName != null ? topicName : 'General'}">Arrays</span>
+                <span th:if="${!isEmpty && question != null}" class="separator">/</span>
+                <span th:if="${!isEmpty && question != null}" class="current" th:text="${question.title}">Two Sum</span>
+            </nav>
+
             <!-- Navigation header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <a th:href="@{/practice(topicId=${topicId}, difficulty=${difficulty})}" class="btn btn-secondary btn-sm">
@@ -24,9 +33,8 @@
                         <input type="hidden" name="difficulty" th:value="${difficulty}" />
                         <input type="hidden" name="index" th:value="${currentIndex}" />
                         <button type="submit" class="btn btn-sm"
-                                th:classappend="${isBookmarked ? 'btn-warning' : 'btn-outline'}"
-                                th:style="${isBookmarked ? 'background-color: #fef3c7; color: #b45309; border-color: #fde68a;' : ''}">
-                            <span th:text="${isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}">☆ Bookmark</span>
+                                th:classappend="${isBookmarked ? 'btn-warning' : 'btn-outline'}">
+                            <span th:text="${isBookmarked ? 'Bookmarked' : 'Bookmark'}">Bookmark</span>
                         </button>
                     </form>
                 </div>
@@ -34,7 +42,9 @@
 
             <!-- Empty State if no questions found -->
             <div th:if="${isEmpty}" class="empty-state">
-                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-icon">
+                    <svg th:replace="~{fragments/icons :: document}"></svg>
+                </div>
                 <h3 class="empty-state-title">No questions found for this filter</h3>
                 <p class="empty-state-desc">Try resetting your topic or difficulty selection to continue practicing.</p>
                 <a th:href="@{/practice}" class="btn btn-primary btn-sm">Return to Filters</a>

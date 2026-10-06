@@ -4,44 +4,116 @@
 
 <!-- Reusable Learn Catalog Fragment -->
 <div th:fragment="learnCatalog" class="learn-catalog-root">
-    <!-- Header with Search -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 28px;">
-        <div>
-            <h1 style="font-size: 2rem; margin-bottom: 6px;">Placement Learning Curriculum</h1>
-            <p style="color: var(--bf-slate-500); font-size: 1rem;">
-                Study fundamental Computer Science subjects and interview concepts curated for technical placements.
-            </p>
+    <!-- Header with Search & Stats -->
+    <div class="learn-catalog-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+            <div>
+                <h1 style="font-size: 2.25rem; font-weight: 700; color: var(--bf-navy-950); margin-bottom: 8px;">
+                    Placement Learning Curriculum
+                </h1>
+                <p style="color: var(--bf-slate-600); font-size: 1.0625rem; max-width: 720px; line-height: 1.6;">
+                    Master fundamental Computer Science knowledge, theoretical depth, and practical interview concepts grounded in ACM/IEEE CS2023 and MIT OpenCourseWare benchmarks.
+                </p>
+
+                <!-- Curriculum Stats Strip -->
+                <div class="learn-stats-strip">
+                    <div class="learn-stat-item">
+                        <span class="learn-stat-bullet"></span>
+                        <span th:text="${totalSubjects != null ? totalSubjects + ' CS Subjects' : '18 CS Subjects'}">18 CS Subjects</span>
+                    </div>
+                    <div class="learn-stat-item">
+                        <span class="learn-stat-bullet" style="background: var(--bf-success);"></span>
+                        <span th:text="${totalTopics != null ? totalTopics + ' Core Placement Topics' : 'Topics Covered'}">Placement Topics</span>
+                    </div>
+                    <div class="learn-stat-item">
+                        <span class="learn-stat-bullet" style="background: var(--bf-purple);"></span>
+                        <span>Spaced Repetition & Brain Maps</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Form (Requirement 6) -->
+            <form th:action="@{/learn/search}" method="get" style="display: flex; gap: 8px; align-self: flex-start;">
+                <input type="text" name="q" placeholder="Search concepts, topics and subjects..."
+                       class="form-control" style="width: 320px; padding: 10px 14px; border-radius: var(--bf-radius-md);" required />
+                <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px;">
+                    <svg th:replace="~{fragments/icons :: search}"></svg>
+                    <span>Search</span>
+                </button>
+            </form>
         </div>
-        <form th:action="@{/learn/search}" method="get" style="display: flex; gap: 8px;">
-            <input type="text" name="q" placeholder="Search concepts (e.g. Array, OOP)..." class="form-control" style="width: 280px;" required />
-            <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
-                <svg th:replace="~{fragments/icons :: search}"></svg>
-                <span>Search</span>
-            </button>
-        </form>
+
+        <!-- Continue Learning & Recently Viewed Banner (Requirements 1 & 2) -->
+        <div th:if="${currentUser != null && (continueLearning != null || (recentlyViewed != null && !recentlyViewed.isEmpty()))}"
+             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 20px;">
+
+            <!-- Continue Learning Card -->
+            <div th:if="${continueLearning != null}" class="card" style="border-left: 4px solid var(--primary); background: var(--surface-elevated); padding: 16px 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Continue Learning</span>
+                    <span class="badge badge-neutral" th:text="${continueLearning.subjectName}">Subject</span>
+                </div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 4px;" th:text="${continueLearning.conceptTitle}">Concept Title</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.8125rem; color: var(--text-secondary);" th:text="${continueLearning.conceptIndex + ' of ' + continueLearning.totalConceptsInTopic + ' concepts · ' + continueLearning.topicName}">3 of 8 concepts</span>
+                    <a th:href="@{/learn/concept/{id}(id=${continueLearning.conceptId})}" class="btn btn-primary btn-sm">Continue →</a>
+                </div>
+            </div>
+
+            <!-- Recently Viewed Mini Strip -->
+            <div th:if="${recentlyViewed != null && !recentlyViewed.isEmpty()}" class="card" style="background: var(--surface-elevated); padding: 16px 20px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+                    Recently Viewed
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <a th:each="rv, rStat : ${recentlyViewed}" th:if="${rStat.index < 3}"
+                       th:href="@{/learn/concept/{id}(id=${rv.conceptId})}"
+                       style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; font-size: 0.875rem;">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;" th:text="${rv.conceptTitle}">Concept Title</span>
+                        <span th:if="${rv.completed}" class="badge badge-success" style="font-size: 0.625rem;">Learned</span>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Subjects Grid -->
-    <div style="display: flex; flex-direction: column; gap: 24px;">
-        <div th:each="subject : ${subjects}" class="card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                <div>
-                    <h2 style="font-size: 1.375rem; margin-bottom: 6px;" th:text="${subject.name}">Data Structures</h2>
-                    <p style="color: var(--bf-slate-500); font-size: 0.9375rem;" th:text="${subject.description}">Description</p>
+    <div class="learn-subjects-grid">
+        <div th:each="subject : ${subjects}" class="subject-card-modern">
+            <div>
+                <div class="subject-header-row">
+                    <span class="subject-order-badge" th:text="${subject.displayOrder < 10 ? '0' + subject.displayOrder : subject.displayOrder}">01</span>
+                    <span class="badge badge-primary" th:text="${subject.topics.size() + ' Topic(s)'}">2 Topics</span>
                 </div>
-                <span class="badge badge-primary" th:text="${subject.topics.size() + ' Topic(s)'}">2 Topics</span>
+                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--bf-navy-950); margin-bottom: 8px;">
+                    <a th:href="@{/learn/subject/{id}(id=${subject.id})}" style="color: inherit; text-decoration: none;" th:text="${subject.name}">
+                        Data Structures & Algorithms
+                    </a>
+                </h2>
+                <p style="color: var(--bf-slate-600); font-size: 0.925rem; line-height: 1.55; margin-bottom: 16px;" th:text="${subject.description}">
+                    Description
+                </p>
             </div>
 
-            <div style="margin-top: 16px;">
-                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-400); margin-bottom: 10px;">Topics Covered</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div style="border-top: 1px solid var(--bf-slate-100); padding-top: 14px; margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bf-slate-400);">
+                        Topics
+                    </span>
+                    <a th:href="@{/learn/subject/{id}(id=${subject.id})}" style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-primary); text-decoration: none;">
+                        View All →
+                    </a>
+                </div>
+                <div class="topic-pill-list">
                     <a th:each="topic : ${subject.topics}"
                        th:href="@{/learn/topic/{id}(id=${topic.id})}"
-                       class="btn btn-secondary btn-sm"
-                       style="background-color: var(--bf-slate-100); border-color: var(--bf-slate-200); font-weight: 600;">
+                       class="topic-pill">
                         <span th:text="${topic.name}">Arrays</span>
-                        <span style="color: var(--bf-primary); margin-left: 4px;">→</span>
+                        <span style="color: var(--bf-slate-400); font-size: 0.75rem;">→</span>
                     </a>
+                    <span th:if="${subject.topics.isEmpty()}" style="font-size: 0.8125rem; color: var(--bf-slate-400); font-style: italic;">
+                        Curriculum units updating
+                    </span>
                 </div>
             </div>
         </div>

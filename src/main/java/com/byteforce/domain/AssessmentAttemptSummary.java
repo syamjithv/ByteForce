@@ -45,4 +45,40 @@ public record AssessmentAttemptSummary(
                 completedAt
         );
     }
+
+    public String formattedCompletedAt() {
+        return completedAt != null
+                ? java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
+                        .withZone(java.time.ZoneId.systemDefault())
+                        .format(completedAt)
+                : "";
+    }
+
+    public String getFormattedCompletedAt() {
+        return formattedCompletedAt();
+    }
+
+    public String getAssessmentTitle() {
+        return assessmentTitle;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getTotalMarks() {
+        return totalMarks;
+    }
+
+    public double getPercentage() {
+        return percentage;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Instant getCompletedAt() {
+        return completedAt;
+    }
 }

@@ -87,6 +87,13 @@ public class AssessmentServiceImpl implements AssessmentService {
             throw new ValidationException("Assessment is not currently active.");
         }
 
+        // Resume existing active attempt if present
+        Optional<AssessmentAttempt> existingActive = getActiveAttemptForUserAndAssessment(userId, assessmentId);
+        if (existingActive.isPresent()) {
+            log.info("Resuming active assessment attempt {} for user {} on assessment {}", existingActive.get().getId(), userId, assessmentId);
+            return existingActive.get();
+        }
+
         AssessmentAttempt attempt = AssessmentAttempt.start(assessmentId, userId);
         AssessmentAttempt saved = assessmentAttemptRepository.save(attempt);
         log.info("Started assessment attempt {} for user {} on assessment {}", saved.getId(), userId, assessmentId);
@@ -173,6 +180,45 @@ public class AssessmentServiceImpl implements AssessmentService {
     public List<AssessmentAttempt> getAttemptsForUser(UUID userId) {
         if (userId == null) return List.of();
         return assessmentAttemptRepository.findByUserId(userId);
+    }
+
+    @Override
+    public Optional<com.byteforce.domain.AssessmentResumeView> getActiveResumeAttempt(UUID userId) {
+        if (userId == null) return Optional.empty();
+        List<AssessmentAttempt> attempts = assessmentAttemptRepository.findByUserId(userId);
+        for (AssessmentAttempt att : attempts) {
+            if ("IN_PROGRESS".equalsIgnoreCase(att.getStatus())) {
+                Optional<Assessment> asstOpt = assessmentRepository.findById(att.getAssessmentId());
+                if (asstOpt.isPresent()) {
+                    Assessment asst = asstOpt.get();
+                    List<Question> questions = assessmentRepository.findQuestionsByAssessmentId(asst.getId());
+                    int totalQ = questions.size();
+                    int answered = (int) assessmentAnswerRepository.countByAttemptId(att.getId());
+                    int currentQ = totalQ > 0 ? Math.min(answered + 1, totalQ) : 1;
+                    return Optional.of(new com.byteforce.domain.AssessmentResumeView(
+                            att.getId(),
+                            asst.getId(),
+                            asst.getTitle(),
+                            answered,
+                            totalQ,
+                            currentQ
+                    ));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<AssessmentAttempt> getActiveAttemptForUserAndAssessment(UUID userId, long assessmentId) {
+        if (userId == null || assessmentId <= 0) return Optional.empty();
+        List<AssessmentAttempt> attempts = assessmentAttemptRepository.findByUserId(userId);
+        for (AssessmentAttempt att : attempts) {
+            if (att.getAssessmentId() == assessmentId && "IN_PROGRESS".equalsIgnoreCase(att.getStatus())) {
+                return Optional.of(att);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

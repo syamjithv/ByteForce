@@ -51,6 +51,25 @@ public final class Question {
         this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt must not be null");
     }
 
+    private Question(long id, long topicId, String title, String slug, String description,
+                     Difficulty difficulty, QuestionType questionType, String solution,
+                     Instant createdAt, Instant updatedAt, boolean formEmpty) {
+        this.id = id;
+        this.topicId = topicId;
+        this.title = title != null ? title.trim() : "";
+        this.slug = slug != null ? slug.trim().toLowerCase() : "";
+        this.description = description != null ? description.trim() : "";
+        this.difficulty = difficulty != null ? difficulty : Difficulty.EASY;
+        this.questionType = questionType != null ? questionType : QuestionType.CODING;
+        this.solution = solution != null ? solution : "";
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+        this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
+    }
+
+    public static Question empty(long topicId) {
+        return new Question(0, topicId, "", "", "", Difficulty.EASY, QuestionType.CODING, "", Instant.now(), Instant.now(), true);
+    }
+
     /**
      * Backward-compatible constructor defaulting to {@link QuestionType#CODING}.
      */

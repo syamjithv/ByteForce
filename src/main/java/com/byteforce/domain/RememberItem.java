@@ -42,6 +42,29 @@ public final class RememberItem {
         this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
     }
 
+    private RememberItem(long id,
+                         long conceptId,
+                         RememberItemType type,
+                         String content,
+                         int displayOrder,
+                         boolean active,
+                         Instant createdAt,
+                         Instant updatedAt,
+                         boolean formEmpty) {
+        this.id = id;
+        this.conceptId = conceptId;
+        this.type = type != null ? type : RememberItemType.KEY_FACT;
+        this.content = content != null ? content.trim() : "";
+        this.displayOrder = displayOrder;
+        this.active = active;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+        this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
+    }
+
+    public static RememberItem empty(long conceptId) {
+        return new RememberItem(0, conceptId, RememberItemType.KEY_FACT, "", 0, true, Instant.now(), Instant.now(), true);
+    }
+
     public static RememberItem create(long conceptId, RememberItemType type, String content, int displayOrder) {
         return new RememberItem(0, conceptId, type, content, displayOrder, true, Instant.now(), Instant.now());
     }

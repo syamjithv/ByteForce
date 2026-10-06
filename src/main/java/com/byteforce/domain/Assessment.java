@@ -47,6 +47,24 @@ public final class Assessment {
         this.createdAt = createdAt != null ? createdAt : Instant.now();
     }
 
+    private Assessment(long id, String title, String description, int durationMinutes,
+                       int totalMarks, boolean isActive, Difficulty difficulty,
+                       Long topicId, Instant createdAt, boolean formEmpty) {
+        this.id = id;
+        this.title = title != null ? title.trim() : "";
+        this.description = description != null ? description : "";
+        this.durationMinutes = durationMinutes > 0 ? durationMinutes : 30;
+        this.totalMarks = totalMarks > 0 ? totalMarks : 30;
+        this.isActive = isActive;
+        this.difficulty = difficulty != null ? difficulty : Difficulty.MEDIUM;
+        this.topicId = topicId;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+    }
+
+    public static Assessment empty() {
+        return new Assessment(0, "", "", 30, 30, true, Difficulty.MEDIUM, null, Instant.now(), true);
+    }
+
     public static Assessment create(String title, String description, int durationMinutes,
                                     int totalMarks, Difficulty difficulty, Long topicId) {
         return new Assessment(0, title, description, durationMinutes, totalMarks, true, difficulty, topicId, Instant.now());

@@ -9,6 +9,14 @@
     <meta name="description" content="ByteForce — Practice coding questions, study CS fundamentals, take timed placement assessments, and track your placement readiness.">
     <link rel="icon" type="image/png" th:href="@{/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('byteforce-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
     <script defer th:src="@{/js/main.js}"></script>
 </head>
 
@@ -22,35 +30,48 @@
 </div>
 
 <!-- Public Navbar Fragment -->
-<nav th:fragment="publicNav(activeTab)" class="public-navbar">
+<nav th:fragment="publicNav(activeTab)" class="public-navbar" id="publicNavbar">
     <div class="public-container navbar-inner">
         <div th:replace="~{fragments/layout :: logo('logo-sm')}"></div>
 
         <ul class="navbar-links">
-            <li><a th:href="@{/}" class="navbar-link" th:classappend="${activeTab == 'home' ? 'active' : ''}">Home</a></li>
             <li><a th:href="@{/learn}" class="navbar-link" th:classappend="${activeTab == 'learn' ? 'active' : ''}">Learn</a></li>
-            <li><a th:href="@{/remember}" class="navbar-link" th:classappend="${activeTab == 'remember' || activeTab == 'brain-maps' ? 'active' : ''}">Remember</a></li>
             <li><a th:href="@{/practice}" class="navbar-link" th:classappend="${activeTab == 'practice' ? 'active' : ''}">Practice</a></li>
-            <li><a th:href="@{/aptitude}" class="navbar-link" th:classappend="${activeTab == 'aptitude' ? 'active' : ''}">Aptitude</a></li>
-            <li><a th:href="@{/assessments}" class="navbar-link" th:classappend="${activeTab == 'assessments' ? 'active' : ''}">Assessments</a></li>
+            <li><a th:href="@{/assessments}" class="navbar-link" th:classappend="${activeTab == 'assessments' ? 'active' : ''}">Assess</a></li>
             <li><a th:href="@{/interview}" class="navbar-link" th:classappend="${activeTab == 'interview' ? 'active' : ''}">Interview</a></li>
-            <li th:if="${currentUser != null}">
-                <a th:href="@{/track}" class="navbar-link" th:classappend="${activeTab == 'track' ? 'active' : ''}">Track</a>
-            </li>
+            <li><a th:href="@{/companies}" class="navbar-link" th:classappend="${activeTab == 'companies' ? 'active' : ''}">Companies</a></li>
+            <li><a th:href="@{/#story}" class="navbar-link" th:classappend="${activeTab == 'story' ? 'active' : ''}">Our Story</a></li>
         </ul>
 
         <div class="navbar-actions">
+            <!-- Theme Toggle -->
+            <button type="button" class="theme-toggle-btn" aria-label="Toggle dark mode" title="Toggle theme">
+                <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+
             <!-- Unauthenticated Visitor -->
             <th:block th:if="${currentUser == null}">
-                <a th:href="@{/login}" class="btn btn-ghost btn-sm">Sign In</a>
-                <a th:href="@{/register}" class="btn btn-primary btn-sm">Create Account</a>
+                <a th:href="@{/login}" class="btn btn-ghost btn-sm">Log in</a>
+                <a th:href="@{/register}" class="btn btn-primary btn-sm">Start Preparing</a>
             </th:block>
 
             <!-- Authenticated Student / Admin -->
             <th:block th:if="${currentUser != null}">
                 <a th:if="${currentUser.role.name() == 'ADMIN'}" th:href="@{/admin}" class="btn btn-primary btn-sm" style="background: var(--bf-amber-500, #d97706); border-color: var(--bf-amber-600, #b45309);">Admin Console</a>
-                <a th:href="@{/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
-                <a th:href="@{/profile}" class="btn btn-ghost btn-sm">Account</a>
+                <a th:href="@{/dashboard}" class="btn btn-primary btn-sm">Dashboard</a>
                 <a th:href="@{/logout}" class="btn btn-ghost btn-sm" title="Sign Out">Sign Out</a>
             </th:block>
         </div>
@@ -107,6 +128,11 @@
             <span class="item-icon"><svg th:replace="~{fragments/icons :: interview}"></svg></span>
             <span>Interview</span>
         </a>
+        <!-- 9. Companies -->
+        <a th:href="@{/companies}" class="sidebar-item" th:classappend="${activeTab == 'companies' ? 'active' : ''}">
+            <span class="item-icon"><svg th:replace="~{fragments/icons :: companies}"></svg></span>
+            <span>Companies</span>
+        </a>
 
         <div class="nav-section-title" style="margin-top: 14px;">Account</div>
         <a th:href="@{/profile}" class="sidebar-item" th:classappend="${activeTab == 'profile' ? 'active' : ''}">
@@ -145,6 +171,10 @@
                 <span class="item-icon"><svg th:replace="~{fragments/icons :: track}"></svg></span>
                 <span>Aptitude</span>
             </a>
+            <a th:href="@{/admin/companies}" class="sidebar-item" th:classappend="${activeTab == 'admin-companies' ? 'active' : ''}">
+                <span class="item-icon"><svg th:replace="~{fragments/icons :: companies}"></svg></span>
+                <span>Companies</span>
+            </a>
         </th:block>
 
         <div class="nav-section-title" style="margin-top: 14px;">Explore</div>
@@ -179,6 +209,22 @@
         <h1 class="topbar-title" th:text="${pageTitle}">Dashboard</h1>
     </div>
     <div class="topbar-actions">
+        <button type="button" class="theme-toggle-btn" aria-label="Toggle dark mode" title="Toggle theme">
+            <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
         <a th:if="${currentUser != null}" th:href="@{/profile}" class="topbar-profile-link" title="My Account & Profile">
             <div th:replace="~{fragments/avatar :: renderAvatar(${currentProfile}, 'avatar-xs')}"></div>
             <span class="topbar-user-name" th:text="${currentUser.fullName}">Student</span>
@@ -187,47 +233,68 @@
 </header>
 
 <!-- Public Footer Fragment -->
-<footer th:fragment="publicFooter" style="background-color: var(--bf-navy-950); color: var(--bf-slate-400); padding: 48px 0 24px 0; border-top: 1px solid var(--bf-navy-800);">
+<footer th:fragment="publicFooter" class="bf-public-footer">
     <div class="public-container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-bottom: 36px;">
-            <div>
-                <div style="background: #ffffff; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce" style="height: 34px; width: auto; display: block;" />
+        <div class="bf-footer-grid">
+            <div class="bf-footer-brand-col">
+                <div class="bf-footer-logo-wrap">
+                    <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce" />
                 </div>
-                <p style="font-size: 0.875rem; line-height: 1.6; color: var(--bf-slate-400);">
-                    Practice. Prepare. Get Placed.<br>
-                    A unified technical placement readiness platform designed to help students master CS fundamentals, solve interview questions, and assess test readiness.
+                <p class="bf-footer-tagline">
+                    <strong>Born from the grind, built for the journey.</strong><br>
+                    A unified placement preparation platform designed to help students master CS fundamentals, solve interview questions, and assess test readiness with intention.
                 </p>
+                <div class="bf-footer-meta-badge">
+                    <span class="bf-footer-badge-dot"></span>
+                    <span>Student-Built Placement Platform</span>
+                </div>
             </div>
             <div>
-                <h4 style="color: var(--bf-white); font-size: 0.9375rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Preparation</h4>
-                <ul style="list-style: none; font-size: 0.875rem; display: flex; flex-direction: column; gap: 8px;">
-                    <li><a th:href="@{/learn}" style="color: var(--bf-slate-400);">Learn CS Concepts</a></li>
-                    <li><a th:href="@{/remember}" style="color: var(--bf-slate-400);">Remember &amp; Brain Maps</a></li>
-                    <li><a th:href="@{/practice}" style="color: var(--bf-slate-400);">Practice Problem Sets</a></li>
-                    <li><a th:href="@{/aptitude}" style="color: var(--bf-slate-400);">Aptitude Questions</a></li>
-                    <li><a th:href="@{/assessments}" style="color: var(--bf-slate-400);">Timed Mock Tests</a></li>
-                    <li><a th:href="@{/track}" style="color: var(--bf-slate-400);">Track Readiness</a></li>
-                    <li><a th:href="@{/interview}" style="color: var(--bf-slate-400);">Interview Preparation</a></li>
+                <h4 class="bf-footer-col-title">Preparation</h4>
+                <ul class="bf-footer-nav-list">
+                    <li><a th:href="@{/learn}">Learn Curriculum</a></li>
+                    <li><a th:href="@{/remember}">Remember &amp; Brain Maps</a></li>
+                    <li><a th:href="@{/practice}">Practice Problems</a></li>
+                    <li><a th:href="@{/aptitude}">Aptitude &amp; Reasoning</a></li>
+                    <li><a th:href="@{/assessments}">Timed Mock Tests</a></li>
+                    <li><a th:href="@{/track}">Readiness Analytics</a></li>
+                    <li><a th:href="@{/interview}">Interview Preparation</a></li>
+                    <li><a th:href="@{/companies}">Company Prep Tracks</a></li>
                 </ul>
             </div>
             <div>
-                <h4 style="color: var(--bf-white); font-size: 0.9375rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Account</h4>
-                <ul style="list-style: none; font-size: 0.875rem; display: flex; flex-direction: column; gap: 8px;">
-                    <li><a th:href="@{/login}" style="color: var(--bf-slate-400);">Student Sign In</a></li>
-                    <li><a th:href="@{/register}" style="color: var(--bf-slate-400);">Create Free Account</a></li>
-                    <li><a th:href="@{/dashboard}" style="color: var(--bf-slate-400);">Dashboard</a></li>
+                <h4 class="bf-footer-col-title">About &amp; Journey</h4>
+                <ul class="bf-footer-nav-list">
+                    <li><a th:href="@{/#story}">The Origin Story</a></li>
+                    <li><a th:href="@{/#problem}">The Scattered Problem</a></li>
+                    <li><a th:href="@{/#connects}">How Everything Connects</a></li>
+                    <li><a th:href="@{/#curriculum}">CS Fundamentals Map</a></li>
+                    <li><a th:href="@{/learn}">Open Curriculum</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="bf-footer-col-title">Account &amp; Legal</h4>
+                <ul class="bf-footer-nav-list">
+                    <li><a th:href="@{/login}">Student Sign In</a></li>
+                    <li><a th:href="@{/register}">Create Free Account</a></li>
+                    <li><a th:href="@{/dashboard}">Student Dashboard</a></li>
+                    <li><a href="javascript:void(0)" onclick="alert('ByteForce is an educational platform built by students for placement preparation. All curriculum content and practice questions are curated for university placement readiness.');">Platform Terms</a></li>
+                    <li><a href="javascript:void(0)" onclick="alert('ByteForce respects student privacy. Student progress, practice attempts, and assessment data remain confidential.');">Privacy Notice</a></li>
                 </ul>
             </div>
         </div>
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; font-size: 0.8125rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <div>© 2026 ByteForce. All rights reserved. Built for technical placement readiness.</div>
-            <div style="display: flex; gap: 16px;">
+        <div class="bf-footer-bottom">
+            <div class="bf-footer-copy">
+                &copy; 2026 ByteForce. All rights reserved. Learn with intention. Practice with purpose. Keep moving.
+            </div>
+            <div class="bf-footer-tech-stack">
                 <span>Java 21</span>
-                <span>•</span>
+                <span class="sep">&bull;</span>
                 <span>Spring Boot</span>
-                <span>•</span>
+                <span class="sep">&bull;</span>
                 <span>Thymeleaf</span>
+                <span class="sep">&bull;</span>
+                <span>Vanilla CSS</span>
             </div>
         </div>
     </div>

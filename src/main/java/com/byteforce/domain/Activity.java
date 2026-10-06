@@ -47,6 +47,12 @@ public final class Activity {
         return createdAt;
     }
 
+    public String getFormattedCreatedAt() {
+        return java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
+                .withZone(java.time.ZoneId.systemDefault())
+                .format(createdAt);
+    }
+
     public Activity withId(long newId) {
         return new Activity(newId, this.userId, this.activityType, this.description, this.createdAt);
     }

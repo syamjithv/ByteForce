@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -228,5 +229,27 @@ class JdbcUserRepositoryTest {
 
         User user = User.create("fail@byteforce.com", "$2a$12$hash", "Failure Test", Role.STUDENT);
         assertThrows(ByteForceException.class, () -> brokenRepo.save(user));
+    }
+
+    @Test
+    @DisplayName("Should deterministically prefer ADMIN role when user has multiple roles in user_roles")
+    void shouldPreferAdminRoleWhenUserHasMultipleRoles() throws SQLException {
+        User user = User.create("multi.role@byteforce.com", "$2a$12$securehash3", "Multi Role User", Role.STUDENT);
+        userRepository.save(user);
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO user_roles (user_id, role_id) VALUES (?, (SELECT id FROM roles WHERE name = 'ADMIN'))")) {
+            ps.setString(1, user.getId().toString());
+            ps.executeUpdate();
+        }
+
+        Optional<User> foundById = userRepository.findById(user.getId());
+        assertTrue(foundById.isPresent(), "User should be found by ID");
+        assertEquals(Role.ADMIN, foundById.get().getRole(), "User with multiple roles should load ADMIN role via findById");
+
+        Optional<User> foundByEmail = userRepository.findByEmail("multi.role@byteforce.com");
+        assertTrue(foundByEmail.isPresent(), "User should be found by email");
+        assertEquals(Role.ADMIN, foundByEmail.get().getRole(), "User with multiple roles should load ADMIN role via findByEmail");
     }
 }

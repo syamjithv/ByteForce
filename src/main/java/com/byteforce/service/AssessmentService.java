@@ -32,6 +32,10 @@ public interface AssessmentService {
 
     List<AssessmentAttempt> getAttemptsForUser(UUID userId);
 
+    Optional<com.byteforce.domain.AssessmentResumeView> getActiveResumeAttempt(UUID userId);
+
+    Optional<AssessmentAttempt> getActiveAttemptForUserAndAssessment(UUID userId, long assessmentId);
+
     List<AssessmentAnswer> getAnswersForAttempt(long attemptId);
 
     Assessment createAssessment(String title, String description, int durationMinutes, int totalMarks, Difficulty difficulty, Long topicId);

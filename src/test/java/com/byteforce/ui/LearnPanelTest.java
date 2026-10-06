@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -130,7 +131,7 @@ class LearnPanelTest {
     @Test
     @DisplayName("Selecting a concept should transition to Detail view and render explanation, key points, example, and resources")
     void shouldSelectConceptAndRenderDetail() throws Exception {
-        when(mockLearnService.getAllSubjects()).thenReturn(List.of(sampleSubject));
+        lenient().when(mockLearnService.getAllSubjects()).thenReturn(List.of(sampleSubject));
         initializePanel();
 
         learnPanel.selectConceptForDetail(sampleConcept);
@@ -180,7 +181,7 @@ class LearnPanelTest {
     @Test
     @DisplayName("Reset to home should clear search and reload subjects")
     void shouldResetToHome() throws Exception {
-        when(mockLearnService.getAllSubjects()).thenReturn(List.of(sampleSubject));
+        lenient().when(mockLearnService.getAllSubjects()).thenReturn(List.of(sampleSubject));
         initializePanel();
 
         learnPanel.selectConceptForDetail(sampleConcept);

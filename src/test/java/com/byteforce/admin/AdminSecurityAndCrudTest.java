@@ -177,6 +177,57 @@ class AdminSecurityAndCrudTest {
                 .andExpect(view().name("admin/aptitude/list"));
     }
 
+    @Test
+    @DisplayName("Security 4: Admin new entity form routes load without 500 error")
+    void adminNewEntityFormsRenderSuccessfully() throws Exception {
+        MockHttpSession adminSession = createAdminSession();
+
+        mockMvc.perform(get("/admin/topics/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/topics/form"))
+                .andExpect(model().attributeExists("topic", "subjects"));
+
+        mockMvc.perform(get("/admin/subjects/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/subjects/form"))
+                .andExpect(model().attributeExists("subject"));
+
+        mockMvc.perform(get("/admin/concepts/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/concepts/form"))
+                .andExpect(model().attributeExists("concept", "topics"));
+
+        mockMvc.perform(get("/admin/resources/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/resources/form"))
+                .andExpect(model().attributeExists("resource", "concepts"));
+
+        mockMvc.perform(get("/admin/questions/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/questions/form"))
+                .andExpect(model().attributeExists("question", "topics"));
+
+        mockMvc.perform(get("/admin/assessments/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/assessments/form"))
+                .andExpect(model().attributeExists("assessment", "topics"));
+
+        mockMvc.perform(get("/admin/brain-maps/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/brain-maps/form"))
+                .andExpect(model().attributeExists("relationship", "concepts"));
+
+        mockMvc.perform(get("/admin/remember/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/remember/form"))
+                .andExpect(model().attributeExists("item", "concepts"));
+
+        mockMvc.perform(get("/admin/aptitude/new").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/aptitude/form"))
+                .andExpect(model().attributeExists("question"));
+    }
+
     // =========================================================================
     // 2. END-TO-END CRUD PERSISTENCE & STUDENT REFLECTION
     // =========================================================================

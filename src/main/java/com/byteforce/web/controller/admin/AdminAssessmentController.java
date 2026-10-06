@@ -63,7 +63,7 @@ public class AdminAssessmentController {
 
     @GetMapping("/new")
     public String newAssessmentForm(Model model) {
-        Assessment assessment = Assessment.create("", "", 30, 30, Difficulty.MEDIUM, null);
+        Assessment assessment = Assessment.empty();
         model.addAttribute("assessment", assessment);
         model.addAttribute("topics", topicService.getAllTopics());
         model.addAttribute("difficulties", Difficulty.values());

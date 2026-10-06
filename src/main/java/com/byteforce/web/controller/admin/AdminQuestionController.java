@@ -87,7 +87,7 @@ public class AdminQuestionController {
 
     @GetMapping("/new")
     public String newQuestionForm(@RequestParam(value = "topicId", required = false) Long topicId, Model model) {
-        Question question = Question.create(topicId != null ? topicId : 0L, "", "", "", Difficulty.EASY, QuestionType.CODING, "");
+        Question question = Question.empty(topicId != null ? topicId : 0L);
         model.addAttribute("question", question);
         model.addAttribute("topics", topicService.getAllTopics());
         model.addAttribute("difficulties", Difficulty.values());

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage Companies')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-companies')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar('Manage Companies')}"></header>
+
+        <main class="app-content" style="max-width: 1200px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+            <div th:if="${flashSuccess}" class="alert alert-success" style="margin-bottom: 20px;" th:text="${flashSuccess}">Success</div>
+            <div th:if="${flashError}" class="alert alert-danger" style="margin-bottom: 20px;" th:text="${flashError}">Error</div>
+
+            <div th:replace="~{admin/fragments :: adminHeader('Company Management', 'Curate enterprise preparation tracks, company metadata, and content mappings.', '/admin/companies/new', 'Add Company')}"></div>
+
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); overflow: hidden; box-shadow: var(--bf-shadow-sm);">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: var(--bf-slate-50); border-bottom: 1px solid var(--bf-slate-200); color: var(--bf-slate-500); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                                <th style="padding: 14px 20px; width: 60px;">Logo</th>
+                                <th style="padding: 14px 20px;">Company</th>
+                                <th style="padding: 14px 20px;">Slug</th>
+                                <th style="padding: 14px 20px;">Status</th>
+                                <th style="padding: 14px 20px;">Last Reviewed</th>
+                                <th style="padding: 14px 20px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${companies}" style="border-bottom: 1px solid var(--bf-slate-100); transition: background-color 0.15s ease;">
+                                <td style="padding: 14px 20px;">
+                                    <div style="width: 44px; height: 32px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px;">
+                                        <img th:if="${c.logoPath != null and !c.logoPath.isEmpty()}" th:src="@{${c.logoPath}}" th:alt="${c.name}" style="max-height: 24px; max-width: 38px; object-fit: contain;" />
+                                    </div>
+                                </td>
+                                <td style="padding: 14px 20px;">
+                                    <div style="font-weight: 700; color: var(--bf-navy-900);" th:text="${c.name}">Company Name</div>
+                                    <div style="font-size: 0.75rem; color: var(--bf-slate-500);" th:text="${c.shortDescription}">Short description</div>
+                                </td>
+                                <td style="padding: 14px 20px; font-family: var(--bf-font-mono, monospace); font-size: 0.8125rem; color: var(--bf-slate-600);" th:text="${c.slug}">slug</td>
+                                <td style="padding: 14px 20px;">
+                                    <span th:if="${c.active}" class="badge badge-success">ACTIVE</span>
+                                    <span th:unless="${c.active}" class="badge" style="background: #f1f5f9; color: #64748b;">INACTIVE</span>
+                                </td>
+                                <td style="padding: 14px 20px; font-size: 0.8125rem; color: var(--bf-slate-500);">
+                                    <span th:if="${c.lastReviewedAt != null}" th:text="${#temporals.format(c.lastReviewedAt, 'dd MMM yyyy')}">Date</span>
+                                    <span th:unless="${c.lastReviewedAt != null}">Not reviewed</span>
+                                </td>
+                                <td style="padding: 14px 20px; text-align: right;">
+                                    <div style="display: inline-flex; gap: 8px; align-items: center;">
+                                        <a th:href="@{/admin/companies/{id}/relationships(id=${c.id})}" class="btn btn-outline btn-sm" title="Manage Content Relationships">
+                                            Relationships
+                                        </a>
+                                        <a th:href="@{/admin/companies/{id}/edit(id=${c.id})}" class="btn btn-ghost btn-sm" title="Edit Metadata">
+                                            Edit
+                                        </a>
+                                        <form th:action="@{/admin/companies/{id}/toggle-active(id=${c.id})}" method="post" style="display: inline;">
+                                            <button type="submit" class="btn btn-ghost btn-sm" th:text="${c.active ? 'Deactivate' : 'Activate'}" style="font-size: 0.75rem;">
+                                                Toggle
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/admin/companies/{id}/delete(id=${c.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this company? All mappings will be removed.');">
+                                            <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--bf-danger, #ef4444); font-size: 0.75rem;">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

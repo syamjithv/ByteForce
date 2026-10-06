@@ -38,6 +38,8 @@ public class JdbcUserRepository implements UserRepository {
             LEFT JOIN student_profiles sp ON u.id = sp.user_id
             """;
 
+    private static final String ORDER_BY_ROLE_PREFERENCE = " ORDER BY CASE WHEN r.name = 'ADMIN' THEN 0 ELSE 1 END";
+
     private final DataSource dataSource;
 
     public JdbcUserRepository(DataSource dataSource) {
@@ -50,7 +52,7 @@ public class JdbcUserRepository implements UserRepository {
             return Optional.empty();
         }
 
-        String sql = SELECT_USER_BASE_SQL + " WHERE u.id = ?";
+        String sql = SELECT_USER_BASE_SQL + " WHERE u.id = ?" + ORDER_BY_ROLE_PREFERENCE;
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -73,7 +75,7 @@ public class JdbcUserRepository implements UserRepository {
         }
 
         String normalizedEmail = EmailValidator.normalize(email);
-        String sql = SELECT_USER_BASE_SQL + " WHERE u.email = ?";
+        String sql = SELECT_USER_BASE_SQL + " WHERE u.email = ?" + ORDER_BY_ROLE_PREFERENCE;
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

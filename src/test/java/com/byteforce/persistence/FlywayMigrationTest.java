@@ -45,10 +45,10 @@ class FlywayMigrationTest {
     }
 
     @Test
-    @DisplayName("Should apply V1 through V7 migrations and create all core tables including staged_questions")
+    @DisplayName("Should apply V1 through V10 migrations and create all core tables including company tables and concept progress")
     void shouldApplyInitialMigrationSuccessfully() throws SQLException {
         int migrationsExecuted = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(7, migrationsExecuted, "Flyway migrations should execute V1 through V7 scripts");
+        assertEquals(10, migrationsExecuted, "Flyway migrations should execute V1 through V10 scripts");
 
         // Verify that all core entities exist as tables
         Set<String> expectedTables = Set.of(
@@ -71,7 +71,15 @@ class FlywayMigrationTest {
                 "remember_items",
                 "concept_relationships",
                 "aptitude_questions",
-                "staged_questions"
+                "staged_questions",
+                "user_remember_reviews",
+                "companies",
+                "company_topics",
+                "company_questions",
+                "company_aptitude_questions",
+                "company_assessments",
+                "company_interview_categories",
+                "user_concept_progress"
         );
 
         Set<String> actualTables = new HashSet<>();
@@ -168,7 +176,7 @@ class FlywayMigrationTest {
     @DisplayName("Migration should be idempotent when re-run on an up-to-date schema")
     void migrationShouldBeIdempotent() {
         int firstRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
-        assertEquals(7, firstRun);
+        assertEquals(10, firstRun);
 
         int secondRun = DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
         assertEquals(0, secondRun, "Subsequent migration run should execute 0 scripts");
@@ -312,6 +320,41 @@ class FlywayMigrationTest {
                  ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM subjects WHERE id IN ('computer-networks', 'computer-organization', 'theory-of-computation')")) {
                 assertTrue(rs.next());
                 assertEquals(3, rs.getInt(1));
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V8 enhancements: user_remember_reviews table and schema")
+    void shouldVerifyV8MemoryReviewStateTable() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, user_id, remember_item_id, due_at, last_reviewed_at, review_count, successful_review_count, state, difficulty, stability, retrievability, last_rating, created_at, updated_at FROM user_remember_reviews WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(14, rs.getMetaData().getColumnCount());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should verify V9 enhancements: companies table and initial 12 seed records")
+    void shouldVerifyV9CompanyPracticeTables() throws SQLException {
+        DatabaseMigrator.migrate(dataSource, "classpath:db/migration");
+
+        try (Connection conn = dataSource.getConnection()) {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT id, name, slug, logo_path, website_url, short_description, description, active, last_reviewed_at, created_at, updated_at FROM companies WHERE 1=0")) {
+                assertNotNull(rs.getMetaData());
+                assertEquals(11, rs.getMetaData().getColumnCount());
+            }
+
+            // Verify initial 12 companies seeded
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM companies")) {
+                assertTrue(rs.next());
+                assertEquals(12, rs.getInt(1), "Should seed exactly 12 initial companies");
             }
         }
     }

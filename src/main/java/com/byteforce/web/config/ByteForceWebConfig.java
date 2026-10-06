@@ -181,4 +181,39 @@ public class ByteForceWebConfig implements WebMvcConfigurer {
     public com.byteforce.service.AptitudeQuestionService aptitudeQuestionService(AppContext appContext) {
         return appContext.getAptitudeQuestionService();
     }
+
+    @Bean
+    public com.byteforce.repository.UserRememberReviewRepository userRememberReviewRepository(AppContext appContext) {
+        return appContext.getUserRememberReviewRepository();
+    }
+
+    @Bean
+    public com.byteforce.service.memory.SpacedRepetitionScheduler spacedRepetitionScheduler(AppContext appContext) {
+        return appContext.getSpacedRepetitionScheduler();
+    }
+
+    @Bean
+    public com.byteforce.service.MemoryService memoryService(AppContext appContext) {
+        return appContext.getMemoryService();
+    }
+
+    @Bean
+    public com.byteforce.repository.CompanyRepository companyRepository(AppContext appContext) {
+        return appContext.getCompanyRepository();
+    }
+
+    @Bean
+    public com.byteforce.service.CompanyService companyService(AppContext appContext) {
+        return appContext.getCompanyService();
+    }
+
+    @Bean
+    public com.byteforce.repository.UserConceptProgressRepository userConceptProgressRepository(AppContext appContext) {
+        return appContext.getUserConceptProgressRepository();
+    }
+
+    @Bean
+    public com.byteforce.service.ConceptProgressService conceptProgressService(AppContext appContext) {
+        return appContext.getConceptProgressService();
+    }
 }

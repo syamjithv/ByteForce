@@ -41,6 +41,20 @@ public final class Topic {
         this(id, null, name, slug, description, displayOrder, createdAt);
     }
 
+    private Topic(long id, String subjectId, String name, String slug, String description, int displayOrder, Instant createdAt, boolean formEmpty) {
+        this.id = id;
+        this.subjectId = subjectId != null && !subjectId.isBlank() ? subjectId.trim().toLowerCase() : null;
+        this.name = name != null ? name.trim() : "";
+        this.slug = slug != null ? slug.trim().toLowerCase() : "";
+        this.description = description;
+        this.displayOrder = displayOrder;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+    }
+
+    public static Topic empty(String subjectId) {
+        return new Topic(0, subjectId, "", "", "", 0, Instant.now(), true);
+    }
+
     /**
      * Factory for creating a new topic with subject relationship (id 0 indicates unsaved).
      */

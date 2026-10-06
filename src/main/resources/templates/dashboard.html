@@ -42,6 +42,103 @@
                 </div>
             </div>
 
+            <!-- Incomplete Assessment Resume Banner (Requirement 8) -->
+            <div th:if="${activeResumeAttempt != null}" class="card mb-6" style="border-left: 4px solid var(--primary); background: var(--surface-elevated); margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <span class="badge badge-warning">Assessment in progress</span>
+                            <span class="badge badge-neutral" th:text="${'Question ' + activeResumeAttempt.currentQuestionNumber + ' of ' + activeResumeAttempt.totalQuestions}">Question 17 of 30</span>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" th:text="${activeResumeAttempt.assessmentTitle}">DSA Fundamentals Mock</h3>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+                            You have an incomplete assessment attempt. Continue to finish your answers before time expires.
+                        </p>
+                    </div>
+                    <div>
+                        <a th:href="@{/assessments/test/{id}(id=${activeResumeAttempt.assessmentId})}" class="btn btn-primary">
+                            Continue Assessment →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Resume & Activity Row (Requirements 1 & 2) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                <!-- 1. Continue Learning Card -->
+                <div class="card" style="border-left: 4px solid var(--primary); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em;">
+                                Continue Learning
+                            </span>
+                            <span th:if="${continueLearning != null}" class="badge badge-neutral" th:text="${continueLearning.subjectName}">Subject</span>
+                        </div>
+
+                        <!-- Real Database Concept State -->
+                        <div th:if="${continueLearning != null}">
+                            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;" th:text="${continueLearning.conceptTitle}">TCP Three-Way Handshake</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 12px;">
+                                <span th:text="${continueLearning.conceptIndex + ' of ' + continueLearning.totalConceptsInTopic + ' concepts'}">3 of 8 concepts</span>
+                                <span> · </span>
+                                <span th:text="${continueLearning.topicName}">Transport Layer</span>
+                            </p>
+                        </div>
+
+                        <!-- Honest Empty State -->
+                        <div th:if="${continueLearning == null}" style="padding: 12px 0;">
+                            <h4 style="font-size: 1.0625rem; font-weight: 600; margin-bottom: 4px;">You haven't started learning yet.</h4>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">Pick a topic and start building your fundamentals.</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <a th:if="${continueLearning != null}" th:href="@{/learn/concept/{id}(id=${continueLearning.conceptId})}" class="btn btn-primary btn-sm">
+                            Continue →
+                        </a>
+                        <a th:if="${continueLearning == null}" th:href="@{/learn}" class="btn btn-outline btn-sm">
+                            Browse Curriculum →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2. Recently Viewed Learning -->
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">
+                                Recently Viewed Learning
+                            </span>
+                            <a th:href="@{/learn}" style="font-size: 0.8125rem; color: var(--primary); text-decoration: none;">View All</a>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${recentlyViewedConcepts == null || recentlyViewedConcepts.isEmpty()}" style="padding: 16px 0;">
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">
+                                Your recently viewed concepts will appear here.
+                            </p>
+                            <span style="font-size: 0.8125rem; color: var(--text-muted);">Explore curriculum units to build your history.</span>
+                        </div>
+
+                        <!-- Real Database List -->
+                        <div th:if="${recentlyViewedConcepts != null && !recentlyViewedConcepts.isEmpty()}" style="display: flex; flex-direction: column; gap: 8px;">
+                            <a th:each="rv : ${recentlyViewedConcepts}"
+                               th:href="@{/learn/concept/{id}(id=${rv.conceptId})}"
+                               style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface-muted); border-radius: var(--bf-radius-sm); text-decoration: none; color: inherit; transition: background 0.15s ease;">
+                                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">
+                                    <div style="font-size: 0.875rem; font-weight: 600;" th:text="${rv.conceptTitle}">Concept Title</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);" th:text="${rv.topicName + (rv.subjectName != null && !rv.subjectName.isBlank() ? ' · ' + rv.subjectName : '')}">Topic</div>
+                                </div>
+                                <div>
+                                    <span th:if="${rv.completed}" class="badge badge-success" style="font-size: 0.6875rem;">Learned</span>
+                                    <span th:if="${!rv.completed}" class="badge badge-neutral" style="font-size: 0.6875rem;">In progress</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Core Pillar Cards Grid -->
             <h3 style="font-size: 1.25rem; margin-bottom: 16px;">Preparation Modules</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px;">

@@ -52,13 +52,13 @@
                             <div style="font-size: 1rem; color: #94a3b8; margin-bottom: 8px;" th:text="${user.email}">student@byteforce.com</div>
                             <div style="display: flex; align-items: center; gap: 16px; font-size: 0.875rem; color: #cbd5e1; flex-wrap: wrap;">
                                 <span th:if="${profile.college != null && !profile.college.isBlank()}" style="display: flex; align-items: center; gap: 6px;">
-                                    🏛️ <span th:text="${profile.college}">University</span>
+                                    <span th:text="${profile.college}">University</span>
                                 </span>
                                 <span th:if="${profile.graduationYear != null}" style="display: flex; align-items: center; gap: 6px;">
-                                    🎓 Class of <span th:text="${profile.graduationYear}">2026</span>
+                                    Class of <span th:text="${profile.graduationYear}">2026</span>
                                 </span>
                                 <span style="display: flex; align-items: center; gap: 6px;">
-                                    📅 Active Student Account
+                                    Active Student Account
                                 </span>
                             </div>
                         </div>
@@ -222,7 +222,7 @@
 
                     <div style="margin-top: 24px; padding: 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md);">
                         <div style="font-size: 0.8125rem; color: var(--bf-slate-600); line-height: 1.5;">
-                            🛡️ <strong>Placement Privacy Notice:</strong> Your practice attempts, assessment submissions, and preparation metrics are securely bound to your authenticated identity.
+                            <strong>Placement Privacy Notice:</strong> Your practice attempts, assessment submissions, and preparation metrics are securely bound to your authenticated identity.
                         </div>
                     </div>
                 </div>

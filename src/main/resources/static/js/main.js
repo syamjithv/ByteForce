@@ -109,4 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // 4. Dark Mode Theme Toggle
+  const initThemeToggle = () => {
+    const savedTheme = localStorage.getItem('byteforce-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const toggleButtons = document.querySelectorAll('.theme-toggle-btn');
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('byteforce-theme', nextTheme);
+      });
+    });
+  };
+  initThemeToggle();
 });
+

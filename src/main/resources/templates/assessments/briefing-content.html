@@ -4,6 +4,13 @@
 
 <div th:fragment="briefingContent" class="briefing-content-root">
     <div style="max-width: 680px; margin: 0 auto;">
+        <!-- Breadcrumb Hierarchy -->
+        <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+            <a th:href="@{/assessments}">Assess</a>
+            <span class="separator">/</span>
+            <span class="current" th:text="${assessment.title}">DSA Fundamentals</span>
+        </nav>
+
         <div style="margin-bottom: 20px;">
             <a th:href="@{/assessments}" class="btn btn-secondary btn-sm">← Back to Assessments Catalog</a>
         </div>

@@ -24,10 +24,19 @@ public class DashboardController {
 
     private final TrackService trackService;
     private final AssessmentService assessmentService;
+    private final com.byteforce.service.ConceptProgressService conceptProgressService;
 
-    public DashboardController(TrackService trackService, AssessmentService assessmentService) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public DashboardController(TrackService trackService,
+                               AssessmentService assessmentService,
+                               @org.springframework.beans.factory.annotation.Autowired(required = false) com.byteforce.service.ConceptProgressService conceptProgressService) {
         this.trackService = trackService;
         this.assessmentService = assessmentService;
+        this.conceptProgressService = conceptProgressService;
+    }
+
+    public DashboardController(TrackService trackService, AssessmentService assessmentService) {
+        this(trackService, assessmentService, null);
     }
 
     @GetMapping("/dashboard")
@@ -62,6 +71,18 @@ public class DashboardController {
 
         // Available mock assessments count
         model.addAttribute("availableAssessments", assessmentService.getAvailableAssessments());
+
+        // Assessment in progress resume card
+        model.addAttribute("activeResumeAttempt", assessmentService.getActiveResumeAttempt(user.getId()).orElse(null));
+
+        // Continue Learning & Recently Viewed
+        if (conceptProgressService != null) {
+            model.addAttribute("continueLearning", conceptProgressService.getContinueLearning(user.getId()).orElse(null));
+            model.addAttribute("recentlyViewedConcepts", conceptProgressService.getRecentlyViewed(user.getId(), 5));
+        } else {
+            model.addAttribute("continueLearning", null);
+            model.addAttribute("recentlyViewedConcepts", List.of());
+        }
 
         return "dashboard";
     }

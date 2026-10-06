@@ -46,6 +46,22 @@ public final class Concept {
         this.resources = resources != null ? Collections.unmodifiableList(new ArrayList<>(resources)) : List.of();
     }
 
+    private Concept(long id, long topicId, String topicName, String title, String shortExplanation,
+                    List<String> keyPoints, String example, List<LearningResource> resources, boolean formEmpty) {
+        this.id = id;
+        this.topicId = topicId;
+        this.topicName = topicName != null ? topicName.trim() : "";
+        this.title = title != null ? title.trim() : "";
+        this.shortExplanation = shortExplanation != null ? shortExplanation.trim() : "";
+        this.keyPoints = keyPoints != null ? Collections.unmodifiableList(new ArrayList<>(keyPoints)) : List.of();
+        this.example = example != null ? example.trim() : "";
+        this.resources = resources != null ? Collections.unmodifiableList(new ArrayList<>(resources)) : List.of();
+    }
+
+    public static Concept empty(long topicId) {
+        return new Concept(0, topicId, "", "", "", List.of(), "", List.of(), true);
+    }
+
     public static Concept create(long id,
                                  long topicId,
                                  String topicName,

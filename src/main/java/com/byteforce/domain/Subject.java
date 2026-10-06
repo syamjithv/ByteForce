@@ -35,6 +35,18 @@ public final class Subject {
         this.topics = topics != null ? Collections.unmodifiableList(new ArrayList<>(topics)) : List.of();
     }
 
+    private Subject(String id, String name, String description, int displayOrder, List<Topic> topics, boolean formEmpty) {
+        this.id = id != null ? id.trim().toLowerCase() : "";
+        this.name = name != null ? name.trim() : "";
+        this.description = description != null ? description.trim() : "";
+        this.displayOrder = displayOrder;
+        this.topics = topics != null ? Collections.unmodifiableList(new ArrayList<>(topics)) : List.of();
+    }
+
+    public static Subject empty() {
+        return new Subject("", "", "", 0, List.of(), true);
+    }
+
     public static Subject create(String id, String name, String description, int displayOrder, List<Topic> topics) {
         return new Subject(id, name, description, displayOrder, topics);
     }

@@ -33,4 +33,8 @@ public interface BrainMapService {
     void deleteRelationship(long id);
 
     long getTotalRelationshipCount();
+
+    com.byteforce.domain.brainmap.BrainMapGraph getBrainMapGraph(long centerConceptId, java.util.UUID currentUserId);
+
+    byte[] exportBrainMapPdf(long centerConceptId);
 }

@@ -22,9 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the Practice module:
@@ -41,30 +46,78 @@ public class PracticeController {
     private final QuestionService questionService;
     private final AttemptService attemptService;
     private final BookmarkService bookmarkService;
+    private final com.byteforce.service.MemoryService memoryService;
+    private final com.byteforce.service.LearnService learnService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PracticeController(TopicService topicService,
+                              QuestionService questionService,
+                              AttemptService attemptService,
+                              BookmarkService bookmarkService,
+                              com.byteforce.service.MemoryService memoryService,
+                              com.byteforce.service.LearnService learnService) {
+        this.topicService = topicService;
+        this.questionService = questionService;
+        this.attemptService = attemptService;
+        this.bookmarkService = bookmarkService;
+        this.memoryService = memoryService;
+        this.learnService = learnService;
+    }
 
     public PracticeController(TopicService topicService,
                               QuestionService questionService,
                               AttemptService attemptService,
                               BookmarkService bookmarkService) {
-        this.topicService = topicService;
-        this.questionService = questionService;
-        this.attemptService = attemptService;
-        this.bookmarkService = bookmarkService;
+        this(topicService, questionService, attemptService, bookmarkService, null, null);
     }
 
     @GetMapping
     public String practiceHome(@RequestParam(value = "topicId", required = false) Long topicId,
                                @RequestParam(value = "difficulty", required = false) String difficultyStr,
+                               @RequestParam(value = "status", required = false) String statusStr,
+                               @RequestParam(value = "bookmarked", required = false) Boolean bookmarked,
+                               HttpSession session,
                                Model model) {
         model.addAttribute("topics", topicService.getAllTopics());
         model.addAttribute("difficulties", Difficulty.values());
         model.addAttribute("selectedTopicId", topicId);
         model.addAttribute("selectedDifficulty", difficultyStr);
+        model.addAttribute("selectedStatus", statusStr);
+        model.addAttribute("selectedBookmarked", bookmarked);
 
         Difficulty difficulty = parseDifficulty(difficultyStr);
-        List<Question> previewQuestions = fetchQuestions(topicId, difficulty);
+        Optional<User> userOpt = WebSessionUtil.getCurrentUser(session);
+        UUID userId = userOpt.map(User::getId).orElse(null);
+
+        List<Question> previewQuestions = fetchFilteredQuestions(topicId, difficulty, statusStr, bookmarked, userId);
         model.addAttribute("previewQuestions", previewQuestions);
         model.addAttribute("totalAvailable", previewQuestions.size());
+
+        if (userId != null) {
+            List<com.byteforce.domain.QuestionAttempt> attempts = attemptService.getAttemptsForUser(userId);
+            Set<Long> solvedIds = new HashSet<>();
+            Set<Long> failedIds = new HashSet<>();
+            for (com.byteforce.domain.QuestionAttempt a : attempts) {
+                if (a.getStatus() == AttemptStatus.SOLVED) {
+                    solvedIds.add(a.getQuestionId());
+                } else if (a.getStatus() == AttemptStatus.FAILED) {
+                    failedIds.add(a.getQuestionId());
+                }
+            }
+            failedIds.removeAll(solvedIds);
+
+            Set<Long> bookmarkedIds = bookmarkService.getBookmarksForUser(userId).stream()
+                    .map(com.byteforce.domain.Bookmark::getQuestionId)
+                    .collect(Collectors.toSet());
+
+            model.addAttribute("solvedIds", solvedIds);
+            model.addAttribute("failedIds", failedIds);
+            model.addAttribute("bookmarkedIds", bookmarkedIds);
+        } else {
+            model.addAttribute("solvedIds", Collections.emptySet());
+            model.addAttribute("failedIds", Collections.emptySet());
+            model.addAttribute("bookmarkedIds", Collections.emptySet());
+        }
 
         return "practice/index";
     }
@@ -72,6 +125,8 @@ public class PracticeController {
     @GetMapping("/session")
     public String practiceSession(@RequestParam(value = "topicId", required = false) Long topicId,
                                   @RequestParam(value = "difficulty", required = false) String difficultyStr,
+                                  @RequestParam(value = "status", required = false) String statusStr,
+                                  @RequestParam(value = "bookmarked", required = false) Boolean bookmarked,
                                   @RequestParam(value = "index", required = false, defaultValue = "0") int index,
                                   Model model,
                                   HttpSession session) {
@@ -85,10 +140,12 @@ public class PracticeController {
 
         User user = userOpt.get();
         Difficulty difficulty = parseDifficulty(difficultyStr);
-        List<Question> questions = fetchQuestions(topicId, difficulty);
+        List<Question> questions = fetchFilteredQuestions(topicId, difficulty, statusStr, bookmarked, user.getId());
 
         model.addAttribute("topicId", topicId);
         model.addAttribute("difficulty", difficultyStr);
+        model.addAttribute("status", statusStr);
+        model.addAttribute("bookmarked", bookmarked);
         model.addAttribute("index", index);
 
         if (questions.isEmpty()) {
@@ -153,6 +210,18 @@ public class PracticeController {
         // Record attempt using AttemptService
         attemptService.recordAttempt(user.getId(), questionId, status, submittedAnswer, 25);
 
+        // Record practice weakness signal for related concepts if attempt failed
+        if (status == AttemptStatus.FAILED && memoryService != null && learnService != null) {
+            try {
+                List<com.byteforce.domain.Concept> concepts = learnService.getConceptsForTopic(question.getTopicId());
+                for (com.byteforce.domain.Concept c : concepts) {
+                    memoryService.recordPracticeWeaknessSignal(user.getId(), c.getId());
+                }
+            } catch (Exception e) {
+                log.warn("Could not record practice weakness signal for question ID {}: {}", questionId, e.getMessage());
+            }
+        }
+
         // Populate result page
         model.addAttribute("question", question);
         model.addAttribute("status", status);
@@ -216,6 +285,66 @@ public class PracticeController {
         } else {
             return questionService.getAllQuestions();
         }
+    }
+
+    private List<Question> fetchFilteredQuestions(Long topicId, Difficulty difficulty, String statusStr, Boolean bookmarked, UUID userId) {
+        List<Question> questions = fetchQuestions(topicId, difficulty);
+        if (userId == null) {
+            return questions;
+        }
+
+        Set<Long> solvedIds = null;
+        Set<Long> failedIds = null;
+        Set<Long> attemptedIds = null;
+        Set<Long> bookmarkedIds = null;
+
+        if (bookmarked != null && bookmarked) {
+            bookmarkedIds = bookmarkService.getBookmarksForUser(userId).stream()
+                    .map(com.byteforce.domain.Bookmark::getQuestionId)
+                    .collect(Collectors.toSet());
+        }
+
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+            List<com.byteforce.domain.QuestionAttempt> attempts = attemptService.getAttemptsForUser(userId);
+            solvedIds = new HashSet<>();
+            failedIds = new HashSet<>();
+            attemptedIds = new HashSet<>();
+            for (com.byteforce.domain.QuestionAttempt a : attempts) {
+                attemptedIds.add(a.getQuestionId());
+                if (a.getStatus() == AttemptStatus.SOLVED) {
+                    solvedIds.add(a.getQuestionId());
+                } else if (a.getStatus() == AttemptStatus.FAILED) {
+                    failedIds.add(a.getQuestionId());
+                }
+            }
+            failedIds.removeAll(solvedIds);
+        }
+
+        final Set<Long> fSolved = solvedIds;
+        final Set<Long> fFailed = failedIds;
+        final Set<Long> fAttempted = attemptedIds;
+        final Set<Long> fBm = bookmarkedIds;
+
+        return questions.stream()
+                .filter(q -> {
+                    if (fBm != null && !fBm.contains(q.getId())) {
+                        return false;
+                    }
+                    if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+                        String s = statusStr.trim().toUpperCase(Locale.ROOT);
+                        if ("SOLVED".equals(s) && (fSolved == null || !fSolved.contains(q.getId()))) {
+                            return false;
+                        }
+                        if ("FAILED".equals(s) && (fFailed == null || !fFailed.contains(q.getId()))) {
+                            return false;
+                        }
+                        if (("NOT_ATTEMPTED".equals(s) || "UNATTEMPTED".equals(s)) && fAttempted != null && fAttempted.contains(q.getId())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .toList();
     }
 
     private Difficulty parseDifficulty(String diff) {

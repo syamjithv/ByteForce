@@ -28,9 +28,16 @@ import java.util.Optional;
 public class TrackController {
 
     private final TrackService trackService;
+    private final com.byteforce.service.MemoryService memoryService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public TrackController(TrackService trackService, com.byteforce.service.MemoryService memoryService) {
+        this.trackService = trackService;
+        this.memoryService = memoryService;
+    }
 
     public TrackController(TrackService trackService) {
-        this.trackService = trackService;
+        this(trackService, null);
     }
 
     @GetMapping
@@ -54,6 +61,13 @@ public class TrackController {
         model.addAttribute("assessmentHistory", assessmentHistory);
         model.addAttribute("activities", activities);
         model.addAttribute("difficultyDistribution", difficultyDistribution);
+
+        if (memoryService != null) {
+            com.byteforce.domain.MemoryAnalytics memoryAnalytics = memoryService.getMemoryAnalytics(user.getId());
+            model.addAttribute("memoryAnalytics", memoryAnalytics);
+        } else {
+            model.addAttribute("memoryAnalytics", com.byteforce.domain.MemoryAnalytics.empty());
+        }
 
         boolean hasActivity = (overall.totalAttempts() > 0 || overall.assessmentsCompleted() > 0);
         model.addAttribute("hasActivity", hasActivity);

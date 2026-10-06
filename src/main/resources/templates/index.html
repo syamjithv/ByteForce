@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Practice. Prepare. Get Placed.')}"></head>
-<body>
+<head th:replace="~{fragments/layout :: head('Everything you need to get placement-ready.')}"></head>
+<body class="bf-public-body">
 
 <!-- Public Navbar -->
 <nav th:replace="~{fragments/layout :: publicNav('home')}"></nav>
@@ -9,150 +9,926 @@
 <!-- Notification banner if logged out -->
 <div th:if="${param.loggedOut}" class="public-container" style="margin-top: 16px;">
     <div class="alert alert-info">
-        <span>✓ You have been signed out safely. Come back anytime to continue your placement preparation!</span>
+        <span>You have been signed out safely. Come back anytime to continue your placement preparation!</span>
     </div>
 </div>
 
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="public-container">
-        <div class="hero-tag">
-            <span style="display: inline-flex; align-items: center; gap: 6px;">
-                <svg th:replace="~{fragments/icons :: spark}"></svg>
-                <span>ByteForce Placement Engine</span>
-            </span>
-            <span>•</span>
-            <span>Technical Placement Readiness</span>
+<!-- ==========================================================================
+     1. HERO SECTION — EXQUISITE EDITORIAL STATEMENT & PRODUCT STUDIO
+     ========================================================================== -->
+<section class="bf-hero-editorial">
+    <div class="bf-hero-bg-grid" aria-hidden="true"></div>
+    <div class="bf-hero-ambient-glow" aria-hidden="true"></div>
+
+    <div class="public-container bf-hero-grid">
+        <!-- Left: Editorial Brand Statement -->
+        <div class="bf-hero-copy-col">
+            <div class="bf-hero-badge bf-reveal">
+                <span class="bf-hero-beacon" aria-hidden="true"></span>
+                <span>BUILT FOR THE PLACEMENT JOURNEY</span>
+            </div>
+
+            <h1 class="bf-hero-display-title bf-reveal">
+                Everything you need <br>
+                <span class="bf-hero-title-accent">to get placement-ready.</span>
+            </h1>
+
+            <p class="bf-hero-lead-text bf-reveal">
+                Learn the fundamentals. Practice what matters. Test yourself. Know where you stand. Prepare for the interview.
+            </p>
+
+            <div class="bf-hero-action-group bf-reveal">
+                <th:block th:if="${currentUser == null}">
+                    <a th:href="@{/register}" class="btn btn-primary btn-lg bf-btn-hero-primary">
+                        <span>Start Preparing</span>
+                        <svg class="bf-btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="4" y1="10" x2="16" y2="10"></line>
+                            <polyline points="11 5 16 10 11 15"></polyline>
+                        </svg>
+                    </a>
+                    <a href="#connects" class="btn btn-outline btn-lg bf-btn-hero-secondary">
+                        <span>Explore ByteForce</span>
+                    </a>
+                </th:block>
+                <th:block th:if="${currentUser != null}">
+                    <a th:href="@{/dashboard}" class="btn btn-primary btn-lg bf-btn-hero-primary">
+                        <span>Go to Student Dashboard</span>
+                        <svg class="bf-btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="4" y1="10" x2="16" y2="10"></line>
+                            <polyline points="11 5 16 10 11 15"></polyline>
+                        </svg>
+                    </a>
+                    <a th:href="@{/learn}" class="btn btn-outline btn-lg bf-btn-hero-secondary">
+                        <span>Open Curriculum</span>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- Grounded Platform Architecture Specs -->
+            <div class="bf-hero-spec-strip bf-reveal">
+                <div class="bf-spec-item">
+                    <span class="bf-spec-num">18</span>
+                    <span class="bf-spec-label">CS Subjects</span>
+                </div>
+                <div class="bf-spec-divider" aria-hidden="true"></div>
+                <div class="bf-spec-item">
+                    <span class="bf-spec-num">42</span>
+                    <span class="bf-spec-label">Structured Topics</span>
+                </div>
+                <div class="bf-spec-divider" aria-hidden="true"></div>
+                <div class="bf-spec-item">
+                    <span class="bf-spec-num">120+</span>
+                    <span class="bf-spec-label">Curated Concepts</span>
+                </div>
+                <div class="bf-spec-divider" aria-hidden="true"></div>
+                <div class="bf-spec-item">
+                    <span class="bf-spec-num">1</span>
+                    <span class="bf-spec-label">Unified Platform</span>
+                </div>
+            </div>
         </div>
 
-        <h1 class="hero-title">
-            Practice. Prepare. <br><span class="highlight">Get Placed.</span>
-        </h1>
+        <!-- Right: Sophisticated Product Story Showcase Composition -->
+        <div class="bf-hero-visual-col bf-reveal">
+            <div class="bf-product-showcase-stage" id="heroShowcase">
+                <!-- Ambient Backdrop Shadow & Glow -->
+                <div class="bf-stage-halo" aria-hidden="true"></div>
 
-        <p class="hero-desc">
-            A placement-readiness platform that brings the technical placement journey into one place.
-            Build deep CS fundamentals, practice interview coding questions, and take timed placement mock tests.
-        </p>
+                <!-- Main Central Studio Card: Learn Concept Engine -->
+                <div class="bf-studio-window">
+                    <div class="bf-studio-window-bar">
+                        <div class="bf-window-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="bf-window-title">byteforce-learn // concepts / concurrency / deadlocks</div>
+                        <div class="bf-window-tag">CORE CS</div>
+                    </div>
 
-        <div class="hero-cta-group">
-            <th:block th:if="${currentUser == null}">
-                <a th:href="@{/register}" class="btn btn-primary btn-lg">
-                    <span>Create Free Account</span>
-                    <span>→</span>
-                </a>
-                <a th:href="@{/learn}" class="btn btn-secondary btn-lg">
-                    <span>Explore ByteForce</span>
-                </a>
-                <a th:href="@{/login}" class="btn btn-outline-navy btn-lg">
-                    <span>Sign In</span>
-                </a>
-            </th:block>
-            <th:block th:if="${currentUser != null}">
-                <a th:href="@{/dashboard}" class="btn btn-primary btn-lg">
-                    <span>Go to Student Dashboard</span>
-                    <span>→</span>
-                </a>
-                <a th:href="@{/practice}" class="btn btn-secondary btn-lg">
-                    <span>Resume Practice</span>
-                </a>
-            </th:block>
+                    <div class="bf-studio-body">
+                        <div class="bf-concept-crumb-row">
+                            <span class="crumb-subject">Operating Systems</span>
+                            <span class="crumb-sep">&rsaquo;</span>
+                            <span class="crumb-topic">Concurrency &amp; Synchronization</span>
+                        </div>
+
+                        <div class="bf-concept-title-row">
+                            <h3 class="bf-studio-concept-title">Deadlocks &amp; Coffman Prevention</h3>
+                            <span class="badge badge-subtle">8 min read</span>
+                        </div>
+
+                        <p class="bf-studio-concept-p">
+                            A deadlock occurs when a set of processes are blocked because each process is holding a resource and waiting for another resource held by another process.
+                        </p>
+
+                        <!-- Code / Technical Visualization Box -->
+                        <div class="bf-studio-code-box">
+                            <div class="bf-code-box-header">
+                                <span class="lang-tag">Java // Resource Allocation Hierarchy</span>
+                                <span class="badge badge-success" style="font-size: 0.6875rem;">Acyclic Guarantee</span>
+                            </div>
+                            <pre class="bf-studio-code"><code><span class="kw">public void</span> <span class="fn">acquireResources</span>(<span class="cls">Resource</span> r1, <span class="cls">Resource</span> r2) {
+    <span class="com">// Prevent circular wait by enforcing strict global acquisition ordering</span>
+    <span class="cls">Resource</span> first = r1.getId() &lt; r2.getId() ? r1 : r2;
+    <span class="cls">Resource</span> second = r1.getId() &lt; r2.getId() ? r2 : r1;
+    
+    first.lock();
+    second.lock(); <span class="com">// No cycle possible in Wait-For Graph</span>
+}</code></pre>
+                        </div>
+
+                        <div class="bf-studio-footer-row">
+                            <div class="bf-learned-pill">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Marked as Learned</span>
+                            </div>
+                            <div class="bf-studio-meta-note">Linked to 4 Practice Problems</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Contextual Panel 1: DBMS Topic Progress (Top Right) -->
+                <div class="bf-float-card bf-float-top-right">
+                    <div class="bf-float-header">
+                        <div class="bf-float-icon-box">
+                            <svg th:replace="~{fragments/icons :: learn}"></svg>
+                        </div>
+                        <div class="bf-float-meta">
+                            <span class="bf-float-label">Database Systems</span>
+                            <span class="bf-float-sub">ACID Transactions</span>
+                        </div>
+                    </div>
+                    <div class="bf-float-metric-row">
+                        <span class="bf-metric-progress">4 of 6 concepts mastered</span>
+                        <span class="bf-metric-pct">67%</span>
+                    </div>
+                    <div class="bf-float-bar">
+                        <div class="bf-float-bar-fill" style="width: 67%;"></div>
+                    </div>
+                </div>
+
+                <!-- Floating Contextual Panel 2: Practice Execution (Bottom Left) -->
+                <div class="bf-float-card bf-float-bottom-left">
+                    <div class="bf-float-header">
+                        <div class="bf-float-icon-box success">
+                            <svg th:replace="~{fragments/icons :: practice}"></svg>
+                        </div>
+                        <div class="bf-float-meta">
+                            <span class="bf-float-label">Practice Solved</span>
+                            <span class="bf-float-sub">Sliding Window Maximum</span>
+                        </div>
+                    </div>
+                    <div class="bf-float-stat-badge">
+                        <span class="dot-live"></span>
+                        <span>Runtime: 8ms &bull; Beats 94.2%</span>
+                    </div>
+                </div>
+
+                <!-- Floating Contextual Panel 3: Placement Readiness (Bottom Right) -->
+                <div class="bf-float-card bf-float-bottom-right">
+                    <div class="bf-float-header">
+                        <div class="bf-float-icon-box warning">
+                            <svg th:replace="~{fragments/icons :: track}"></svg>
+                        </div>
+                        <div class="bf-float-meta">
+                            <span class="bf-float-label">Placement Readiness</span>
+                            <span class="bf-float-sub">Core CS &amp; Algorithms</span>
+                        </div>
+                    </div>
+                    <div class="bf-readiness-indicator">
+                        <span class="readiness-score">86%</span>
+                        <span class="readiness-text">Interview Ready</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Five Core Pillars Section -->
-<section class="pillars-section">
+<!-- ==========================================================================
+     2. TRUST / POSITIONING STRIP — THE CONTINUOUS PREPARATION PIPELINE
+     ========================================================================== -->
+<section class="bf-positioning-strip">
     <div class="public-container">
-        <div class="section-header">
-            <h2 class="section-title">The Complete Placement Journey</h2>
-            <p class="section-subtitle">
-                Everything engineering students need to bridge the gap from classroom theory to campus placement success.
+        <div class="bf-strip-lead bf-reveal">
+            <span class="bf-strip-eyebrow">ONE INTEGRATED SYSTEM</span>
+            <p class="bf-strip-text">The fundamentals, practice, and preparation you actually need.</p>
+        </div>
+
+        <div class="bf-pipeline-row bf-reveal">
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">01</span>
+                <span class="bf-pipe-name">LEARN</span>
+                <span class="bf-pipe-desc">Deep CS Fundamentals</span>
+            </div>
+            <div class="bf-pipe-arrow" aria-hidden="true">&rarr;</div>
+
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">02</span>
+                <span class="bf-pipe-name">REMEMBER</span>
+                <span class="bf-pipe-desc">Spaced Active Recall</span>
+            </div>
+            <div class="bf-pipe-arrow" aria-hidden="true">&rarr;</div>
+
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">03</span>
+                <span class="bf-pipe-name">PRACTICE</span>
+                <span class="bf-pipe-desc">Curated Problem Sets</span>
+            </div>
+            <div class="bf-pipe-arrow" aria-hidden="true">&rarr;</div>
+
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">04</span>
+                <span class="bf-pipe-name">ASSESS</span>
+                <span class="bf-pipe-desc">Timed Placement Mocks</span>
+            </div>
+            <div class="bf-pipe-arrow" aria-hidden="true">&rarr;</div>
+
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">05</span>
+                <span class="bf-pipe-name">TRACK</span>
+                <span class="bf-pipe-desc">Readiness Analytics</span>
+            </div>
+            <div class="bf-pipe-arrow" aria-hidden="true">&rarr;</div>
+
+            <div class="bf-pipeline-step">
+                <span class="bf-pipe-num">06</span>
+                <span class="bf-pipe-name">INTERVIEW</span>
+                <span class="bf-pipe-desc">Technical &amp; HR Confidence</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     3. "THE PROBLEM" EDITORIAL SECTION — THE SCATTERED PREPARATION TRAP
+     ========================================================================== -->
+<section class="bf-problem-section" id="problem">
+    <div class="public-container">
+        <div class="bf-problem-header bf-reveal">
+            <span class="bf-editorial-tag">THE PROBLEM WE SOLVED</span>
+            <h2 class="bf-problem-title">Placement preparation shouldn't feel like five browser windows and forty bookmarks.</h2>
+            <p class="bf-problem-subtitle">
+                Most students don't struggle because they lack aptitude. They struggle because their preparation is scattered across disconnected tools, conflicting advice, and unorganized folders.
             </p>
         </div>
 
-        <div class="pillars-grid">
-            <!-- 1. LEARN -->
-            <div class="pillar-card">
-                <div class="pillar-icon learn-icon">
-                    <svg th:replace="~{fragments/icons :: learn}"></svg>
+        <div class="bf-problem-contrast-grid bf-reveal">
+            <!-- Left: The Fragmented Chaos -->
+            <div class="bf-contrast-card bf-contrast-scattered">
+                <div class="bf-contrast-badge negative">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span>The Scattered Preparation Trap</span>
                 </div>
-                <h3 class="pillar-title">Learn</h3>
-                <p class="pillar-desc">
-                    Build strong Computer Science fundamentals. Study core subjects, structured placement topics, and high-yield concepts with curated explanations and code examples.
-                </p>
-                <a th:href="@{/learn}" class="btn btn-outline btn-sm">Explore Curriculum →</a>
+                <h3 class="bf-contrast-heading">Fragmented Tools, Zero Continuity</h3>
+                <ul class="bf-scattered-list">
+                    <li>
+                        <span class="scatter-source">YouTube Playlists</span>
+                        <span class="scatter-desc">Passive 40-video series watched at 2x speed with zero retention.</span>
+                    </li>
+                    <li>
+                        <span class="scatter-source">Bloated PDF Notes</span>
+                        <span class="scatter-desc">Hundreds of pages of theoretical slides without code or interview context.</span>
+                    </li>
+                    <li>
+                        <span class="scatter-source">Random LeetCode Grinding</span>
+                        <span class="scatter-desc">Solving disjointed problems without understanding core topic patterns.</span>
+                    </li>
+                    <li>
+                        <span class="scatter-source">Scattered Aptitude Sites</span>
+                        <span class="scatter-desc">Outdated quantitative formulas on ad-filled test portals.</span>
+                    </li>
+                    <li>
+                        <span class="scatter-source">Interview Forum Threads</span>
+                        <span class="scatter-desc">Conflicting rumors and unverified interview experiences.</span>
+                    </li>
+                </ul>
+                <div class="bf-scattered-verdict">
+                    Result: Constant self-doubt, knowledge decay, and no clear way to gauge real campus readiness.
+                </div>
             </div>
 
-            <!-- 2. PRACTICE -->
-            <div class="pillar-card">
-                <div class="pillar-icon practice-icon">
-                    <svg th:replace="~{fragments/icons :: practice}"></svg>
+            <!-- Right: The ByteForce Cohesive Architecture -->
+            <div class="bf-contrast-card bf-contrast-unified">
+                <div class="bf-contrast-badge positive">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>The ByteForce Solution</span>
                 </div>
-                <h3 class="pillar-title">Practice</h3>
-                <p class="pillar-desc">
-                    Practice coding and placement questions. Filter by topic and difficulty, solve MCQs, SQL queries, and algorithmic code with instant solution verification.
-                </p>
-                <a th:href="@{/practice}" class="btn btn-outline btn-sm">Browse Questions →</a>
-            </div>
-
-            <!-- 3. ASSESS -->
-            <div class="pillar-card">
-                <div class="pillar-icon assess-icon">
-                    <svg th:replace="~{fragments/icons :: assessments}"></svg>
+                <h3 class="bf-contrast-heading">One Thoughtful, Reinforcing Pipeline</h3>
+                <div class="bf-unified-features">
+                    <div class="bf-unified-item">
+                        <div class="bf-unified-icon">
+                            <svg th:replace="~{fragments/icons :: learn}"></svg>
+                        </div>
+                        <div>
+                            <h4>Curated CS Fundamentals</h4>
+                            <p>Concepts structured by faculty and placement veterans around what top engineering teams actually evaluate.</p>
+                        </div>
+                    </div>
+                    <div class="bf-unified-item">
+                        <div class="bf-unified-icon">
+                            <svg th:replace="~{fragments/icons :: remember}"></svg>
+                        </div>
+                        <div>
+                            <h4>Spaced Active Recall</h4>
+                            <p>High-yield concept takeaways scheduled into your memory queue to prevent pre-interview knowledge decay.</p>
+                        </div>
+                    </div>
+                    <div class="bf-unified-item">
+                        <div class="bf-unified-icon">
+                            <svg th:replace="~{fragments/icons :: practice}"></svg>
+                        </div>
+                        <div>
+                            <h4>Purpose-Built Practice</h4>
+                            <p>Every practice problem links directly to its underlying topic, teaching you reusable patterns rather than memorized code.</p>
+                        </div>
+                    </div>
+                    <div class="bf-unified-item">
+                        <div class="bf-unified-icon">
+                            <svg th:replace="~{fragments/icons :: track}"></svg>
+                        </div>
+                        <div>
+                            <h4>Honest Readiness Analytics</h4>
+                            <p>No arbitrary percentages. Diagnostic topic breakdown highlights weak areas before campus drives begin.</p>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="pillar-title">Assess</h3>
-                <p class="pillar-desc">
-                    Take timed assessments and placement mock tests. Experience real exam pressure with question navigation, countdown timers, and detailed answer reviews.
-                </p>
-                <a th:href="@{/assessments}" class="btn btn-outline btn-sm">View Mock Tests →</a>
-            </div>
-
-            <!-- 4. TRACK -->
-            <div class="pillar-card">
-                <div class="pillar-icon track-icon">
-                    <svg th:replace="~{fragments/icons :: track}"></svg>
+                <div class="bf-unified-verdict">
+                    Result: Clarity, deliberate mastery, and genuine confidence when walking into technical rounds.
                 </div>
-                <h3 class="pillar-title">Track</h3>
-                <p class="pillar-desc">
-                    Understand your preparation progress and weak areas. Measure solved counts, accuracy percentages, topic-wise strengths, and honest assessment analytics.
-                </p>
-                <th:block th:if="${currentUser != null}">
-                    <a th:href="@{/track}" class="btn btn-outline btn-sm">View Your Progress →</a>
-                </th:block>
-                <th:block th:if="${currentUser == null}">
-                    <a th:href="@{/auth-required(returnUrl='/track', feature='tracking personalized placement analytics')}" class="btn btn-outline btn-sm">Track Progress →</a>
-                </th:block>
-            </div>
-
-            <!-- 5. INTERVIEW -->
-            <div class="pillar-card">
-                <div class="pillar-icon interview-icon">
-                    <svg th:replace="~{fragments/icons :: interview}"></svg>
-                </div>
-                <h3 class="pillar-title">Interview</h3>
-                <p class="pillar-desc">
-                    Prepare for technical and HR interviews. Master technical problem breakdown, behavioral response frameworks (STAR method), and company round expectations.
-                </p>
-                <a th:href="@{/interview}" class="btn btn-outline btn-sm">Interview Guides →</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Call to Action Banner -->
-<section style="background-color: var(--bf-navy-900); color: var(--bf-white); padding: 64px 0; margin-top: 40px; text-align: center;">
+<!-- ==========================================================================
+     4. BYTEFORCE ORIGIN STORY — AUTHENTIC STUDENT PHILOSOPHY
+     ========================================================================== -->
+<section class="bf-story-section" id="story">
+    <div class="bf-story-ambient-glow" aria-hidden="true"></div>
     <div class="public-container">
-        <h2 style="font-size: 2.25rem; color: var(--bf-white); margin-bottom: 14px;">Ready to start your placement preparation?</h2>
-        <p style="font-size: 1.125rem; color: var(--bf-slate-300); max-width: 640px; margin: 0 auto 28px auto;">
-            Join your peers preparing with curated CS learning, targeted problem-solving, and realistic timed assessments.
+        <div class="bf-story-layout">
+            <!-- Left: Large Display Typographic Hook -->
+            <div class="bf-story-hero-col bf-reveal">
+                <div class="bf-story-mark-box">
+                    <img th:src="@{/images/byteforce-icon.png}" alt="ByteForce B" class="bf-story-b-img" />
+                </div>
+                <span class="bf-story-tagline">OUR ORIGIN &amp; PHILOSOPHY</span>
+                <h2 class="bf-story-huge-title">
+                    Born from the grind, <br>
+                    <span>built for the journey.</span>
+                </h2>
+                <div class="bf-story-quote-card">
+                    <p>
+                        "ByteForce takes its name from brute force — the idea of trying, failing, learning, and trying again until something finally clicks. That felt strangely familiar to us."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Approved Narrative Body -->
+            <div class="bf-story-body-col bf-reveal">
+                <p class="bf-story-p highlight">
+                    As students preparing for placements, we found ourselves moving between coding platforms, lecture notes, YouTube videos, PDFs, aptitude sites, and interview resources, often unsure of what to learn next or whether we were actually making progress. So we decided to build the kind of platform we wished we had.
+                </p>
+                <p class="bf-story-p">
+                    <strong>ByteForce is our attempt to turn that scattered experience into one thoughtful journey.</strong> The content, practice sets, revision material, assessments, and preparation paths are curated around the things we have learned, struggled with, and wished someone had organized for us earlier. It isn't meant to replace the work — it is meant to make the work make more sense.
+                </p>
+
+                <div class="bf-story-punchline-box">
+                    <div class="bf-punchline-text">
+                        Learn with intention. Practice with purpose. Keep moving.
+                    </div>
+                </div>
+
+                <div class="bf-story-milestone-path">
+                    <div class="milestone-node">
+                        <span class="node-dot"></span>
+                        <span class="node-label">Scattered Prep</span>
+                    </div>
+                    <div class="milestone-line"></div>
+                    <div class="milestone-node">
+                        <span class="node-dot"></span>
+                        <span class="node-label">Organized Learn</span>
+                    </div>
+                    <div class="milestone-line"></div>
+                    <div class="milestone-node">
+                        <span class="node-dot"></span>
+                        <span class="node-label">Focused Practice</span>
+                    </div>
+                    <div class="milestone-line"></div>
+                    <div class="milestone-node">
+                        <span class="node-dot"></span>
+                        <span class="node-label">Mock Assessment</span>
+                    </div>
+                    <div class="milestone-line"></div>
+                    <div class="milestone-node">
+                        <span class="node-dot active"></span>
+                        <span class="node-label active">Placement Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     5. CORE PRODUCT EXPERIENCE — "EVERYTHING CONNECTS" (VARIED LAYOUTS)
+     ========================================================================== -->
+<section class="bf-connects-section" id="connects">
+    <div class="public-container">
+        <div class="bf-section-header bf-reveal">
+            <span class="bf-section-eyebrow">THE UNIFIED ARCHITECTURE</span>
+            <h2 class="bf-section-title">Everything connects.</h2>
+            <p class="bf-section-desc">
+                Placement preparation fails when learning and practice live in separate silos. ByteForce builds a closed-loop system where each stage reinforces the next.
+            </p>
+        </div>
+
+        <div class="bf-journey-stages-container">
+
+            <!-- STAGE 1: LEARN (Large Editorial Split Layout) -->
+            <div class="bf-stage-row bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 01 &bull; CURRICULUM</div>
+                    <h3 class="bf-stage-title">Learn the foundations companies actually expect.</h3>
+                    <p class="bf-stage-desc">
+                        A collegiate curriculum engineered from first principles. Operating Systems, Computer Networks, DBMS, System Design, and Algorithmic Theory — organized into coherent learning pathways with rigorous explanations.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> Complete topic and concept hierarchy with zero fluff</li>
+                        <li><span>&check;</span> Concrete code implementations and visual diagrams</li>
+                        <li><span>&check;</span> Explicit "Mark as learned" tracking backed by real persistence</li>
+                    </ul>
+                    <a th:href="@{/learn}" class="btn btn-outline btn-md bf-stage-btn">Explore Learn Curriculum &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-mock-browser">
+                        <div class="bf-mock-browser-bar">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                            <span class="bar-title">byteforce.edu / learn / database-management-systems</span>
+                        </div>
+                        <div class="bf-mock-curriculum-panel">
+                            <div class="curriculum-item active">
+                                <div class="item-status">&check;</div>
+                                <div class="item-info">
+                                    <div class="item-title">ACID Properties &amp; Transaction States</div>
+                                    <div class="item-sub">Concept 1 of 8 &bull; Mastered</div>
+                                </div>
+                            </div>
+                            <div class="curriculum-item">
+                                <div class="item-status pending">02</div>
+                                <div class="item-info">
+                                    <div class="item-title">Database Indexing: B-Trees &amp; B+ Trees</div>
+                                    <div class="item-sub">Concept 2 of 8 &bull; In Progress</div>
+                                </div>
+                            </div>
+                            <div class="curriculum-item">
+                                <div class="item-status">03</div>
+                                <div class="item-info">
+                                    <div class="item-title">Normal Forms: 1NF to BCNF with Decompositions</div>
+                                    <div class="item-sub">Concept 3 of 8 &bull; Up Next</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2: REMEMBER (Interactive Active Recall Card) -->
+            <div class="bf-stage-row reverse bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 02 &bull; RETENTION</div>
+                    <h3 class="bf-stage-title">Learn it once. Remember it when it matters.</h3>
+                    <p class="bf-stage-desc">
+                        Reading is not remembering. ByteForce Remember extracts high-yield technical takeaways and schedules them using spaced retrieval algorithms, ensuring core networking and OS differences stay sharp on interview day.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> Flash cues for high-frequency placement questions</li>
+                        <li><span>&check;</span> Brain Maps showing conceptual relationships and dependencies</li>
+                        <li><span>&check;</span> Active recall rating: Again, Hard, Good, Easy</li>
+                    </ul>
+                    <a th:href="@{/remember}" class="btn btn-outline btn-md bf-stage-btn">Explore Remember &amp; Brain Maps &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-recall-demo-card" id="demoRecallCard">
+                        <div class="recall-header">
+                            <span class="recall-tag">ACTIVE RECALL CUE</span>
+                            <span class="badge badge-subtle">Computer Networks</span>
+                        </div>
+                        <div class="recall-prompt">
+                            What is the fundamental architectural difference between TCP and UDP?
+                        </div>
+                        <div class="recall-solution" id="demoRecallAnswer">
+                            <div class="recall-grid">
+                                <div class="protocol-box">
+                                    <div class="proto-title tcp">TCP (Transmission Control)</div>
+                                    <p>Connection-oriented, 3-way handshake, guaranteed in-order delivery, flow &amp; congestion control. Used for HTTP, SSH, DB connections.</p>
+                                </div>
+                                <div class="protocol-box">
+                                    <div class="proto-title udp">UDP (User Datagram)</div>
+                                    <p>Connectionless, minimal 8-byte header overhead, no delivery or order guarantee. Best for DNS lookups, VoIP, real-time gaming.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recall-footer">
+                            <span class="recall-schedule-note">&bull; Scheduled retrieval queue active</span>
+                            <button type="button" class="btn btn-ghost btn-sm" id="toggleRecallBtn">Toggle Solution Preview</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 3: PRACTICE (IDE Code Challenge Showcase) -->
+            <div class="bf-stage-row bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 03 &bull; PROBLEM SOLVING</div>
+                    <h3 class="bf-stage-title">Don't just learn it. Use it.</h3>
+                    <p class="bf-stage-desc">
+                        Solve curated placement problems with clear constraints, time complexity expectations, and immediate execution feedback. Every problem is categorized by topic and difficulty to build repeatable patterns.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> Filters by Topic, Difficulty, Attempt Status, and Bookmarks</li>
+                        <li><span>&check;</span> Clean multi-language testing environment (Java 21, Python, C++)</li>
+                        <li><span>&check;</span> Detailed test case outputs with runtime analysis</li>
+                    </ul>
+                    <a th:href="@{/practice}" class="btn btn-outline btn-md bf-stage-btn">Solve Practice Sets &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-ide-preview">
+                        <div class="ide-tab-bar">
+                            <div class="ide-tab active">Solution.java</div>
+                            <div class="ide-difficulty-badge">Medium</div>
+                        </div>
+                        <div class="ide-editor-area">
+<pre><code><span class="kw">class</span> <span class="cls">Solution</span> {
+    <span class="kw">public int</span>[] <span class="fn">twoSum</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> target) {
+        <span class="cls">Map</span>&lt;<span class="cls">Integer</span>, <span class="cls">Integer</span>&gt; map = <span class="kw">new</span> <span class="cls">HashMap</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; nums.length; i++) {
+            <span class="kw">int</span> complement = target - nums[i];
+            <span class="kw">if</span> (map.containsKey(complement)) {
+                <span class="kw">return new int</span>[] { map.get(complement), i };
+            }
+            map.put(nums[i], i);
+        }
+        <span class="kw">return new int</span>[0];
+    }
+}</code></pre>
+                        </div>
+                        <div class="ide-testcase-bar">
+                            <div class="test-result-badge">&check; 3/3 Test Cases Passed</div>
+                            <div class="test-perf">Runtime: 2ms (Beats 98.4%) &bull; Memory: 42.6MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 4: ASSESS (Timed Placement Mock Environment) -->
+            <div class="bf-stage-row reverse bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 04 &bull; DIAGNOSTICS</div>
+                    <h3 class="bf-stage-title">Know what you actually know.</h3>
+                    <p class="bf-stage-desc">
+                        Simulate real online placement assessment environments. Timed test conditions, mixed-category question sets, and comprehensive post-assessment diagnostic reports pinpoint exactly where your gaps are before campus drives.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> Authentic timed mock test sessions with countdown clocks</li>
+                        <li><span>&check;</span> In-progress test session resumption if interrupted</li>
+                        <li><span>&check;</span> Sectional score breakdown across CS, DSA, and Aptitude</li>
+                    </ul>
+                    <a th:href="@{/assessments}" class="btn btn-outline btn-md bf-stage-btn">Take Diagnostic Mocks &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-mock-test-window">
+                        <div class="test-window-header">
+                            <div>
+                                <span class="test-name">TCS / Infosys Foundation Mock</span>
+                                <span class="test-category">30 Questions &bull; 45 Mins</span>
+                            </div>
+                            <div class="test-timer-badge">
+                                <span class="timer-dot"></span>
+                                <span>24:18 Left</span>
+                            </div>
+                        </div>
+                        <div class="test-question-box">
+                            <div class="question-header">
+                                <span class="question-num">Question 18 of 30</span>
+                                <span class="question-domain">Operating Systems</span>
+                            </div>
+                            <p class="question-text">
+                                Which scheduling algorithm is non-preemptive and guarantees minimum average waiting time for a set of processes arriving simultaneously?
+                            </p>
+                            <div class="question-choices">
+                                <div class="choice-item">A. Round Robin (RR)</div>
+                                <div class="choice-item selected">&check; B. Shortest Job First (SJF)</div>
+                                <div class="choice-item">C. Priority Scheduling</div>
+                                <div class="choice-item">D. First-Come First-Served (FCFS)</div>
+                            </div>
+                        </div>
+                        <div class="test-palette-strip">
+                            <div class="palette-dots">
+                                <span class="p-dot done">1</span>
+                                <span class="p-dot done">2</span>
+                                <span class="p-dot done">3</span>
+                                <span class="p-dot done">...</span>
+                                <span class="p-dot current">18</span>
+                                <span class="p-dot">19</span>
+                                <span class="p-dot">20</span>
+                            </div>
+                            <span class="palette-status">17 Answered &bull; 1 Flagged &bull; 12 Unanswered</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 5: TRACK (Personal Progress Intelligence) -->
+            <div class="bf-stage-row bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 05 &bull; INTELLIGENCE</div>
+                    <h3 class="bf-stage-title">Your personal placement readiness radar.</h3>
+                    <p class="bf-stage-desc">
+                        No arbitrary percentages. ByteForce synthesizes your actual concept completion, practice problem results, and mock test scores into transparent topic-level readiness diagnostics.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> Topic-by-topic mastery tracking with granular data</li>
+                        <li><span>&check;</span> Practice consistency streak and solve distribution</li>
+                        <li><span>&check;</span> Diagnostic weak area detection with recommended action</li>
+                    </ul>
+                    <a th:href="@{/track}" class="btn btn-outline btn-md bf-stage-btn">View Track Analytics &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-analytics-card">
+                        <div class="analytics-card-header">
+                            <span class="analytics-title">Topic Mastery Breakdown</span>
+                            <span class="badge badge-success">Overall Readiness: 78%</span>
+                        </div>
+                        <div class="analytics-bars">
+                            <div class="analytics-row">
+                                <div class="row-label">
+                                    <span>Data Structures &amp; Algorithms</span>
+                                    <span>88%</span>
+                                </div>
+                                <div class="row-bar"><div class="fill" style="width: 88%;"></div></div>
+                            </div>
+                            <div class="analytics-row">
+                                <div class="row-label">
+                                    <span>Database Management Systems</span>
+                                    <span>82%</span>
+                                </div>
+                                <div class="row-bar"><div class="fill" style="width: 82%;"></div></div>
+                            </div>
+                            <div class="analytics-row">
+                                <div class="row-label">
+                                    <span>Operating Systems &amp; Concurrency</span>
+                                    <span>74%</span>
+                                </div>
+                                <div class="row-bar"><div class="fill" style="width: 74%;"></div></div>
+                            </div>
+                            <div class="analytics-row">
+                                <div class="row-label">
+                                    <span>Computer Networks &amp; Protocols</span>
+                                    <span>65%</span>
+                                </div>
+                                <div class="row-bar"><div class="fill warning" style="width: 65%;"></div></div>
+                            </div>
+                        </div>
+                        <div class="analytics-alert-box">
+                            <div class="alert-icon">!</div>
+                            <div class="alert-text">
+                                <strong>Diagnostic Recommendation:</strong> Practice 4 more questions in <em>Computer Networks &bull; Subnetting &amp; Routing</em> to elevate your interview readiness to 85%.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 6: INTERVIEW & COMPANIES (Context-Rich Prep) -->
+            <div class="bf-stage-row reverse bf-reveal">
+                <div class="bf-stage-meta-col">
+                    <div class="bf-stage-badge">STAGE 06 &bull; CONTEXT</div>
+                    <h3 class="bf-stage-title">Prepare for the conversation, not just the code.</h3>
+                    <p class="bf-stage-desc">
+                        Technical interviews test how you communicate architecture, trade-offs, and design decisions. ByteForce pairs structured concept prep with company-specific patterns and behavioral frameworks.
+                    </p>
+                    <ul class="bf-stage-feature-list">
+                        <li><span>&check;</span> High-frequency technical interview questions with deep-dive breakdowns</li>
+                        <li><span>&check;</span> Structured STAR-method guidance for HR &amp; behavioral rounds</li>
+                        <li><span>&check;</span> Company preparation tracks tailored to technical hiring bars</li>
+                    </ul>
+                    <a th:href="@{/interview}" class="btn btn-outline btn-md bf-stage-btn">Explore Interview Guides &rarr;</a>
+                </div>
+                <div class="bf-stage-visual-col">
+                    <div class="bf-interview-showcase-box">
+                        <div class="interview-box-header">
+                            <span class="interview-type">TECHNICAL ROUND &bull; SYSTEM FUNDAMENTALS</span>
+                            <span class="badge badge-subtle">Core Discussion</span>
+                        </div>
+                        <div class="interview-q-title">
+                            "Explain the difference between a process and a thread, and how context switching differs between them."
+                        </div>
+                        <div class="interview-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-num">1.</span>
+                                <div class="breakdown-content">
+                                    <strong>Memory Space:</strong> Processes have separate virtual address spaces (code, data, heap). Threads within the same process share heap, globals, and open file descriptors, maintaining only their own stack and registers.
+                                </div>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-num">2.</span>
+                                <div class="breakdown-content">
+                                    <strong>Switching Overhead:</strong> Process context switch requires invalidating the TLB (Translation Lookaside Buffer) and switching memory mapping tables. Thread switch retains cache and TLB mappings, making it significantly faster.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interview-tip">
+                            <strong>Interviewer Follow-up Trap:</strong> Be prepared to explain Inter-Process Communication (IPC) techniques such as pipes, message queues, and shared memory.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     6. CS FUNDAMENTALS CURRICULUM ARCHITECTURE MAP
+     ========================================================================== -->
+<section class="bf-curriculum-section" id="curriculum">
+    <div class="public-container">
+        <div class="bf-section-header bf-reveal">
+            <span class="bf-section-eyebrow">COMPREHENSIVE KNOWLEDGE BASE</span>
+            <h2 class="bf-section-title">Learn the foundations companies actually expect.</h2>
+            <p class="bf-section-desc">
+                Not just surface-level syntax snippets. A rigorous curriculum covering core systems, software architecture, and modern computing.
+            </p>
+        </div>
+
+        <div class="bf-curriculum-clusters-grid bf-reveal">
+            <!-- Cluster 1: Core Systems & Architecture -->
+            <div class="bf-curriculum-cluster">
+                <div class="cluster-header">
+                    <div class="cluster-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="cluster-title">Core Systems &amp; Architecture</h3>
+                        <p class="cluster-sub">Hardware abstraction, concurrency &amp; networking</p>
+                    </div>
+                </div>
+                <div class="cluster-subjects">
+                    <a th:href="@{/learn}" class="subject-pill">Operating Systems</a>
+                    <a th:href="@{/learn}" class="subject-pill">Computer Networks</a>
+                    <a th:href="@{/learn}" class="subject-pill">Computer Organization</a>
+                    <a th:href="@{/learn}" class="subject-pill">Distributed Systems</a>
+                    <a th:href="@{/learn}" class="subject-pill">System Design</a>
+                </div>
+            </div>
+
+            <!-- Cluster 2: Data & Algorithmic Foundations -->
+            <div class="bf-curriculum-cluster">
+                <div class="cluster-header">
+                    <div class="cluster-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="cluster-title">Data &amp; Algorithmic Thinking</h3>
+                        <p class="cluster-sub">Data structures, DBMS, languages &amp; computation</p>
+                    </div>
+                </div>
+                <div class="cluster-subjects">
+                    <a th:href="@{/learn}" class="subject-pill">Data Structures &amp; Algorithms</a>
+                    <a th:href="@{/learn}" class="subject-pill">Java &amp; OOP Concepts</a>
+                    <a th:href="@{/learn}" class="subject-pill">DBMS &amp; SQL Mastery</a>
+                    <a th:href="@{/learn}" class="subject-pill">Theory of Computation</a>
+                    <a th:href="@{/learn}" class="subject-pill">Mathematics for CS</a>
+                </div>
+            </div>
+
+            <!-- Cluster 3: Applied Engineering & Security -->
+            <div class="bf-curriculum-cluster">
+                <div class="cluster-header">
+                    <div class="cluster-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="cluster-title">Applied Engineering &amp; Modern CS</h3>
+                        <p class="cluster-sub">Software engineering, web architectures, AI &amp; security</p>
+                    </div>
+                </div>
+                <div class="cluster-subjects">
+                    <a th:href="@{/learn}" class="subject-pill">Software Engineering &amp; SDLC</a>
+                    <a th:href="@{/learn}" class="subject-pill">Web Architecture &amp; APIs</a>
+                    <a th:href="@{/learn}" class="subject-pill">Cybersecurity &amp; Encryption</a>
+                    <a th:href="@{/learn}" class="subject-pill">AI &amp; Machine Learning</a>
+                    <a th:href="@{/learn}" class="subject-pill">HCI &amp; Accessibility</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bf-curriculum-cta-row bf-reveal">
+            <div class="curriculum-metric">
+                <span class="cur-num">18</span>
+                <span class="cur-text">Complete Subjects</span>
+            </div>
+            <div class="curriculum-metric">
+                <span class="cur-num">42</span>
+                <span class="cur-text">Structured Topics</span>
+            </div>
+            <div class="curriculum-metric">
+                <span class="cur-num">120+</span>
+                <span class="cur-text">Curated Concept Articles</span>
+            </div>
+            <a th:href="@{/learn}" class="btn btn-primary btn-md">Browse Full Curriculum &rarr;</a>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     7. AUTHENTIC STUDENT ORIGIN SECTION (NO FAKE SOCIAL PROOF)
+     ========================================================================== -->
+<section class="bf-authentic-origin-section">
+    <div class="public-container bf-origin-inner bf-reveal">
+        <span class="bf-origin-eyebrow-tag">AUTHENTIC &bull; STUDENT BUILT</span>
+        <h2 class="bf-origin-heading">Built by students who got tired of piecing it all together.</h2>
+        <p class="bf-origin-narrative">
+            We didn't build ByteForce in a corporate boardroom. We built it in college dorms and library corners between placement rounds. Every concept, question, and card was curated from the things that actually mattered when recruiters sat across the table. No fluff, no fake placement percentages, no marketing noise — just the focused preparation we needed.
         </p>
-        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <div class="bf-origin-principles">
+            <div class="principle-item">
+                <div class="principle-marker">&bull;</div>
+                <div class="principle-text">
+                    <strong>Zero Disconnected Tools:</strong> You shouldn't need six accounts to prepare for one interview.
+                </div>
+            </div>
+            <div class="principle-item">
+                <div class="principle-marker">&bull;</div>
+                <div class="principle-text">
+                    <strong>Real Conceptual Rigor:</strong> Practice without understanding core systems only gets you so far.
+                </div>
+            </div>
+            <div class="principle-item">
+                <div class="principle-marker">&bull;</div>
+                <div class="principle-text">
+                    <strong>Honest Progress:</strong> No artificial gamification. See your true topic readiness with clarity.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     8. FINAL CINEMATIC CTA
+     ========================================================================== -->
+<section class="bf-final-cta-section">
+    <div class="bf-final-ambient" aria-hidden="true"></div>
+    <div class="public-container bf-final-cta-inner bf-reveal">
+        <div class="bf-final-mark">
+            <img th:src="@{/images/byteforce-icon.png}" alt="ByteForce B" class="bf-final-b-img" />
+        </div>
+        <h2 class="bf-final-headline">Your placement preparation starts here.</h2>
+        <p class="bf-final-statement">
+            Learn with intention. Practice with purpose. Keep moving.
+        </p>
+        <div class="bf-final-actions">
             <th:block th:if="${currentUser == null}">
-                <a th:href="@{/register}" class="btn btn-primary btn-lg">Start Preparing Free</a>
-                <a th:href="@{/login}" class="btn btn-secondary btn-lg">Sign In to Account</a>
+                <a th:href="@{/register}" class="btn btn-primary btn-lg bf-btn-final-primary">
+                    <span>Start Preparing</span>
+                    <svg class="bf-btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="4" y1="10" x2="16" y2="10"></line>
+                        <polyline points="11 5 16 10 11 15"></polyline>
+                    </svg>
+                </a>
+                <a th:href="@{/learn}" class="btn btn-outline btn-lg bf-btn-final-secondary">Explore Curriculum</a>
             </th:block>
             <th:block th:if="${currentUser != null}">
-                <a th:href="@{/dashboard}" class="btn btn-primary btn-lg">Open Your Dashboard</a>
+                <a th:href="@{/dashboard}" class="btn btn-primary btn-lg bf-btn-final-primary">
+                    <span>Go to Student Dashboard</span>
+                    <svg class="bf-btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="4" y1="10" x2="16" y2="10"></line>
+                        <polyline points="11 5 16 10 11 15"></polyline>
+                    </svg>
+                </a>
+                <a th:href="@{/learn}" class="btn btn-outline btn-lg bf-btn-final-secondary">Explore Curriculum</a>
             </th:block>
         </div>
     </div>
@@ -160,6 +936,71 @@
 
 <!-- Public Footer -->
 <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+
+<!-- ==========================================================================
+     VANILLA JS MICROINTERACTIONS & SCROLL OBSERVERS
+     ========================================================================== -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Navigation scroll elevation effect
+    const navbar = document.getElementById('publicNavbar');
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('is-scrolled');
+            } else {
+                navbar.classList.remove('is-scrolled');
+            }
+        }, { passive: true });
+    }
+
+    // 2. Interactive Recall Card solution preview toggle
+    const toggleRecallBtn = document.getElementById('toggleRecallBtn');
+    const recallSolution = document.getElementById('demoRecallAnswer');
+    if (toggleRecallBtn && recallSolution) {
+        toggleRecallBtn.addEventListener('click', () => {
+            const isHidden = recallSolution.style.display === 'none';
+            recallSolution.style.display = isHidden ? 'block' : 'none';
+            toggleRecallBtn.textContent = isHidden ? 'Hide Solution Preview' : 'Show Solution Preview';
+        });
+    }
+
+    // 3. Subtle pointer tilt reaction for Hero Showcase Stage
+    const heroShowcase = document.getElementById('heroShowcase');
+    if (heroShowcase && window.matchMedia('(pointer: fine)').matches) {
+        heroShowcase.addEventListener('mousemove', (e) => {
+            const rect = heroShowcase.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            heroShowcase.style.transform = `perspective(1000px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+        });
+
+        heroShowcase.addEventListener('mouseleave', () => {
+            heroShowcase.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg)';
+        });
+    }
+
+    // 4. Scroll Reveal with IntersectionObserver
+    const reveals = document.querySelectorAll('.bf-reveal');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        reveals.forEach(el => observer.observe(el));
+    } else {
+        reveals.forEach(el => el.classList.add('is-visible'));
+    }
+});
+</script>
 
 </body>
 </html>

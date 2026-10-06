@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${isNew} ? 'Create Company' : 'Edit Company')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-companies')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar(${isNew} ? 'New Company' : 'Edit Company')}"></header>
+
+        <main class="app-content" style="max-width: 800px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+            <div th:if="${flashError}" class="alert alert-danger" style="margin-bottom: 20px;" th:text="${flashError}">Error</div>
+
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <div>
+                    <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${isNew} ? 'Create Target Company' : 'Edit Company: ' + ${company.name}">Company Form</h2>
+                    <p style="color: var(--bf-slate-500); font-size: 0.875rem;">Company identity, official branding, and web presence.</p>
+                </div>
+                <a th:href="@{/admin/companies}" class="btn btn-outline btn-sm">&larr; Back to Companies</a>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 32px; box-shadow: var(--bf-shadow-sm);">
+                <form th:action="${isNew} ? @{/admin/companies/new} : @{/admin/companies/{id}/edit(id=${company.id})}" method="post">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Company Name *</label>
+                        <input type="text" name="name" th:value="${company.name}" required placeholder="e.g. Tata Consultancy Services"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Slug (URL Identifier) *</label>
+                        <input type="text" name="slug" th:value="${company.slug}" required placeholder="e.g. tcs"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; font-family: var(--bf-font-mono, monospace);" />
+                        <span style="font-size: 0.75rem; color: var(--bf-slate-500); margin-top: 4px; display: block;">Used in web URL: /companies/{slug}</span>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Logo Asset Path</label>
+                        <input type="text" name="logoPath" th:value="${company.logoPath}" placeholder="e.g. /images/companies/tcs.svg"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                        <span style="font-size: 0.75rem; color: var(--bf-slate-500); margin-top: 4px; display: block;">Local static SVG or PNG asset under /images/companies/</span>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Official Website URL</label>
+                        <input type="url" name="websiteUrl" th:value="${company.websiteUrl}" placeholder="e.g. https://www.tcs.com"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Short Description</label>
+                        <input type="text" name="shortDescription" th:value="${company.shortDescription}" placeholder="One-line summary for catalog cards"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem;" />
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); margin-bottom: 6px;">Detailed Overview</label>
+                        <textarea name="description" rows="4" placeholder="Comprehensive background on recruitment domains..."
+                                  style="width: 100%; padding: 10px 14px; border: 1px solid var(--bf-slate-300); border-radius: var(--bf-radius-md, 8px); font-size: 0.9375rem; line-height: 1.5;" th:text="${company.description}"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 28px;">
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.875rem; color: var(--bf-navy-900); cursor: pointer;">
+                            <input type="checkbox" name="active" value="true" th:checked="${company.active}" style="width: 18px; height: 18px;" />
+                            <span>Active (Visible to Students in /companies catalog)</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <a th:href="@{/admin/companies}" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary" th:text="${isNew} ? 'Create Company' : 'Save Changes'">Save Company</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

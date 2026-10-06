@@ -66,8 +66,8 @@
                           th:text="${q.difficulty}">EASY</span>
                     <span class="badge badge-purple" th:text="${q.questionType}">CODING</span>
                 </div>
-                <div style="font-size: 0.875rem; font-weight: 700; color: var(--bf-primary);">
-                    ★ <span th:text="${marksMap.getOrDefault(q.id, 1)}">10</span> Marks
+                <div style="font-size: 0.875rem; font-weight: 700; color: var(--bf-primary);" th:text="${marksMap.getOrDefault(q.id, 1)} + ' Marks'">
+                    10 Marks
                 </div>
             </div>
 

@@ -31,6 +31,12 @@ class WebIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private com.byteforce.service.AuthService authService;
+
+    @Autowired
+    private com.byteforce.service.AssessmentService assessmentService;
+
     @Test
     @DisplayName("Journey 1: Public Home page loads with hero, brand identity, and core pillars")
     void testPublicHomePage() throws Exception {
@@ -191,6 +197,30 @@ class WebIntegrationTest {
                 .andExpect(view().name("track/index"))
                 .andExpect(content().string(containsString("Placement Preparation Progress")))
                 .andExpect(content().string(containsString("Overall Preparation Metrics")));
+    }
+
+    @Test
+    @DisplayName("Journey 7b: Track module renders assessment history with formatted date without SpEL errors")
+    void testTrackModuleWithAssessmentHistory() throws Exception {
+        String email = "track.student." + System.currentTimeMillis() + "@byteforce.com";
+        User student = authService.register(email, "SecurePassword123!", "Track Student");
+
+        java.util.List<com.byteforce.domain.Assessment> assessments = assessmentService.getAvailableAssessments();
+        if (!assessments.isEmpty()) {
+            com.byteforce.domain.Assessment assessment = assessments.getFirst();
+            com.byteforce.domain.AssessmentAttempt attempt = assessmentService.startAssessment(student.getId(), assessment.getId());
+            assessmentService.submitAssessment(attempt.getId(), java.util.Map.of());
+        }
+
+        MockHttpSession session = new MockHttpSession();
+        WebSessionUtil.setCurrentUser(session, student);
+
+        mockMvc.perform(get("/track").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("track/index"))
+                .andExpect(content().string(containsString("Placement Preparation Progress")))
+                .andExpect(content().string(containsString("Overall Preparation Metrics")))
+                .andExpect(content().string(containsString("Technical Placement Readiness Mock Test 1")));
     }
 
     @Test

@@ -59,6 +59,12 @@ public class AssessmentController {
             questionCounts.put(a.getId(), assessmentService.getQuestionsForAssessment(a.getId()).size());
         }
         model.addAttribute("questionCounts", questionCounts);
+
+        Optional<User> userOpt = WebSessionUtil.getCurrentUser(session);
+        if (userOpt.isPresent()) {
+            model.addAttribute("activeResumeAttempt", assessmentService.getActiveResumeAttempt(userOpt.get().getId()).orElse(null));
+        }
+
         return "assessments/index";
     }
 

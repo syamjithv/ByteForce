@@ -52,6 +52,14 @@ import com.byteforce.service.BrainMapService;
 import com.byteforce.service.BrainMapServiceImpl;
 import com.byteforce.service.LearnService;
 import com.byteforce.service.LearnServiceImpl;
+import com.byteforce.repository.CompanyRepository;
+import com.byteforce.repository.JdbcCompanyRepository;
+import com.byteforce.service.CompanyService;
+import com.byteforce.service.CompanyServiceImpl;
+import com.byteforce.repository.UserRememberReviewRepository;
+import com.byteforce.repository.JdbcUserRememberReviewRepository;
+import com.byteforce.service.MemoryService;
+import com.byteforce.service.MemoryServiceImpl;
 import com.byteforce.service.QuestionService;
 import com.byteforce.service.QuestionServiceImpl;
 import com.byteforce.service.RememberService;
@@ -102,6 +110,8 @@ public class AppContext implements AutoCloseable {
     private final RememberItemRepository rememberItemRepository;
     private final ConceptRelationshipRepository conceptRelationshipRepository;
     private final com.byteforce.repository.AptitudeQuestionRepository aptitudeQuestionRepository;
+    private final UserRememberReviewRepository userRememberReviewRepository;
+    private final com.byteforce.repository.UserConceptProgressRepository userConceptProgressRepository;
 
     // Services
     private final ActivityService activityService;
@@ -117,6 +127,11 @@ public class AppContext implements AutoCloseable {
     private final BrainMapService brainMapService;
     private final TrackService trackService;
     private final com.byteforce.service.AptitudeQuestionService aptitudeQuestionService;
+    private final com.byteforce.service.memory.SpacedRepetitionScheduler spacedRepetitionScheduler;
+    private final MemoryService memoryService;
+    private final CompanyRepository companyRepository;
+    private final CompanyService companyService;
+    private final com.byteforce.service.ConceptProgressService conceptProgressService;
 
     /**
      * Initializes the composition root with an existing DataSource.
@@ -159,6 +174,8 @@ public class AppContext implements AutoCloseable {
         this.rememberItemRepository = new JdbcRememberItemRepository(dataSource);
         this.conceptRelationshipRepository = new JdbcConceptRelationshipRepository(dataSource);
         this.aptitudeQuestionRepository = new com.byteforce.repository.JdbcAptitudeQuestionRepository(dataSource);
+        this.userRememberReviewRepository = new JdbcUserRememberReviewRepository(dataSource);
+        this.userConceptProgressRepository = new com.byteforce.repository.JdbcUserConceptProgressRepository(dataSource);
 
         log.info("Wiring ByteForce services...");
         this.activityService = new ActivityServiceImpl(activityRepository);
@@ -170,10 +187,25 @@ public class AppContext implements AutoCloseable {
         this.attemptService = new AttemptServiceImpl(attemptRepository, questionRepository, activityService);
         this.assessmentService = new AssessmentServiceImpl(assessmentRepository, assessmentAttemptRepository, assessmentAnswerRepository, questionRepository, activityService);
         this.learnService = new LearnServiceImpl(learnRepository, subjectRepository, topicRepository, conceptRepository, learningResourceRepository);
+        this.conceptProgressService = new com.byteforce.service.ConceptProgressServiceImpl(userConceptProgressRepository);
         this.rememberService = new RememberServiceImpl(rememberItemRepository, conceptRepository);
-        this.brainMapService = new BrainMapServiceImpl(conceptRelationshipRepository, conceptRepository);
+        this.brainMapService = new BrainMapServiceImpl(conceptRelationshipRepository, conceptRepository, topicRepository, subjectRepository, userRememberReviewRepository);
         this.trackService = new TrackServiceImpl(attemptService, assessmentService, activityService, bookmarkService, questionRepository, topicRepository);
         this.aptitudeQuestionService = new com.byteforce.service.AptitudeQuestionServiceImpl(aptitudeQuestionRepository);
+        this.spacedRepetitionScheduler = new com.byteforce.service.memory.FsrsScheduler();
+        this.memoryService = new MemoryServiceImpl(
+                userRememberReviewRepository,
+                rememberItemRepository,
+                conceptRepository,
+                topicRepository,
+                subjectRepository,
+                conceptRelationshipRepository,
+                spacedRepetitionScheduler,
+                brainMapService
+        );
+
+        this.companyRepository = new JdbcCompanyRepository(dataSource);
+        this.companyService = new CompanyServiceImpl(companyRepository, topicRepository, questionRepository, aptitudeQuestionRepository, assessmentRepository, attemptService, assessmentService);
 
         log.info("ByteForce AppContext initialized successfully.");
     }
@@ -328,6 +360,34 @@ public class AppContext implements AutoCloseable {
 
     public com.byteforce.service.AptitudeQuestionService getAptitudeQuestionService() {
         return aptitudeQuestionService;
+    }
+
+    public UserRememberReviewRepository getUserRememberReviewRepository() {
+        return userRememberReviewRepository;
+    }
+
+    public com.byteforce.service.memory.SpacedRepetitionScheduler getSpacedRepetitionScheduler() {
+        return spacedRepetitionScheduler;
+    }
+
+    public MemoryService getMemoryService() {
+        return memoryService;
+    }
+
+    public CompanyRepository getCompanyRepository() {
+        return companyRepository;
+    }
+
+    public CompanyService getCompanyService() {
+        return companyService;
+    }
+
+    public com.byteforce.repository.UserConceptProgressRepository getUserConceptProgressRepository() {
+        return userConceptProgressRepository;
+    }
+
+    public com.byteforce.service.ConceptProgressService getConceptProgressService() {
+        return conceptProgressService;
     }
 
     @Override

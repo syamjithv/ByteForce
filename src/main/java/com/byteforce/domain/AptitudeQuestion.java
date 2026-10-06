@@ -79,6 +79,42 @@ public final class AptitudeQuestion {
         this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
     }
 
+    private AptitudeQuestion(long id,
+                             AptitudeCategory category,
+                             String topic,
+                             Difficulty difficulty,
+                             String question,
+                             String optionA,
+                             String optionB,
+                             String optionC,
+                             String optionD,
+                             String correctAnswer,
+                             String explanation,
+                             boolean active,
+                             Instant createdAt,
+                             Instant updatedAt,
+                             boolean formEmpty) {
+        this.id = id;
+        this.category = category != null ? category : AptitudeCategory.QUANTITATIVE;
+        this.topic = topic != null ? topic.trim() : "";
+        this.difficulty = difficulty != null ? difficulty : Difficulty.EASY;
+        this.question = question != null ? question.trim() : "";
+        this.optionA = optionA != null ? optionA.trim() : "";
+        this.optionB = optionB != null ? optionB.trim() : "";
+        this.optionC = optionC != null ? optionC.trim() : "";
+        this.optionD = optionD != null ? optionD.trim() : "";
+        this.correctAnswer = correctAnswer != null ? correctAnswer : "A";
+        this.explanation = explanation != null ? explanation.trim() : "";
+        this.active = active;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+        this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
+    }
+
+    public static AptitudeQuestion empty(AptitudeCategory category) {
+        return new AptitudeQuestion(0, category != null ? category : AptitudeCategory.QUANTITATIVE,
+                "", Difficulty.EASY, "", "", "", "", "", "A", "", true, Instant.now(), Instant.now(), true);
+    }
+
     public static AptitudeQuestion create(AptitudeCategory category,
                                           String topic,
                                           Difficulty difficulty,

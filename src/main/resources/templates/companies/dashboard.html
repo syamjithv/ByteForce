@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${company.name} + ' — Preparation Dashboard')}"></head>
+<body>
+
+<div class="app-layout">
+    <!-- Authenticated Student Sidebar -->
+    <aside th:replace="~{fragments/layout :: appSidebar('companies')}"></aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar(${company.name} + ' Preparation')}"></header>
+
+        <div class="app-content">
+            <!-- Back to Catalog Link -->
+            <div style="margin-bottom: 20px;">
+                <a th:href="@{/companies}" class="company-secondary-link" style="font-weight: 600;">
+                    <span>&larr;</span>
+                    <span>All Target Companies</span>
+                </a>
+            </div>
+
+            <!-- Header: Company Logo, Name, Short Description -->
+            <div class="company-dash-header">
+                <div class="company-dash-identity">
+                    <div class="company-dash-logo-box">
+                        <img th:src="@{${company.logoPath}}" th:alt="${company.name}" />
+                    </div>
+                    <div>
+                        <h1 class="company-dash-title" th:text="${company.name}">Company Name</h1>
+                        <p class="company-dash-desc" th:text="${company.shortDescription}">Company short description</p>
+                    </div>
+                </div>
+
+                <div th:if="${company.websiteUrl != null and !company.websiteUrl.isEmpty()}">
+                    <a th:href="${company.websiteUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+                        <span>Official Website</span>
+                        <span>&nearr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Preparation Navigation Anchors -->
+            <div class="company-prep-nav">
+                <a href="#overview" class="company-prep-tab active">Overview</a>
+                <a href="#technical" class="company-prep-tab">Technical (<span th:text="${dashboard.linkedTopics.size()}">0</span>)</a>
+                <a href="#practice" class="company-prep-tab">Practice (<span th:text="${dashboard.linkedQuestions.size()}">0</span>)</a>
+                <a href="#aptitude" class="company-prep-tab">Aptitude (<span th:text="${dashboard.linkedAptitudeQuestions.size()}">0</span>)</a>
+                <a href="#assessments" class="company-prep-tab">Assessments (<span th:text="${dashboard.linkedAssessments.size()}">0</span>)</a>
+                <a href="#interview" class="company-prep-tab">Interview (<span th:text="${dashboard.linkedInterviewCategories.size()}">0</span>)</a>
+            </div>
+
+            <!-- Honest Preparation Progress Strip (No Fake Stats) -->
+            <div class="company-section-block" style="padding: 20px 24px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bf-slate-500);">Your Target Progress</span>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900); margin: 2px 0 0 0;">Preparation Milestones</h3>
+                    </div>
+                    <div th:if="${dashboard.hasActivity}" style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: 800; color: var(--bf-primary);" th:text="${dashboard.questionsSolved} + ' / ' + ${dashboard.questionsAttempted}">0 / 0</div>
+                            <div style="font-size: 0.75rem; color: var(--bf-slate-500); font-weight: 600;">Questions Solved</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: 800; color: var(--bf-success);" th:text="${dashboard.assessmentsCompleted}">0</div>
+                            <div style="font-size: 0.75rem; color: var(--bf-slate-500); font-weight: 600;">Mock Tests Completed</div>
+                        </div>
+                    </div>
+                    <div th:unless="${dashboard.hasActivity}">
+                        <span style="font-size: 0.875rem; color: var(--bf-slate-500); font-style: italic;">
+                            Your company-specific progress will appear as you complete linked preparation.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. OVERVIEW -->
+            <section class="company-section-block" id="overview">
+                <div class="company-section-header">
+                    <h2 class="company-section-title">Prepare for <span th:text="${company.name}">Company</span></h2>
+                    <span class="badge badge-subtle">Preparation Path</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 16px;">
+                    <!-- Overview Pillar 1 -->
+                    <div style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;">1. Technical</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 16px; line-height: 1.5;">Build the technical foundation connected to this preparation path.</p>
+                        <a href="#technical" class="btn btn-outline btn-sm">Start technical prep &rarr;</a>
+                    </div>
+                    <!-- Overview Pillar 2 -->
+                    <div style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;">2. Practice</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 16px; line-height: 1.5;">Solve curated coding questions and algorithmic challenges.</p>
+                        <a href="#practice" class="btn btn-outline btn-sm">Practice questions &rarr;</a>
+                    </div>
+                    <!-- Overview Pillar 3 -->
+                    <div style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;">3. Aptitude</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 16px; line-height: 1.5;">Practice relevant quantitative, logical, and verbal speed topics.</p>
+                        <a href="#aptitude" class="btn btn-outline btn-sm">Practice aptitude &rarr;</a>
+                    </div>
+                    <!-- Overview Pillar 4 -->
+                    <div style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;">4. Assessments</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 16px; line-height: 1.5;">Test your readiness under realistic timed exam conditions.</p>
+                        <a href="#assessments" class="btn btn-outline btn-sm">Take assessment &rarr;</a>
+                    </div>
+                    <!-- Overview Pillar 5 -->
+                    <div style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;">5. Interview</h4>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin-bottom: 16px; line-height: 1.5;">Prepare for technical and behavioral conversation rounds.</p>
+                        <a href="#interview" class="btn btn-outline btn-sm">Prepare for interview &rarr;</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. TECHNICAL PREPARATION -->
+            <section class="company-section-block" id="technical">
+                <div class="company-section-header">
+                    <div>
+                        <h2 class="company-section-title">Technical Preparation</h2>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Core topics and concepts connected to this company.</span>
+                    </div>
+                </div>
+
+                <div th:if="${dashboard.hasTopics()}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    <div th:each="topic : ${dashboard.linkedTopics}" style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 18px; background: #fafafa;">
+                        <span class="badge badge-subtle" style="margin-bottom: 8px;">Topic</span>
+                        <h4 style="font-size: 1.0625rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 6px;" th:text="${topic.name}">Topic Name</h4>
+                        <p style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 14px; line-height: 1.5;" th:text="${topic.description}">Topic description</p>
+                        <a th:href="@{/learn/topic/{slug}(slug=${topic.slug})}" class="btn btn-outline btn-sm">Study Topic &rarr;</a>
+                    </div>
+                </div>
+
+                <div th:unless="${dashboard.hasTopics()}" class="empty-state" style="padding: 32px 16px;">
+                    <h4 class="empty-state-title">Technical preparation is being curated.</h4>
+                    <p class="empty-state-desc">Target curriculum mappings for this company are currently being reviewed.</p>
+                    <a th:href="@{/learn}" class="btn btn-primary btn-sm">Explore Core Curriculum</a>
+                </div>
+            </section>
+
+            <!-- 3. PRACTICE QUESTIONS -->
+            <section class="company-section-block" id="practice">
+                <div class="company-section-header">
+                    <div>
+                        <h2 class="company-section-title">Practice Questions</h2>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Coding and conceptual questions linked to this recruitment track.</span>
+                    </div>
+                    <a th:href="@{/practice}" class="btn btn-ghost btn-sm">All Questions &rarr;</a>
+                </div>
+
+                <div th:if="${dashboard.hasQuestions()}" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="q : ${dashboard.linkedQuestions}" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 16px 20px; background: var(--bf-white);">
+                        <div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                                <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(q.difficulty.name())}" th:text="${q.difficulty.name()}">EASY</span>
+                                <span class="badge badge-subtle" th:text="${q.questionType.name()}">CODING</span>
+                            </div>
+                            <h4 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin: 0;" th:text="${q.title}">Question Title</h4>
+                        </div>
+                        <a th:href="@{/practice/question/{id}(id=${q.id})}" class="btn btn-primary btn-sm">Solve &rarr;</a>
+                    </div>
+                </div>
+
+                <div th:unless="${dashboard.hasQuestions()}" class="empty-state" style="padding: 32px 16px;">
+                    <h4 class="empty-state-title">Practice questions are being curated.</h4>
+                    <p class="empty-state-desc">Target question bank selections for this company will appear once approved.</p>
+                    <a th:href="@{/practice}" class="btn btn-primary btn-sm">Browse Practice Bank</a>
+                </div>
+            </section>
+
+            <!-- 4. APTITUDE PREPARATION -->
+            <section class="company-section-block" id="aptitude">
+                <div class="company-section-header">
+                    <div>
+                        <h2 class="company-section-title">Aptitude Preparation</h2>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Quantitative, logical, and verbal speed topics.</span>
+                    </div>
+                    <a th:href="@{/aptitude}" class="btn btn-ghost btn-sm">Aptitude Home &rarr;</a>
+                </div>
+
+                <div th:if="${dashboard.hasAptitude()}" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="aq : ${dashboard.linkedAptitudeQuestions}" style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 16px 20px; background: var(--bf-white);">
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                            <span class="badge badge-subtle" th:text="${aq.category.name()}">QUANTITATIVE</span>
+                            <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(aq.difficulty.name())}" th:text="${aq.difficulty.name()}">EASY</span>
+                            <span style="font-size: 0.75rem; color: var(--bf-slate-500);" th:text="${aq.topic}">Topic</span>
+                        </div>
+                        <div style="font-size: 0.9375rem; font-weight: 600; color: var(--bf-navy-900);" th:text="${aq.question}">Aptitude question prompt</div>
+                    </div>
+                </div>
+
+                <div th:unless="${dashboard.hasAptitude()}" class="empty-state" style="padding: 32px 16px;">
+                    <h4 class="empty-state-title">Company aptitude content is being curated.</h4>
+                    <p class="empty-state-desc">Reasoning and numerical aptitude categories for this track are currently being mapped.</p>
+                    <a th:href="@{/aptitude}" class="btn btn-primary btn-sm">Practice General Aptitude</a>
+                </div>
+            </section>
+
+            <!-- 5. ASSESSMENTS -->
+            <section class="company-section-block" id="assessments">
+                <div class="company-section-header">
+                    <div>
+                        <h2 class="company-section-title">Company Mock Assessments</h2>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Full-length timed mock exams replicating pattern conditions.</span>
+                    </div>
+                    <a th:href="@{/assessments}" class="btn btn-ghost btn-sm">All Mock Tests &rarr;</a>
+                </div>
+
+                <div th:if="${dashboard.hasAssessments()}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+                    <div th:each="as : ${dashboard.linkedAssessments}" style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 20px; background: var(--bf-white);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(as.difficulty.name())}" th:text="${as.difficulty.name()}">MEDIUM</span>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--bf-slate-500);" th:text="${as.durationMinutes} + ' Mins'">60 Mins</span>
+                        </div>
+                        <h4 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 8px;" th:text="${as.title}">Assessment Title</h4>
+                        <p style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 16px;" th:text="${as.description}">Description</p>
+                        <a th:href="@{/assessments/{id}/start(id=${as.id})}" class="btn btn-primary btn-sm" style="width: 100%; text-align: center;">Start Mock Test &rarr;</a>
+                    </div>
+                </div>
+
+                <div th:unless="${dashboard.hasAssessments()}" class="empty-state" style="padding: 32px 16px;">
+                    <h4 class="empty-state-title">Company assessments are being curated.</h4>
+                    <p class="empty-state-desc">Timed mock tests specifically formatted for this company are in verification.</p>
+                    <a th:href="@{/assessments}" class="btn btn-primary btn-sm">Explore Placement Mocks</a>
+                </div>
+            </section>
+
+            <!-- 6. INTERVIEW PREPARATION -->
+            <section class="company-section-block" id="interview">
+                <div class="company-section-header">
+                    <div>
+                        <h2 class="company-section-title">Interview Round Preparation</h2>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">Round blueprints and conversation guidance.</span>
+                    </div>
+                    <a th:href="@{/interview}" class="btn btn-ghost btn-sm">Interview Module &rarr;</a>
+                </div>
+
+                <div th:if="${dashboard.hasInterview()}" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div th:each="cat : ${dashboard.linkedInterviewCategories}" style="border: 1px solid var(--bf-slate-200); border-radius: 8px; padding: 18px 22px; background: #fafafa;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                            <h4 style="font-size: 1.0625rem; font-weight: 700; color: var(--bf-navy-900); margin: 0;" th:text="${cat.title}">Round Title</h4>
+                            <span class="badge badge-subtle" th:text="${cat.categoryType}">TECHNICAL</span>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--bf-slate-600); margin: 0; line-height: 1.5;" th:text="${cat.description}">Round details and expectations.</p>
+                    </div>
+                </div>
+
+                <div th:unless="${dashboard.hasInterview()}" class="empty-state" style="padding: 32px 16px;">
+                    <h4 class="empty-state-title">Company interview preparation is being curated.</h4>
+                    <p class="empty-state-desc">Specific interview blueprints and question frameworks will be posted soon.</p>
+                    <a th:href="@{/interview}" class="btn btn-primary btn-sm">Open Interview Masterclass</a>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

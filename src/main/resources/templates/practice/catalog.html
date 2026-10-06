@@ -4,8 +4,20 @@
 
 <!-- Reusable Practice Catalog Fragment -->
 <div th:fragment="practiceCatalog" class="practice-catalog-root">
+
+    <!-- Breadcrumb Hierarchy -->
+    <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">/</span>
+        <span class="current">Practice</span>
+        <th:block th:if="${selectedTopicId != null}">
+            <span class="separator">/</span>
+            <span th:each="t : ${topics}" th:if="${t.id == selectedTopicId}" class="current" th:text="${t.name}">Topic</span>
+        </th:block>
+    </nav>
+
     <!-- Top Header -->
-    <div style="margin-bottom: 28px;">
+    <div style="margin-bottom: 24px;">
         <h1 style="font-size: 2rem; margin-bottom: 6px;">Practice Questions</h1>
         <p style="color: var(--bf-slate-500); font-size: 1rem;">
             Solve curated placement coding problems, MCQs, SQL queries, and conceptual interview questions.
@@ -13,10 +25,10 @@
     </div>
 
     <!-- Filters & Start Practice Bar -->
-    <div class="card" style="margin-bottom: 32px; background-color: var(--bf-white);">
-        <form th:action="@{/practice}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) auto; gap: 16px; align-items: flex-end;">
+    <div class="card" style="margin-bottom: 28px; background-color: var(--surface);">
+        <form th:action="@{/practice}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 16px; align-items: flex-end;">
             <div class="form-group" style="margin-bottom: 0;">
-                <label for="topicId" class="form-label">Select Topic</label>
+                <label for="topicId" class="form-label">Topic</label>
                 <select id="topicId" name="topicId" class="form-control">
                     <option value="">All Topics</option>
                     <option th:each="t : ${topics}"
@@ -27,7 +39,7 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-                <label for="difficulty" class="form-label">Select Difficulty</label>
+                <label for="difficulty" class="form-label">Difficulty</label>
                 <select id="difficulty" name="difficulty" class="form-control">
                     <option value="">All Difficulties</option>
                     <option th:each="d : ${difficulties}"
@@ -37,10 +49,34 @@
                 </select>
             </div>
 
-            <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="status" class="form-label">Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    <option value="NOT_ATTEMPTED" th:selected="${selectedStatus == 'NOT_ATTEMPTED'}">Not attempted</option>
+                    <option value="SOLVED" th:selected="${selectedStatus == 'SOLVED'}">Solved</option>
+                    <option value="FAILED" th:selected="${selectedStatus == 'FAILED'}">Failed</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="bookmarked" class="form-label">Bookmark</label>
+                <select id="bookmarked" name="bookmarked" class="form-control">
+                    <option value="">All Questions</option>
+                    <option value="true" th:selected="${selectedBookmarked == true}">Bookmarked only</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <button type="submit" class="btn btn-secondary">Filter</button>
-                <a th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty})}" class="btn btn-primary">
-                    Start Practice Session →
+                <a th:if="${selectedTopicId != null || selectedDifficulty != null || selectedStatus != null || selectedBookmarked != null}"
+                   th:href="@{/practice}" class="btn btn-ghost btn-sm" title="Clear all filters">
+                    Reset
+                </a>
+                <a th:if="${!previewQuestions.isEmpty()}"
+                   th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty}, status=${selectedStatus}, bookmarked=${selectedBookmarked})}"
+                   class="btn btn-primary">
+                    Start Session →
                 </a>
             </div>
         </form>
@@ -56,23 +92,47 @@
         </h2>
     </div>
 
+    <!-- Empty States -->
     <div th:if="${previewQuestions.isEmpty()}" class="empty-state">
         <div class="empty-state-icon">
             <svg th:replace="~{fragments/icons :: document}"></svg>
         </div>
-        <h3 class="empty-state-title">No questions found</h3>
-        <p class="empty-state-desc">Try clearing or changing your filters to see more placement questions.</p>
-        <a th:href="@{/practice}" class="btn btn-secondary btn-sm">Reset Filters</a>
+        <div th:if="${selectedBookmarked == true}">
+            <h3 class="empty-state-title">No bookmarked questions yet</h3>
+            <p class="empty-state-desc">Bookmark questions you want to revisit during practice.</p>
+        </div>
+        <div th:if="${selectedBookmarked != true}">
+            <h3 class="empty-state-title">No questions found</h3>
+            <p class="empty-state-desc">Try clearing or changing your filters to see more placement questions.</p>
+        </div>
+        <a th:href="@{/practice}" class="btn btn-secondary btn-sm mt-3">Reset Filters</a>
     </div>
 
-    <div th:if="${!previewQuestions.isEmpty()}" style="display: flex; flex-direction: column; gap: 14px;">
+    <!-- Questions List -->
+    <div th:if="${!previewQuestions.isEmpty()}" style="display: flex; flex-direction: column; gap: 12px;">
         <div th:each="q, iterStat : ${previewQuestions}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div style="flex: 1; min-width: 280px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                     <span class="badge"
                           th:classappend="${q.difficulty.name() == 'EASY' ? 'badge-easy' : (q.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
                           th:text="${q.difficulty}">EASY</span>
                     <span class="badge badge-purple" th:text="${q.questionType}">CODING</span>
+
+                    <!-- Attempt Status Badge -->
+                    <span th:if="${currentUser != null && solvedIds.contains(q.id)}" class="badge badge-success">
+                        Solved
+                    </span>
+                    <span th:if="${currentUser != null && failedIds.contains(q.id)}" class="badge badge-danger">
+                        Failed
+                    </span>
+                    <span th:if="${currentUser != null && !solvedIds.contains(q.id) && !failedIds.contains(q.id)}" class="badge badge-slate">
+                        Not attempted
+                    </span>
+
+                    <!-- Bookmark Badge -->
+                    <span th:if="${currentUser != null && bookmarkedIds.contains(q.id)}" class="badge badge-amber">
+                        Bookmarked
+                    </span>
                 </div>
                 <h3 style="font-size: 1.125rem; margin-bottom: 4px;" th:text="${q.title}">Two Sum</h3>
                 <p style="font-size: 0.875rem; color: var(--bf-slate-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 700px;"
@@ -80,7 +140,7 @@
             </div>
 
             <div>
-                <a th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty}, index=${iterStat.index})}"
+                <a th:href="@{/practice/session(topicId=${selectedTopicId}, difficulty=${selectedDifficulty}, status=${selectedStatus}, bookmarked=${selectedBookmarked}, index=${iterStat.index})}"
                    class="btn btn-outline btn-sm">
                     Solve Question →
                 </a>

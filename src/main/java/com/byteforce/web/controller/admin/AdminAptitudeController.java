@@ -62,10 +62,7 @@ public class AdminAptitudeController {
 
     @GetMapping("/new")
     public String newAptitudeQuestionForm(@RequestParam(value = "category", required = false) AptitudeCategory category, Model model) {
-        AptitudeQuestion question = AptitudeQuestion.create(
-                category != null ? category : AptitudeCategory.QUANTITATIVE,
-                "", Difficulty.EASY, "", "", "", "", "", "A", ""
-        );
+        AptitudeQuestion question = AptitudeQuestion.empty(category);
         model.addAttribute("question", question);
         model.addAttribute("categories", AptitudeCategory.values());
         model.addAttribute("difficulties", Difficulty.values());

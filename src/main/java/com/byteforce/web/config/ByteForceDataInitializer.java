@@ -1,5 +1,7 @@
 package com.byteforce.web.config;
 
+import com.byteforce.domain.AptitudeQuestion;
+import com.byteforce.domain.Assessment;
 import com.byteforce.domain.Concept;
 import com.byteforce.domain.ConceptRelationship;
 import com.byteforce.domain.ConceptRelationshipType;
@@ -48,6 +50,8 @@ public class ByteForceDataInitializer implements ApplicationRunner {
     private final com.byteforce.repository.UserRepository userRepository;
     private final com.byteforce.security.PasswordHasher passwordHasher;
     private final com.byteforce.repository.AptitudeQuestionRepository aptitudeQuestionRepository;
+    private final com.byteforce.repository.CompanyRepository companyRepository;
+    private final MasterCurriculumSeeder masterCurriculumSeeder;
 
     public ByteForceDataInitializer(TopicService topicService,
                                     QuestionService questionService,
@@ -58,7 +62,9 @@ public class ByteForceDataInitializer implements ApplicationRunner {
                                     ConceptRelationshipRepository conceptRelationshipRepository,
                                     com.byteforce.repository.UserRepository userRepository,
                                     com.byteforce.security.PasswordHasher passwordHasher,
-                                    com.byteforce.repository.AptitudeQuestionRepository aptitudeQuestionRepository) {
+                                    com.byteforce.repository.AptitudeQuestionRepository aptitudeQuestionRepository,
+                                    com.byteforce.repository.CompanyRepository companyRepository,
+                                    MasterCurriculumSeeder masterCurriculumSeeder) {
         this.topicService = topicService;
         this.questionService = questionService;
         this.assessmentService = assessmentService;
@@ -69,6 +75,8 @@ public class ByteForceDataInitializer implements ApplicationRunner {
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;
         this.aptitudeQuestionRepository = aptitudeQuestionRepository;
+        this.companyRepository = companyRepository;
+        this.masterCurriculumSeeder = masterCurriculumSeeder;
     }
 
     @Override
@@ -89,7 +97,12 @@ public class ByteForceDataInitializer implements ApplicationRunner {
             seedConceptsAndResources();
             seedRememberItems();
             seedConceptRelationships();
+
+            // Seed master CS curriculum across all 18 subjects (preserves 1001-1004, 2001-2003, 3001-3004)
+            masterCurriculumSeeder.seedAll(topicService, conceptRepository, rememberItemRepository, conceptRelationshipRepository);
+
             seedAptitudeQuestions();
+            seedCompanyRelationships();
             log.info("ByteForce data initialization completed successfully.");
         } catch (Exception e) {
             log.warn("Notice: Data initializer completed with note: {}", e.getMessage(), e);
@@ -178,27 +191,49 @@ public class ByteForceDataInitializer implements ApplicationRunner {
 
     private void seedSubjects() {
         List<Subject> subjects = List.of(
+                new Subject("programming-foundations", "Programming Foundations",
+                        "Variables, control flow, functions, recursion, memory layout, call stack, and asymptotic complexity (Big-O).", 1, List.of()),
                 new Subject("data-structures", "Data Structures & Algorithms",
-                        "Fundamental memory representations, algorithmic complexity, and dynamic collections.", 1, List.of()),
-                new Subject("dbms", "Database Management Systems",
-                        "Relational schema architecture, normalization, SQL querying, and transaction ACID properties.", 2, List.of()),
+                        "Contiguous arrays, linked lists, stacks, queues, hash tables, trees, heaps, graphs, and algorithmic strategies.", 2, List.of()),
+                new Subject("java-oop", "Java & OOP",
+                        "Encapsulation, inheritance, polymorphism, interfaces, abstract classes, SOLID principles, Collections, Streams, JVM, and Java 21 features.", 3, List.of()),
+                new Subject("dbms", "DBMS & SQL (Database Management Systems)",
+                        "Relational modeling, SQL queries, joins, aggregates, indexing (B-trees), normalization, transactions (ACID), and concurrency control.", 4, List.of()),
                 new Subject("operating-systems", "Operating Systems",
-                        "Process lifecycle, CPU scheduling, virtual memory, threads, synchronization, and deadlocks.", 3, List.of()),
+                        "Process lifecycle, threads, CPU scheduling, synchronization primitives, deadlocks, virtual memory, paging, and system calls.", 5, List.of()),
                 new Subject("computer-networks", "Computer Networks",
-                        "OSI & TCP/IP layered architecture, routing protocols, HTTP/HTTPS, and socket communication.", 4, List.of()),
+                        "OSI & TCP/IP models, routing, TCP/UDP, flow control, DNS, HTTP/HTTPS, WebSockets, and network security.", 6, List.of()),
                 new Subject("computer-organization", "Computer Organization & Architecture",
-                        "Instruction set architectures, CPU pipelining, cache hierarchy, memory management, and I/O systems.", 5, List.of()),
-                new Subject("software-engineering", "Software Engineering & System Design",
-                        "Design patterns, agile development, architectural styles, API design, and distributed systems fundamentals.", 6, List.of()),
+                        "Binary representations, logic gates, CPU datapath, instruction pipelining, cache hierarchy, MMU, and interrupts.", 7, List.of()),
+                new Subject("theory-of-computation", "Theory of Computation",
+                        "Automata theory, DFA/NFA, regular languages, context-free grammars, Turing machines, decidability, and P vs NP.", 8, List.of()),
+                new Subject("software-engineering", "Software Engineering",
+                        "SDLC models, Agile/Scrum, Git workflows, unit & integration testing, TDD, CI/CD, design patterns, and clean code.", 9, List.of()),
+                new Subject("system-design", "System Design",
+                        "Scalability, load balancing, caching strategies, database sharding, CAP theorem, message queues, rate limiting, and microservices.", 10, List.of()),
+                new Subject("cybersecurity", "Cybersecurity",
+                        "CIA triad, authentication, authorization, cryptographic fundamentals, PKI, OWASP Top 10 vulnerabilities, and network defense.", 11, List.of()),
+                new Subject("distributed-systems", "Distributed & Parallel Systems",
+                        "Concurrency vs parallelism, RPC, replication, consensus algorithms (Raft), distributed transactions (2PC, Saga), and vector clocks.", 12, List.of()),
+                new Subject("compilers-languages", "Programming Languages & Compilers",
+                        "Compilation vs interpretation, lexing, AST parsing, type systems, semantic analysis, intermediate representations, and runtime memory.", 13, List.of()),
+                new Subject("web-api-fundamentals", "Web & API Fundamentals",
+                        "Client-server architecture, HTTP protocol, REST APIs, JSON serialization, cookies, sessions, CORS, and reverse proxies.", 14, List.of()),
+                new Subject("ai-ml-fundamentals", "AI & ML Fundamentals",
+                        "Supervised vs unsupervised learning, regression, classification, gradient descent, neural networks, evaluation metrics, and LLMs.", 15, List.of()),
+                new Subject("mathematics-for-cs", "Mathematics for CS",
+                        "Propositional logic, set theory, mathematical induction, combinatorics, graph theory, probability, and recurrence relations.", 16, List.of()),
+                new Subject("hci-accessibility", "HCI & Accessibility",
+                        "User-centered design, usability heuristics, cognitive load, WCAG accessibility standards, ARIA, and responsive UX.", 17, List.of()),
+                new Subject("ethics-privacy", "Ethics, Privacy & Professional Practice",
+                        "Open source licensing (MIT, Apache, GPL), intellectual property, GDPR privacy principles, AI ethics, and the ACM Code of Conduct.", 18, List.of()),
                 new Subject("aptitude", "Quantitative & Logical Aptitude",
-                        "Aptitude problem solving, logical reasoning, numerical ability, and placement interview speed math.", 7, List.of())
+                        "Aptitude problem solving, logical reasoning, numerical ability, and placement interview speed math.", 19, List.of())
         );
 
         for (Subject s : subjects) {
-            if (!subjectRepository.existsById(s.getId())) {
-                subjectRepository.save(s);
-                log.info("Seeded subject: {} ({})", s.getName(), s.getId());
-            }
+            subjectRepository.save(s);
+            log.info("Seeded/updated subject: {} ({})", s.getName(), s.getId());
         }
     }
 
@@ -216,20 +251,59 @@ public class ByteForceDataInitializer implements ApplicationRunner {
     private String determineSubjectForTopic(String slug) {
         if (slug == null) return "data-structures";
         String s = slug.toLowerCase();
-        if (s.contains("sql") || s.contains("data") && s.contains("base") || s.contains("db")) {
+        if (s.contains("prog") || s.contains("asymp") || s.contains("complex") || s.contains("recur")) {
+            return "programming-foundations";
+        }
+        if (s.contains("sql") || s.contains("dbms") || s.contains("data") && s.contains("base") || s.contains("db")) {
             return "dbms";
         }
         if (s.contains("os") || s.contains("process") || s.contains("thread") || s.contains("concur")) {
             return "operating-systems";
         }
-        if (s.contains("oop") || s.contains("java") || s.contains("design") || s.contains("arch")) {
-            return "software-engineering";
+        if (s.contains("java") || s.contains("oop")) {
+            return "java-oop";
         }
         if (s.contains("network")) {
             return "computer-networks";
         }
-        if (s.contains("aptitude") || s.contains("quant") || s.contains("logic")) {
+        if (s.contains("arch") || s.contains("cache") || s.contains("cpu") || s.contains("pipel") || s.contains("gate")) {
+            return "computer-organization";
+        }
+        if (s.contains("auto") || s.contains("turing") || s.contains("comput") || s.contains("grammar")) {
+            return "theory-of-computation";
+        }
+        if (s.contains("system-design") || s.contains("scalab") || s.contains("shard") || s.contains("cache-dist")) {
+            return "system-design";
+        }
+        if (s.contains("security") || s.contains("crypto") || s.contains("auth") || s.contains("owasp") || s.contains("injection")) {
+            return "cybersecurity";
+        }
+        if (s.contains("distrib") || s.contains("consensus") || s.contains("raft")) {
+            return "distributed-systems";
+        }
+        if (s.contains("compiler") || s.contains("parse") || s.contains("ast") || s.contains("lexer")) {
+            return "compilers-languages";
+        }
+        if (s.contains("web") || s.contains("api") || s.contains("rest") || s.contains("http")) {
+            return "web-api-fundamentals";
+        }
+        if (s.contains("ai") || s.contains("ml") || s.contains("learn") || s.contains("neural")) {
+            return "ai-ml-fundamentals";
+        }
+        if (s.contains("math") || s.contains("logic") || s.contains("combinat") || s.contains("probab")) {
+            return "mathematics-for-cs";
+        }
+        if (s.contains("hci") || s.contains("accessib") || s.contains("wcag") || s.contains("aria")) {
+            return "hci-accessibility";
+        }
+        if (s.contains("ethic") || s.contains("privac") || s.contains("license") || s.contains("gdpr")) {
+            return "ethics-privacy";
+        }
+        if (s.contains("aptitude") || s.contains("quant")) {
             return "aptitude";
+        }
+        if (s.contains("soft") || s.contains("agile") || s.contains("git") || s.contains("test")) {
+            return "software-engineering";
         }
         return "data-structures";
     }
@@ -770,5 +844,82 @@ public class ByteForceDataInitializer implements ApplicationRunner {
         }
 
         return topicService.createTopic(subjectId, name, slug, description, order);
+    }
+
+    private void seedCompanyRelationships() {
+        try {
+            // TCS initial mappings
+            companyRepository.findBySlug("tcs").ifPresent(tcs -> {
+                if (companyRepository.findTopicIdsByCompanyId(tcs.getId()).isEmpty()) {
+                    List<Topic> topics = topicService.getAllTopics();
+                    List<Long> topicIds = topics.stream().limit(3).map(Topic::getId).toList();
+                    companyRepository.setCompanyTopics(tcs.getId(), topicIds);
+
+                    List<Question> questions = questionService.getAllQuestions();
+                    List<Long> qIds = questions.stream().limit(4).map(Question::getId).toList();
+                    companyRepository.setCompanyQuestions(tcs.getId(), qIds);
+
+                    List<AptitudeQuestion> apts = aptitudeQuestionRepository.findAll();
+                    List<Long> aptIds = apts.stream().limit(5).map(AptitudeQuestion::getId).toList();
+                    companyRepository.setCompanyAptitudeQuestions(tcs.getId(), aptIds);
+
+                    List<Assessment> assessments = assessmentService.getAvailableAssessments();
+                    List<Long> assessIds = assessments.stream().limit(1).map(Assessment::getId).toList();
+                    companyRepository.setCompanyAssessments(tcs.getId(), assessIds);
+
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            tcs.getId(), "TCS Technical Coding & CS Fundamentals Round", "TECHNICAL",
+                            "Focus on Arrays, Two Pointers, String manipulation, and SQL query joins.", 1));
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            tcs.getId(), "TCS Managerial & HR Behavioral Round", "HR_BEHAVIORAL",
+                            "STAR method responses, teamwork scenarios, and project walkthroughs.", 2));
+                    log.info("Seeded initial preparation relationships for TCS.");
+                }
+            });
+
+            // Amazon initial mappings
+            companyRepository.findBySlug("amazon").ifPresent(amazon -> {
+                if (companyRepository.findTopicIdsByCompanyId(amazon.getId()).isEmpty()) {
+                    List<Topic> topics = topicService.getAllTopics();
+                    List<Long> topicIds = topics.stream().filter(t -> t.getSlug().contains("dsa") || t.getSlug().contains("array")).map(Topic::getId).toList();
+                    companyRepository.setCompanyTopics(amazon.getId(), topicIds);
+
+                    List<Question> questions = questionService.getAllQuestions();
+                    List<Long> qIds = questions.stream().limit(3).map(Question::getId).toList();
+                    companyRepository.setCompanyQuestions(amazon.getId(), qIds);
+
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            amazon.getId(), "Amazon Leadership Principles & STAR Interview", "HR_BEHAVIORAL",
+                            "Customer Obsession, Ownership, Bias for Action, and Deliver Results.", 1));
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            amazon.getId(), "Amazon Coding & Problem Solving Round", "TECHNICAL",
+                            "Optimal time and space complexities, scalable algorithmic patterns.", 2));
+                    log.info("Seeded initial preparation relationships for Amazon.");
+                }
+            });
+
+            // Microsoft initial mappings
+            companyRepository.findBySlug("microsoft").ifPresent(msft -> {
+                if (companyRepository.findTopicIdsByCompanyId(msft.getId()).isEmpty()) {
+                    List<Topic> topics = topicService.getAllTopics();
+                    List<Long> topicIds = topics.stream().limit(2).map(Topic::getId).toList();
+                    companyRepository.setCompanyTopics(msft.getId(), topicIds);
+
+                    List<Question> questions = questionService.getAllQuestions();
+                    List<Long> qIds = questions.stream().skip(1).limit(3).map(Question::getId).toList();
+                    companyRepository.setCompanyQuestions(msft.getId(), qIds);
+
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            msft.getId(), "Microsoft Technical Architecture & Design", "TECHNICAL",
+                            "Object-oriented design, algorithmic trade-offs, and clean code principles.", 1));
+                    companyRepository.saveInterviewCategory(com.byteforce.domain.CompanyInterviewCategory.create(
+                            msft.getId(), "Microsoft Behavioral & Cultural Fit", "HR_BEHAVIORAL",
+                            "Growth mindset, collaboration, and learning from failure.", 2));
+                    log.info("Seeded initial preparation relationships for Microsoft.");
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Notice: seedCompanyRelationships completed with note: {}", e.getMessage());
+        }
     }
 }

@@ -63,7 +63,7 @@ public class AdminRememberController {
 
     @GetMapping("/new")
     public String newItemForm(@RequestParam(value = "conceptId", required = false) Long conceptId, Model model) {
-        RememberItem item = RememberItem.create(conceptId != null ? conceptId : 0L, RememberItemType.KEY_FACT, "", 0);
+        RememberItem item = RememberItem.empty(conceptId != null ? conceptId : 0L);
         model.addAttribute("item", item);
         model.addAttribute("concepts", learnService.getAllConcepts());
         model.addAttribute("itemTypes", RememberItemType.values());

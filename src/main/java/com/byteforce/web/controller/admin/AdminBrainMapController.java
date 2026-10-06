@@ -56,7 +56,7 @@ public class AdminBrainMapController {
 
     @GetMapping("/new")
     public String newRelationshipForm(Model model) {
-        ConceptRelationship relationship = ConceptRelationship.create(0L, 0L, ConceptRelationshipType.PREREQUISITE, "", 0);
+        ConceptRelationship relationship = ConceptRelationship.empty();
         model.addAttribute("relationship", relationship);
         model.addAttribute("concepts", learnService.getAllConcepts());
         model.addAttribute("relationshipTypes", ConceptRelationshipType.values());

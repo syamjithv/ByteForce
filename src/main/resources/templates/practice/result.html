@@ -10,6 +10,14 @@
         <header th:replace="~{fragments/layout :: appTopbar('Question Result')}"></header>
 
         <main class="app-content">
+            <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+                <a th:href="@{/practice}">Practice</a>
+                <span class="separator">/</span>
+                <span th:text="${topicName != null ? topicName : 'Questions'}">Topic</span>
+                <span class="separator">/</span>
+                <span class="current">Result</span>
+            </nav>
+
             <div class="card" style="margin-bottom: 24px;">
                 <!-- Status Banner -->
                 <div th:if="${status.name() == 'SOLVED'}" class="alert alert-success" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
