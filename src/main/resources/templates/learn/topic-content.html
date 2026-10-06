@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="topicContent" class="topic-content-root" style="max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+    <!-- Breadcrumb Hierarchy -->
+    <nav class="concept-breadcrumbs" aria-label="Breadcrumb">
+        <a th:href="@{/learn}">Learn</a>
+        <span class="separator">/</span>
+        <a th:if="${subject != null}" th:href="@{/learn/subject/{id}(id=${subject.id})}" th:text="${subject.name}">Subject</a>
+        <span th:if="${subject != null}" class="separator">/</span>
+        <span class="current" th:text="${topic.name}">Topic Name</span>
+    </nav>
+
+    <!-- Topic Header Hero Card -->
+    <header class="card" style="padding: 32px 36px; border-radius: var(--bf-radius-lg);">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
+            <span class="concept-badge-topic" th:text="${subject != null ? subject.name : 'Computer Science'}">Subject</span>
+            <span class="concept-badge-core">Placement Topic</span>
+            <span class="badge badge-primary" th:text="${concepts.size() + ' Concept(s)'}">Concepts</span>
+            <span th:if="${currentUser != null && !concepts.isEmpty()}" class="badge badge-success">
+                <span th:text="${(topicCompletedCount != null ? topicCompletedCount : 0) + ' / ' + concepts.size() + ' concepts completed'}">4 / 10 concepts completed</span>
+            </span>
+        </div>
+        <h1 style="font-size: 2.25rem; font-weight: 700; color: var(--bf-navy-950); margin-bottom: 10px;" th:text="${topic.name}">Arrays</h1>
+        <p style="color: var(--bf-slate-600); font-size: 1.0625rem; line-height: 1.6; max-width: 800px;" th:text="${topic.description}">Topic description</p>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px; align-items: center; flex-wrap: wrap;">
+            <a th:if="${subject != null}" th:href="@{/learn/subject/{id}(id=${subject.id})}" class="btn btn-secondary btn-sm">
+                ← Back to <span th:text="${subject.name}">Subject</span>
+            </a>
+            <a th:href="@{/practice(topicId=${topic.id})}" class="btn btn-primary btn-sm">
+                <span th:text="${practiceCount != null && practiceCount > 0 ? 'Practice ' + practiceCount + ' Topic Questions ↗' : 'Practice Arena ↗'}">Practice Topic Questions ↗</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Concepts Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--bf-navy-950);">Core Placement Concepts</h2>
+        <span style="font-size: 0.875rem; color: var(--bf-slate-500);" th:text="${concepts.size() + ' concept unit(s)'}">Concepts</span>
+    </div>
+
+    <div th:if="${concepts.isEmpty()}" class="empty-state card" style="padding: 40px; text-align: center;">
+        <p style="color: var(--bf-slate-500);">Concepts for this topic are currently being populated.</p>
+    </div>
+
+    <div th:if="${!concepts.isEmpty()}" style="display: flex; flex-direction: column; gap: 16px;">
+        <div th:each="concept : ${concepts}" class="card" style="padding: 24px 28px; border-radius: var(--bf-radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+            <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--bf-navy-950);">
+                        <a th:href="@{/learn/concept/{id}(id=${concept.id})}" style="color: inherit; text-decoration: none;" th:text="${concept.title}">Array Traversal</a>
+                    </h3>
+                    <span th:if="${currentUser != null && conceptCompletionMap != null && conceptCompletionMap.get(concept.id) == true}"
+                          class="badge badge-success"
+                          style="font-size: 0.75rem;">✓ Learned</span>
+                    <span th:if="${currentUser != null && conceptCompletionMap != null && conceptCompletionMap.containsKey(concept.id) && conceptCompletionMap.get(concept.id) == false}"
+                          class="badge badge-neutral"
+                          style="font-size: 0.75rem;">In progress</span>
+                    <span th:if="${concept.resources != null && !concept.resources.isEmpty()}"
+                          class="badge badge-neutral"
+                          style="font-size: 0.75rem;"
+                          th:text="${concept.resources.size() + ' Resource(s)'}">2 Resources</span>
+                </div>
+                <p style="color: var(--bf-slate-600); font-size: 0.95rem; line-height: 1.55; margin-bottom: 12px;" th:text="${concept.shortExplanation}">
+                    Explanation
+                </p>
+
+                <!-- Key points preview if available -->
+                <div th:if="${concept.keyPoints != null && !concept.keyPoints.isEmpty()}" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div th:each="kp, iterStat : ${concept.keyPoints}" th:if="${iterStat.count <= 2}" style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.8125rem; color: var(--bf-navy-800);">
+                        <span style="color: var(--bf-primary); font-weight: 700;">•</span>
+                        <span th:text="${kp}">Key point preview</span>
+                    </div>
+                </div>
+            </div>
+
+            <a th:href="@{/learn/concept/{id}(id=${concept.id})}" class="btn btn-primary" style="padding: 10px 20px; font-weight: 600; align-self: flex-start;">
+                Study Concept →
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

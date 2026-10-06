@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${concept.title} + ' — Concept Memory')}"></head>
+<body>
+
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('remember')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar(${concept.title} + ' — Memory State')}"></header>
+        <main class="app-content" style="max-width: 960px; margin: 0 auto; padding-top: 28px;">
+
+            <!-- Breadcrumb Navigation -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-size: 0.8125rem; color: var(--bf-slate-500);">
+                    <a th:href="@{/remember}" style="color: var(--bf-slate-500); text-decoration: none;">Memory</a>
+                    <span> › </span>
+                    <span th:if="${subject != null}" th:text="${subject.name}">Subject</span>
+                    <span> › </span>
+                    <span th:if="${topic != null}" th:text="${topic.name}">Topic</span>
+                    <span> › </span>
+                    <strong style="color: var(--bf-navy-900);" th:text="${concept.title}">Concept</strong>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a th:href="@{/brain-maps(conceptId=${concept.id})}" class="btn btn-outline btn-sm">
+                        Brain Map
+                    </a>
+                    <a th:href="@{/learn/concept/{id}(id=${concept.id})}" class="btn btn-outline btn-sm">
+                        Learn Concept
+                    </a>
+                </div>
+            </div>
+
+            <!-- Flash Notification -->
+            <div th:if="${successMessage != null}" class="card" style="padding: 12px 18px; margin-bottom: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 0.875rem;">
+                <span th:text="${successMessage}">Enrolled</span>
+            </div>
+
+            <!-- Concept Header Card -->
+            <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); padding: 24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                    <div style="max-width: 600px;">
+                        <span class="badge badge-primary" style="margin-bottom: 8px; display: inline-block;">CONCEPT MEMORY NODE</span>
+                        <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--bf-navy-900); margin: 0 0 8px 0;" th:text="${concept.title}">
+                            Concept Title
+                        </h1>
+                        <p style="color: var(--bf-slate-600); font-size: 0.9375rem; line-height: 1.6; margin: 0;" th:text="${concept.shortExplanation}">
+                            Concept short explanation.
+                        </p>
+                    </div>
+
+                    <!-- Primary Action Button -->
+                    <div>
+                        <div th:if="${memoryStatus.enrolled}">
+                            <a th:if="${memoryStatus.dueItems > 0}"
+                               th:href="@{/remember/review}"
+                               class="btn btn-primary"
+                               style="padding: 10px 22px; font-weight: 600;">
+                                Review Now (<span th:text="${memoryStatus.dueItems}">1</span> Due) →
+                            </a>
+                            <div th:if="${memoryStatus.dueItems == 0}" style="text-align: right;">
+                                <span class="badge badge-success" style="font-size: 0.8125rem; padding: 6px 12px; margin-bottom: 6px; display: inline-block;">
+                                    ✓ Scheduled
+                                </span>
+                                <div style="font-size: 0.75rem; color: var(--bf-slate-500);" th:text="${memoryStatus.formattedNextDue}">
+                                    Due tomorrow
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${!memoryStatus.enrolled}">
+                            <form method="post" th:action="@{/remember/concept/{id}/enroll(id=${concept.id})}">
+                                <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 600;">
+                                    + Add to Memory Schedule
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Metrics Grid (Honest database metrics) -->
+            <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); padding: 22px; margin-bottom: 24px;">
+                <h3 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin: 0 0 16px 0;">
+                    Personal Spaced Repetition Metrics
+                </h3>
+
+                <div th:if="${!memoryStatus.enrolled}" style="text-align: center; padding: 24px; color: var(--bf-slate-500); font-size: 0.9375rem;">
+                    This concept is not yet enrolled in your memory queue. Click "Add to Memory Schedule" above to begin tracking recall.
+                </div>
+
+                <div th:if="${memoryStatus.enrolled}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">Memory State</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${memoryStatus.dominantState.displayName}">
+                            Review
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">Next Due</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-primary);" th:text="${memoryStatus.formattedNextDue}">
+                            Due Tomorrow
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">Reviews Completed</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${memoryStatus.totalReviews}">
+                            0
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">Successful Recall</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);" th:text="${memoryStatus.successfulReviews}">
+                            0
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">FSRS Stability</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);">
+                            <span th:text="${memoryStatus.averageStability}">0.0</span> <small style="font-size: 0.75rem; font-weight: 400; color: var(--bf-slate-500);">days</small>
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--bf-slate-50); padding: 14px; border-radius: 6px;">
+                        <div style="font-size: 0.75rem; color: var(--bf-slate-500); margin-bottom: 4px;">FSRS Difficulty</div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);">
+                            <span th:text="${memoryStatus.averageDifficulty}">0.0</span> <small style="font-size: 0.75rem; font-weight: 400; color: var(--bf-slate-500);">/ 10</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connected Concept Relationships (Brain Map Bridge) -->
+            <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); padding: 22px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h3 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin: 0;">
+                        Connected Knowledge Network
+                    </h3>
+                    <a th:href="@{/brain-maps(conceptId=${concept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.8125rem;">
+                        View Interactive Map →
+                    </a>
+                </div>
+
+                <div th:if="${memoryStatus.relatedConcepts.isEmpty()}" style="color: var(--bf-slate-400); font-size: 0.875rem;">
+                    No relationships mapped yet for this concept.
+                </div>
+
+                <div th:if="${!memoryStatus.relatedConcepts.isEmpty()}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                    <div th:each="rel : ${memoryStatus.relatedConcepts}" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: 6px; padding: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span class="badge"
+                                  style="font-size: 0.6875rem; padding: 2px 6px; border-radius: 4px; font-weight: 700;"
+                                  th:text="${rel.type.displayName}">
+                                Prerequisite
+                            </span>
+                            <a th:href="@{/remember/concept/{id}(id=${rel.connectedConcept.id})}" style="font-size: 0.75rem; color: var(--bf-primary); text-decoration: none;">
+                                Memory State →
+                            </a>
+                        </div>
+                        <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--bf-navy-900); margin: 0 0 4px 0;" th:text="${rel.connectedConcept.title}">
+                            Connected Title
+                        </h4>
+                        <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin: 0;" th:text="${rel.description}">
+                            Description
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Revision Items Attached to this Concept -->
+            <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); padding: 22px;">
+                <h3 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin: 0 0 16px 0;">
+                    Curriculum Revision Items (<span th:text="${rememberItems.size()}">0</span>)
+                </h3>
+
+                <div th:if="${rememberItems.isEmpty()}" style="color: var(--bf-slate-400); font-size: 0.875rem;">
+                    No revision items added yet.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div th:each="ri : ${rememberItems}" style="padding: 14px 18px; border: 1px solid var(--bf-slate-200); border-radius: 6px; background-color: var(--bf-slate-50);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="badge badge-primary"
+                                  style="font-size: 0.6875rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;"
+                                  th:text="${ri.type.displayName}">
+                                Key Fact
+                            </span>
+                            <a th:href="@{/remember/review(itemId=${ri.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                Practice Recall
+                            </a>
+                        </div>
+                        <div style="font-size: 0.9375rem; color: var(--bf-navy-900); line-height: 1.5; white-space: pre-wrap;" th:text="${ri.content}">
+                            Item content
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

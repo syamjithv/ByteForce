@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Practice Session')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('practice')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Practice Mode')}"></header>
+
+        <main class="app-content">
+            <!-- Breadcrumbs -->
+            <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+                <a th:href="@{/practice}">Practice</a>
+                <span class="separator">/</span>
+                <span th:text="${topicName != null ? topicName : 'General'}">Arrays</span>
+                <span th:if="${!isEmpty && question != null}" class="separator">/</span>
+                <span th:if="${!isEmpty && question != null}" class="current" th:text="${question.title}">Two Sum</span>
+            </nav>
+
+            <!-- Navigation header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <a th:href="@{/practice(topicId=${topicId}, difficulty=${difficulty})}" class="btn btn-secondary btn-sm">
+                    ← Change Filters / Catalog
+                </a>
+
+                <div th:if="${!isEmpty}" style="display: flex; gap: 10px; align-items: center;">
+                    <!-- Bookmark Form -->
+                    <form th:action="@{/practice/bookmark}" method="post">
+                        <input type="hidden" name="questionId" th:value="${question.id}" />
+                        <input type="hidden" name="topicId" th:value="${topicId}" />
+                        <input type="hidden" name="difficulty" th:value="${difficulty}" />
+                        <input type="hidden" name="index" th:value="${currentIndex}" />
+                        <button type="submit" class="btn btn-sm"
+                                th:classappend="${isBookmarked ? 'btn-warning' : 'btn-outline'}">
+                            <span th:text="${isBookmarked ? 'Bookmarked' : 'Bookmark'}">Bookmark</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Empty State if no questions found -->
+            <div th:if="${isEmpty}" class="empty-state">
+                <div class="empty-state-icon">
+                    <svg th:replace="~{fragments/icons :: document}"></svg>
+                </div>
+                <h3 class="empty-state-title">No questions found for this filter</h3>
+                <p class="empty-state-desc">Try resetting your topic or difficulty selection to continue practicing.</p>
+                <a th:href="@{/practice}" class="btn btn-primary btn-sm">Return to Filters</a>
+            </div>
+
+            <!-- Active Question Workspace -->
+            <div th:if="${!isEmpty}" class="card" style="margin-bottom: 24px;">
+                <!-- Header Metadata Badges -->
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+                    <span class="badge badge-neutral" th:text="${'Question ' + (currentIndex + 1) + ' of ' + totalQuestions}">Question 1 of 1</span>
+                    <span class="badge badge-primary" th:text="${topicName}">Arrays</span>
+                    <span class="badge"
+                          th:classappend="${question.difficulty.name() == 'EASY' ? 'badge-easy' : (question.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                          th:text="${question.difficulty}">MEDIUM</span>
+                    <span class="badge badge-purple" th:text="${question.questionType}">CODING</span>
+                </div>
+
+                <!-- Question Title -->
+                <h2 style="font-size: 1.5rem; margin-bottom: 12px; color: var(--bf-navy-900);" th:text="${question.title}">Two Sum</h2>
+
+                <!-- Question Description / Statement -->
+                <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 18px 20px; margin-bottom: 24px; font-size: 0.9375rem; color: var(--bf-navy-800); white-space: pre-wrap; line-height: 1.6;"
+                     th:text="${question.description}">
+                    Question description text...
+                </div>
+
+                <!-- Interactive Submission Form -->
+                <form th:action="@{/practice/submit}" method="post">
+                    <input type="hidden" name="questionId" th:value="${question.id}" />
+                    <input type="hidden" name="topicId" th:value="${topicId}" />
+                    <input type="hidden" name="difficulty" th:value="${difficulty}" />
+                    <input type="hidden" name="index" th:value="${currentIndex}" />
+
+                    <div class="form-group">
+                        <label class="form-label" style="font-size: 1rem; margin-bottom: 10px;">Your Answer / Solution</label>
+
+                        <!-- If Multiple Choice Question -->
+                        <div th:if="${mcqChoices != null && !mcqChoices.isEmpty()}" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                            <label th:each="choice : ${mcqChoices}"
+                                   style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); cursor: pointer;">
+                                <input type="radio" name="answer" th:value="${#strings.substring(choice, 0, 1)}" required />
+                                <span style="font-size: 0.9375rem; color: var(--bf-navy-900);" th:text="${choice}">Option</span>
+                            </label>
+                        </div>
+
+                        <!-- If Coding / SQL / Conceptual Question -->
+                        <div th:if="${mcqChoices == null || mcqChoices.isEmpty()}">
+                            <textarea name="answer" class="form-control" rows="8"
+                                      placeholder="Type your code implementation, SQL query, or conceptual answer here..."
+                                      style="font-family: var(--bf-font-mono); font-size: 0.875rem;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submission Action Row -->
+                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit Answer</button>
+
+                        <!-- Skip Button -->
+                        <button type="submit" formaction="/practice/skip" class="btn btn-secondary btn-lg">
+                            Skip Question
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

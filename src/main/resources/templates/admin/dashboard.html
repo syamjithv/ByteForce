@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard')}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('admin-dashboard')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{admin/fragments :: adminTopbar('Admin Dashboard')}"></header>
+
+        <main class="app-content" style="max-width: 1200px; margin: 0 auto; padding: 28px 24px;">
+            <div th:replace="~{admin/fragments :: alerts}"></div>
+
+            <!-- Welcome Banner -->
+            <div style="background: linear-gradient(135deg, var(--bf-navy-900) 0%, var(--bf-navy-800) 100%); color: var(--bf-white); border-radius: var(--bf-radius-lg, 16px); padding: 32px; margin-bottom: 32px; box-shadow: var(--bf-shadow-md); position: relative; overflow: hidden;">
+                <div style="position: relative; z-index: 2; max-width: 700px;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: var(--bf-radius-full); padding: 4px 12px; margin-bottom: 12px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--bf-amber-400, #fbbf24);"></span>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--bf-amber-300, #fcd34d); text-transform: uppercase; letter-spacing: 0.05em;">ByteForce Central Administration</span>
+                    </div>
+                    <h2 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; color: var(--bf-white);">Curriculum & Content Management</h2>
+                    <p style="color: var(--bf-slate-300); font-size: 0.9375rem; line-height: 1.6;">
+                        Directly manage placement subjects, topics, CS concepts, quick-revision items, questions, mock assessments, and knowledge graph links.
+                        All changes instantly persist to the production database and appear in student views.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Section 1: Content Management -->
+            <div style="margin-bottom: 36px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);">Learn Curriculum</h3>
+                        <p style="font-size: 0.8125rem; color: var(--bf-slate-500);">Hierarchical learning tree from subjects down to resources.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                    <!-- Subjects Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px; transition: transform 0.2s, box-shadow 0.2s;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Subjects</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: var(--bf-primary); display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${subjectCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/subjects}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">View All</a>
+                            <a th:href="@{/admin/subjects/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Topics Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Topics</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${topicCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/topics}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">View All</a>
+                            <a th:href="@{/admin/topics/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Concepts Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Concepts</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${conceptCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/concepts}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">View All</a>
+                            <a th:href="@{/admin/concepts/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Resources Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Resources</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${resourceCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/resources}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">View All</a>
+                            <a th:href="@{/admin/resources/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Practice & Assessments -->
+            <div style="margin-bottom: 36px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);">Practice & Assessment Bank</h3>
+                        <p style="font-size: 0.8125rem; color: var(--bf-slate-500);">Coding problems, placement MCQs, mock exams, and aptitude tests.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                    <!-- Questions Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Question Bank</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(234, 88, 12, 0.1); color: #ea580c; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${questionCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/questions}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Manage</a>
+                            <a th:href="@{/admin/questions/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Assessments Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Mock Assessments</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(220, 38, 38, 0.1); color: #dc2626; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${assessmentCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/assessments}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Manage</a>
+                            <a th:href="@{/admin/assessments/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Aptitude Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Aptitude Questions</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(202, 138, 4, 0.1); color: #ca8a04; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${aptitudeCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/aptitude}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Manage</a>
+                            <a th:href="@{/admin/aptitude/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Knowledge Layer (Phase 2) -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--bf-navy-900);">Knowledge & Retention Network</h3>
+                        <p style="font-size: 0.8125rem; color: var(--bf-slate-500);">Quick memory hooks and concept interconnection graph.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                    <!-- Remember Items Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Remember Items</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(6, 182, 212, 0.1); color: #0891b2; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${rememberCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/remember}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Manage</a>
+                            <a th:href="@{/admin/remember/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+
+                    <!-- Brain Maps Card -->
+                    <div class="card" style="background: var(--bf-white); border-radius: var(--bf-radius-lg, 12px); border: 1px solid var(--bf-slate-200); padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <span style="color: var(--bf-slate-500); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Brain Map Links</span>
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(236, 72, 153, 0.1); color: #ec4899; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            </div>
+                        </div>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--bf-navy-950); margin-bottom: 12px;" th:text="${relationshipCount}">0</div>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/admin/brain-maps}" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Manage</a>
+                            <a th:href="@{/admin/brain-maps/new}" class="btn btn-primary btn-sm" style="padding: 6px 12px;">+ Add</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Review Answers — ' + ${assessment.title})}"></head>
+<body>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('assessments')}"></aside>
+
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('Answer Review')}"></header>
+
+        <main class="app-content">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <a th:href="@{/assessments/result/{id}(id=${attempt.id})}" class="btn btn-secondary btn-sm">← Return to Score Summary</a>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--bf-slate-500);">
+                        Total Questions: <strong th:text="${totalQuestions}">5</strong>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h1 style="font-size: 1.75rem; margin-bottom: 4px;" th:text="${assessment.title}">Assessment Title</h1>
+                    <p style="color: var(--bf-slate-500); font-size: 0.9375rem;">Question-by-Question Solution Breakdown</p>
+                </div>
+
+                <!-- Review Items List -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div th:each="item, iterStat : ${reviewItems}" class="card" style="padding: 28px;">
+                        <!-- Item Header Badges -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span class="badge badge-neutral" th:text="${'Question ' + (iterStat.index + 1)}">Question 1</span>
+                                <span class="badge"
+                                      th:classappend="${item.answer.status.name() == 'SOLVED' ? 'badge-easy' : (item.answer.status.name() == 'FAILED' ? 'badge-hard' : 'badge-medium')}"
+                                      th:text="${item.answer.status}">SOLVED</span>
+                                <span class="badge badge-purple" th:text="${item.question.questionType}">CODING</span>
+                            </div>
+                            <div style="font-size: 0.875rem; font-weight: 700; color: var(--bf-primary);">
+                                Marks: <span th:text="${item.answer.marksAwarded}">10</span> / <span th:text="${item.maxMarks}">10</span>
+                            </div>
+                        </div>
+
+                        <!-- Question Title -->
+                        <h2 style="font-size: 1.25rem; margin-bottom: 10px; color: var(--bf-navy-900);" th:text="${item.question.title}">Title</h2>
+
+                        <!-- Problem Statement -->
+                        <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 14px 16px; font-size: 0.875rem; color: var(--bf-navy-800); white-space: pre-wrap; line-height: 1.5; margin-bottom: 18px;"
+                             th:text="${item.question.description}">
+                            Description
+                        </div>
+
+                        <!-- Submitted Answer -->
+                        <div style="margin-bottom: 16px;">
+                            <h4 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-400); margin-bottom: 6px;">Your Submitted Answer</h4>
+                            <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 12px 14px; font-family: var(--bf-font-mono); font-size: 0.875rem; white-space: pre-wrap; color: var(--bf-navy-900);"
+                                 th:text="${item.answer.submittedAnswer != null && !item.answer.submittedAnswer.isBlank() ? item.answer.submittedAnswer : '(No answer submitted / Skipped)'}">
+                                Answer
+                            </div>
+                        </div>
+
+                        <!-- Expected Reference Solution -->
+                        <div>
+                            <h4 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-400); margin-bottom: 6px;">Expected Solution / Reference</h4>
+                            <pre class="code-box"><code th:text="${item.question.solution}">// Reference Solution</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px; text-align: center;">
+                    <a th:href="@{/assessments}" class="btn btn-primary btn-lg">
+                        Back to Assessments Catalog
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

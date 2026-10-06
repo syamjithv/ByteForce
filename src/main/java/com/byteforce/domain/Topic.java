@@ -1,0 +1,150 @@
+package com.byteforce.domain;
+
+import java.time.Instant;
+import java.util.Objects;
+
+/**
+ * Immutable domain entity representing a topic category for questions.
+ */
+public final class Topic {
+
+    private final long id;
+    private final String subjectId;
+    private final String name;
+    private final String slug;
+    private final String description;
+    private final int displayOrder;
+    private final Instant createdAt;
+
+    public Topic(long id, String subjectId, String name, String slug, String description, int displayOrder, Instant createdAt) {
+        this.id = id;
+        this.subjectId = subjectId != null && !subjectId.isBlank() ? subjectId.trim().toLowerCase() : null;
+
+        Objects.requireNonNull(name, "name must not be null");
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("name must not be blank");
+        }
+        this.name = name.trim();
+
+        Objects.requireNonNull(slug, "slug must not be null");
+        if (slug.isBlank()) {
+            throw new IllegalArgumentException("slug must not be blank");
+        }
+        this.slug = slug.trim().toLowerCase();
+
+        this.description = description;
+        this.displayOrder = displayOrder;
+        this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
+    }
+
+    public Topic(long id, String name, String slug, String description, int displayOrder, Instant createdAt) {
+        this(id, null, name, slug, description, displayOrder, createdAt);
+    }
+
+    private Topic(long id, String subjectId, String name, String slug, String description, int displayOrder, Instant createdAt, boolean formEmpty) {
+        this.id = id;
+        this.subjectId = subjectId != null && !subjectId.isBlank() ? subjectId.trim().toLowerCase() : null;
+        this.name = name != null ? name.trim() : "";
+        this.slug = slug != null ? slug.trim().toLowerCase() : "";
+        this.description = description;
+        this.displayOrder = displayOrder;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
+    }
+
+    public static Topic empty(String subjectId) {
+        return new Topic(0, subjectId, "", "", "", 0, Instant.now(), true);
+    }
+
+    /**
+     * Factory for creating a new topic with subject relationship (id 0 indicates unsaved).
+     */
+    public static Topic create(String subjectId, String name, String slug, String description, int displayOrder) {
+        return new Topic(0, subjectId, name, slug, description, displayOrder, Instant.now());
+    }
+
+    /**
+     * Factory for creating a new topic (id 0 indicates unsaved).
+     */
+    public static Topic create(String name, String slug, String description, int displayOrder) {
+        return create(null, name, slug, description, displayOrder);
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getSubjectId() {
+        return subjectId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    /**
+     * Returns a copy with the database-assigned id.
+     */
+    public Topic withId(long newId) {
+        return new Topic(newId, this.subjectId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withSubjectId(String newSubjectId) {
+        return new Topic(this.id, newSubjectId, this.name, this.slug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withName(String newName) {
+        return new Topic(this.id, this.subjectId, newName, this.slug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withSlug(String newSlug) {
+        return new Topic(this.id, this.subjectId, this.name, newSlug, this.description, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withDescription(String newDescription) {
+        return new Topic(this.id, this.subjectId, this.name, this.slug, newDescription, this.displayOrder, this.createdAt);
+    }
+
+    public Topic withDisplayOrder(int newDisplayOrder) {
+        return new Topic(this.id, this.subjectId, this.name, this.slug, this.description, newDisplayOrder, this.createdAt);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Topic topic = (Topic) o;
+        return id == topic.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Topic{" +
+                "id=" + id +
+                ", subjectId='" + subjectId + '\'' +
+                ", name='" + name + '\'' +
+                ", slug='" + slug + '\'' +
+                ", displayOrder=" + displayOrder +
+                '}';
+    }
+}

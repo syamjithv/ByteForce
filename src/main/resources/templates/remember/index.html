@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('ByteForce Memory — Long-Term Concept Revision')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('remember')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('ByteForce Memory — Spaced Revision')}"></header>
+        <main class="app-content">
+            <!-- Header Section -->
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background-color: rgba(30, 58, 138, 0.1); color: var(--bf-primary);">
+                        <svg th:replace="~{fragments/icons :: remember}"></svg>
+                    </span>
+                    <h1 style="font-size: 1.875rem; color: var(--bf-navy-900); margin: 0;">Remember — Quick Revision &amp; Memory</h1>
+                </div>
+                <p style="color: var(--bf-slate-600); font-size: 0.9375rem; max-width: 800px; margin: 0 0 18px 0;">
+                    Evidence-informed spaced repetition revision, retrieval practice testing, and visual concept knowledge architecture.
+                </p>
+
+                <!-- Unified View Switcher Tabs -->
+                <div style="display: inline-flex; background-color: var(--surface-muted); padding: 4px; border-radius: var(--bf-radius-md); gap: 4px; border: 1px solid var(--border);">
+                    <a th:href="@{/remember(view='memory')}"
+                       class="btn btn-sm"
+                       th:style="${activeView == 'memory' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                        <span>Memory Revision</span>
+                    </a>
+                    <a th:href="@{/remember(view='cards')}"
+                       class="btn btn-sm"
+                       th:style="${activeView == 'cards' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                        <span>Revision Cards</span>
+                    </a>
+                    <a th:href="@{/remember(view='brain-maps')}"
+                       class="btn btn-sm"
+                       th:style="${activeView == 'brain-maps' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                        <span>Brain Maps</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dynamic View Routing -->
+            <div th:if="${activeView == 'brain-maps'}">
+                <div th:replace="~{remember/brain-maps :: brainMapsContent}"></div>
+            </div>
+            <div th:if="${activeView == 'cards'}">
+                <div th:replace="~{remember/cards :: cardsContent}"></div>
+            </div>
+            <div th:if="${activeView == 'memory'}">
+                <div th:replace="~{remember/memory-home :: memoryHomeContent}"></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('remember')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <!-- Header Section -->
+        <div style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background-color: rgba(30, 58, 138, 0.1); color: var(--bf-primary);">
+                    <svg th:replace="~{fragments/icons :: remember}"></svg>
+                </span>
+                <h1 style="font-size: 1.875rem; color: var(--bf-navy-900); margin: 0;">Remember — Quick Revision &amp; Memory</h1>
+            </div>
+            <p style="color: var(--bf-slate-600); font-size: 0.9375rem; max-width: 800px; margin: 0 0 18px 0;">
+                Evidence-informed spaced repetition revision, retrieval practice testing, and visual concept knowledge architecture.
+            </p>
+
+            <!-- Unified View Switcher Tabs -->
+            <div style="display: inline-flex; background-color: var(--surface-muted); padding: 4px; border-radius: var(--bf-radius-md); gap: 4px; border: 1px solid var(--border);">
+                <a th:href="@{/remember(view='memory')}"
+                   class="btn btn-sm"
+                   th:style="${activeView == 'memory' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                    <span>Memory System</span>
+                </a>
+                <a th:href="@{/remember(view='cards')}"
+                   class="btn btn-sm"
+                   th:style="${activeView == 'cards' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                    <span>Revision Cards</span>
+                </a>
+                <a th:href="@{/remember(view='brain-maps')}"
+                   class="btn btn-sm"
+                   th:style="${activeView == 'brain-maps' ? 'background: var(--surface); color: var(--text-primary); font-weight: 700; box-shadow: var(--bf-shadow-sm);' : 'background: transparent; color: var(--text-secondary); font-weight: 500;'}">
+                    <span>Brain Maps</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Dynamic View Routing -->
+        <div th:if="${activeView == 'brain-maps'}">
+            <div th:replace="~{remember/brain-maps :: brainMapsContent}"></div>
+        </div>
+        <div th:if="${activeView == 'cards'}">
+            <div th:replace="~{remember/cards :: cardsContent}"></div>
+        </div>
+        <div th:if="${activeView == 'memory'}">
+            <div th:replace="~{remember/memory-home :: memoryHomeContent}"></div>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+</body>
+</html>

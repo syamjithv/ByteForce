@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign in Required')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: publicNav('')}"></nav>
+
+<div class="auth-wrapper">
+    <div class="auth-card" style="text-align: center;">
+        <!-- Official Logo -->
+        <div class="auth-logo">
+            <a th:href="@{/}" class="bf-brand-logo">
+                <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce" />
+            </a>
+        </div>
+
+        <div style="width: 56px; height: 56px; border-radius: 50%; background-color: var(--bf-primary-light); color: var(--bf-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg th:replace="~{fragments/icons :: lock}"></svg>
+        </div>
+
+        <h1 class="auth-title">You're almost there.</h1>
+
+        <p class="auth-subtitle" style="margin-bottom: 24px; font-size: 1rem;">
+            Create a free ByteForce account or sign in to continue with
+            <strong th:text="${feature != null ? feature : 'your placement preparation'}" style="color: var(--bf-navy-900);">this protected feature</strong>.
+        </p>
+
+        <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 14px 16px; margin-bottom: 24px; font-size: 0.875rem; color: var(--bf-slate-600); text-align: left;">
+            <div style="font-weight: 600; color: var(--bf-navy-800); margin-bottom: 6px;">Why is an account required?</div>
+            <ul style="padding-left: 20px; line-height: 1.5;">
+                <li>Save and evaluate your practice problem answers</li>
+                <li>Track topic strengths and diagnostic weak areas</li>
+                <li>Record verified timed assessment scores & history</li>
+                <li>Bookmark questions to review later</li>
+            </ul>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a th:href="@{/register(returnUrl=${returnUrl})}" class="btn btn-primary btn-lg btn-block">
+                Create Account
+            </a>
+            <a th:href="@{/login(returnUrl=${returnUrl})}" class="btn btn-secondary btn-lg btn-block">
+                Sign In
+            </a>
+        </div>
+
+        <div class="auth-footer">
+            <a th:href="@{/}" class="back-to-home-link">
+                ← Continue browsing without signing in
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="conceptContent" class="concept-page-container">
+    <!-- Breadcrumb Hierarchy Navigation -->
+    <nav class="concept-breadcrumbs" aria-label="Breadcrumb">
+        <a th:href="@{/learn}">Learn</a>
+        <span class="separator">/</span>
+        <a th:if="${subject != null}" th:href="@{/learn/subject/{id}(id=${subject.id})}" th:text="${subject.name}">Computer Science</a>
+        <span th:if="${subject != null}" class="separator">/</span>
+        <a th:if="${topic != null}" th:href="@{/learn/topic/{id}(id=${topic.id})}" th:text="${topic.name}">Topic</a>
+        <span class="separator">/</span>
+        <span class="current" th:text="${concept.title}">Concept Title</span>
+    </nav>
+
+    <!-- Header Hero Card -->
+    <header class="concept-hero">
+        <div class="concept-badge-row">
+            <span class="concept-badge-topic" th:text="${topic != null ? topic.name : (concept.topicName != null && !concept.topicName.isBlank() ? concept.topicName : 'Placement Concept')}">Topic Name</span>
+            <span class="concept-badge-core">Core CS Foundation</span>
+            <span class="concept-badge-focus">Placement Essential</span>
+            <span th:if="${isLearned}" class="badge badge-success" style="font-size: 0.75rem;">✓ Learned</span>
+        </div>
+        <h1 class="concept-hero-title" th:text="${concept.title}">Concept Title</h1>
+        <p class="concept-hero-lead" th:text="${presentation != null && presentation.summary != null && !presentation.summary.isBlank() ? presentation.summary : concept.shortExplanation}">
+            One-line explanation that immediately tells the student what this concept actually means.
+        </p>
+
+        <!-- Metadata & Memory Quick Action Bar -->
+        <div class="concept-meta-bar">
+            <!-- Memory State -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div th:if="${conceptMemoryStatus != null && conceptMemoryStatus.enrolled}" style="font-size: 0.875rem;">
+                    <span th:if="${conceptMemoryStatus.dueItems > 0}" style="color: var(--bf-danger); font-weight: 600;">
+                        ● <span th:text="${conceptMemoryStatus.dueItems}">1</span> items due for revision today
+                    </span>
+                    <span th:if="${conceptMemoryStatus.dueItems == 0}" style="color: var(--bf-success); font-weight: 600;">
+                        ● Active in revision schedule (<span th:text="${conceptMemoryStatus.formattedNextDue}">Due tomorrow</span>)
+                    </span>
+                    <span style="color: var(--bf-slate-400); margin: 0 4px;">·</span>
+                    <span style="color: var(--bf-slate-500);" th:text="${conceptMemoryStatus.totalReviews + ' completed reviews'}">0 reviews</span>
+                </div>
+                <div th:if="${conceptMemoryStatus == null || !conceptMemoryStatus.enrolled}" style="font-size: 0.875rem; color: var(--bf-slate-600);">
+                    <span th:if="${rememberItems != null && !rememberItems.isEmpty()}">Spaced-repetition items available for recall practice.</span>
+                    <span th:if="${rememberItems == null || rememberItems.isEmpty()}">Core placement theory unit with visual guide.</span>
+                </div>
+            </div>
+
+            <!-- Action CTAs -->
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <!-- Mark as Learned Button (Requirement 3) -->
+                <form th:if="${currentUser != null}" th:action="@{/learn/concept/{id}/toggle-learned(id=${concept.id})}" method="post" style="display: inline; margin: 0;">
+                    <button type="submit" class="btn btn-sm"
+                            th:classappend="${isLearned ? 'btn-success' : 'btn-outline'}"
+                            style="font-size: 0.8125rem;">
+                        <span th:if="${isLearned}">✓ Learned</span>
+                        <span th:if="${!isLearned}">Mark as learned</span>
+                    </button>
+                </form>
+                <a th:if="${currentUser == null}" th:href="@{/login(redirect=${'/learn/concept/' + concept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.8125rem;">
+                    Mark as learned
+                </a>
+
+                <a th:href="@{/brain-maps(conceptId=${concept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.8125rem;">
+                    Brain Map
+                </a>
+                <a th:if="${conceptMemoryStatus != null && conceptMemoryStatus.enrolled}"
+                   th:href="@{/remember/concept/{id}(id=${concept.id})}"
+                   class="btn btn-outline btn-sm"
+                   style="font-size: 0.8125rem;">
+                    Review Now →
+                </a>
+                <form th:if="${currentUser != null && (conceptMemoryStatus == null || !conceptMemoryStatus.enrolled) && rememberItems != null && !rememberItems.isEmpty()}"
+                      th:action="@{/remember/concept/{id}/enroll(id=${concept.id})}"
+                      method="post" style="display: inline; margin: 0;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="font-size: 0.8125rem;">
+                        Add to Memory
+                    </button>
+                </form>
+                <a th:if="${currentUser == null && rememberItems != null && !rememberItems.isEmpty()}"
+                   th:href="@{/login(redirect=${'/learn/concept/' + concept.id})}"
+                   class="btn btn-outline btn-sm"
+                   style="font-size: 0.8125rem;">
+                    Add to Memory
+                </a>
+                <a th:if="${topic != null}"
+                   th:href="@{/practice(topic=${topic.id})}"
+                   class="btn btn-secondary btn-sm"
+                   style="font-size: 0.8125rem;">
+                    Practice Topic ↗
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Why This Matters Section -->
+    <section th:if="${presentation != null && presentation.whyThisMatters != null}" class="concept-why-matters">
+        <div class="concept-why-title">
+            <span>Why This Matters</span>
+        </div>
+        <p class="concept-why-body" th:text="${presentation.whyThisMatters}">
+            Explanation of why this concept exists, its hardware/systems rationale, and its direct relevance in technical placements.
+        </p>
+    </section>
+
+    <!-- The Idea Section -->
+    <section th:if="${presentation != null && presentation.theIdea != null}" class="concept-the-idea">
+        <h2 class="section-heading">
+            <span>The Core Concept</span>
+        </h2>
+        <div class="section-body-text">
+            <p th:each="para : ${#strings.arraySplit(presentation.theIdea, '&#10;&#10;')}" th:text="${para}">
+                Structured explanation paragraph.
+            </p>
+        </div>
+    </section>
+
+    <!-- Key Points Section (Prominent 01, 02, 03 Card) -->
+    <section th:if="${concept.keyPoints != null && !concept.keyPoints.isEmpty()}" class="concept-key-points">
+        <h2 class="section-heading">
+            <span>Key Placement Takeaways</span>
+        </h2>
+        <div class="key-points-list">
+            <div th:each="point, iterStat : ${concept.keyPoints}" class="key-point-item">
+                <span class="key-point-num" th:text="${iterStat.count < 10 ? '0' + iterStat.count : iterStat.count}">01</span>
+                <span class="key-point-text" th:text="${point}">Core placement fact statement</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works (Visual Sequence / Diagram) -->
+    <section th:if="${presentation != null && presentation.hasVisualSteps()}" class="concept-how-it-works">
+        <h2 class="section-heading">
+            <span>How It Works — Step-by-Step Flow</span>
+        </h2>
+        <div class="workflow-track">
+            <th:block th:each="step, iterStat : ${presentation.visualSteps}">
+                <div class="workflow-node">
+                    <span th:text="${step}">STATE</span>
+                </div>
+                <div th:if="${!iterStat.last}" class="workflow-arrow">→</div>
+            </th:block>
+        </div>
+        <p th:if="${presentation.howItWorks != null && !presentation.howItWorks.isBlank()}"
+           style="margin-top: 14px; font-size: 0.9375rem; color: var(--bf-slate-600); line-height: 1.6;"
+           th:text="${presentation.howItWorks}">
+            Step by step explanation of lifecycle.
+        </p>
+    </section>
+
+    <!-- Real Example Section -->
+    <section th:if="${presentation != null && presentation.realExample != null}" class="concept-real-example">
+        <h2 class="section-heading">
+            <span>Real-World Scenario & Analogy</span>
+        </h2>
+        <div class="example-callout-box">
+            <p th:text="${presentation.realExample}">Practical application or intuitive analogy.</p>
+        </div>
+    </section>
+
+    <!-- Code / Implementation Example -->
+    <section th:if="${presentation != null && presentation.hasCodeExample()}" class="concept-code-card">
+        <div style="padding: 14px 20px 4px 20px; font-size: 0.9375rem; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 8px;">
+            <span th:utext="'Code & Implementation Example'">Code &amp; Implementation Example</span>
+        </div>
+        <div class="code-header-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="code-lang-tag" th:text="${#strings.toUpperCase(presentation.codeLanguage)}">JAVA 21</span>
+                <span style="font-size: 0.8125rem; color: var(--bf-slate-400);" th:text="${concept.title + ' Implementation'}">Code Example</span>
+            </div>
+            <button type="button" class="code-copy-btn" onclick="copyCodeSnippet(this)">
+                <span>Copy Code</span>
+            </button>
+        </div>
+        <pre class="code-pre-block"><code id="conceptCodeSnippet" th:text="${presentation.codeExample}">// Example Code</code></pre>
+    </section>
+
+    <!-- Common Confusion Callout -->
+    <section th:if="${commonConfusions != null && !commonConfusions.isEmpty()}">
+        <div th:each="confusion : ${commonConfusions}" class="concept-confusion-card">
+            <div class="concept-confusion-title">
+                <span>Common Interview Confusion</span>
+            </div>
+            <p class="concept-confusion-body" th:text="${confusion.content}">
+                Detailed distinction highlighting typical student mistakes and interview pitfalls.
+            </p>
+        </div>
+    </section>
+
+    <!-- Interview Reminder Callout -->
+    <section th:if="${interviewReminders != null && !interviewReminders.isEmpty()}">
+        <div th:each="reminder : ${interviewReminders}" class="concept-interview-card">
+            <div class="concept-interview-title">
+                <span>Placement & Interviewer Focus</span>
+            </div>
+            <p class="concept-interview-body" th:text="${reminder.content}">
+                What interviewers frequently ask regarding this concept and the exact reasoning expected.
+            </p>
+        </div>
+    </section>
+
+    <!-- Remember System (Quick Spaced Revision) -->
+    <section th:if="${keyFacts != null && !keyFacts.isEmpty()}" class="card" style="margin-bottom: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+            <h2 class="section-heading" style="margin-bottom: 0;">
+                <span>Remember — Quick Revision Items</span>
+            </h2>
+            <a th:href="@{/remember}" class="btn btn-ghost btn-sm" style="font-size: 0.8125rem;">
+                Browse All Memory Cards →
+            </a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div th:each="item : ${keyFacts}" style="padding: 12px 16px; border-radius: var(--bf-radius-md); background-color: var(--bf-slate-50); border-left: 4px solid var(--bf-primary); display: flex; align-items: flex-start; gap: 12px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bf-slate-500); margin-bottom: 4px;" th:text="${item.type.displayName}">KEY FACT</div>
+                    <div style="font-size: 0.9375rem; color: var(--bf-navy-900); line-height: 1.5;" th:text="${item.content}">Item content text</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connected Concepts (Brain Maps) -->
+    <section class="card" style="margin-bottom: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+            <h2 class="section-heading" style="margin-bottom: 0;">
+                <span>Brain Map — Connected Concepts</span>
+            </h2>
+            <a th:href="@{/brain-maps(conceptId=${concept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.8125rem;">
+                Open Interactive Brain Map →
+            </a>
+        </div>
+        <div th:if="${relatedConcepts == null || relatedConcepts.isEmpty()}" style="color: var(--bf-slate-500); font-size: 0.9375rem;">
+            No adjacent knowledge nodes mapped yet for this topic unit.
+        </div>
+        <div th:if="${relatedConcepts != null && !relatedConcepts.isEmpty()}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+            <div th:each="relView : ${relatedConcepts}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="badge"
+                              th:classappend="${relView.type.name() == 'PREREQUISITE' ? 'badge-hard' : (relView.type.name() == 'COMMONLY_CONFUSED' ? 'badge-purple' : 'badge-primary')}"
+                              th:text="${relView.type.displayName}">Relationship</span>
+                        <span style="font-size: 0.75rem; color: var(--bf-slate-400);" th:text="${relView.outgoing ? 'Outgoing →' : '← Incoming'}">Direction</span>
+                    </div>
+                    <h3 style="font-size: 1.0625rem; margin-bottom: 6px; color: var(--bf-navy-900);" th:text="${relView.connectedConcept.title}">Connected Concept</h3>
+                    <p th:if="${relView.description != null && !relView.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 6px;" th:text="${relView.description}">Relationship note</p>
+                    <p style="font-size: 0.8125rem; color: var(--bf-slate-500); line-height: 1.4;" th:text="${relView.connectedConcept.shortExplanation}">Concept summary</p>
+                </div>
+                <a th:href="@{/learn/concept/{id}(id=${relView.connectedConcept.id})}" class="btn btn-outline btn-sm" style="align-self: flex-start;">
+                    Study Connected Concept →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practice This Callout Banner -->
+    <section class="concept-practice-banner">
+        <div>
+            <h2 class="practice-banner-heading">Ready to Test Your Understanding?</h2>
+            <p class="practice-banner-sub">
+                Apply this theory by solving curated coding interview and CS fundamentals questions directly on ByteForce.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a th:if="${topic != null}"
+               th:href="@{/practice(topic=${topic.id})}"
+               class="btn btn-primary"
+               style="background: var(--bf-white); color: var(--bf-navy-950); font-weight: 700; border: none; padding: 10px 20px;">
+                <span th:text="${practiceCount != null && practiceCount > 0 ? 'Practice ' + practiceCount + ' Questions →' : 'Practice Topic →'}">Practice Topic Questions →</span>
+            </a>
+            <a th:if="${topic == null}"
+               th:href="@{/practice}"
+               class="btn btn-primary"
+               style="background: var(--bf-white); color: var(--bf-navy-950); font-weight: 700; border: none; padding: 10px 20px;">
+                Explore Practice Arena →
+            </a>
+        </div>
+    </section>
+
+    <!-- Curated Academic Resources -->
+    <section th:if="${resources != null && !resources.isEmpty()}" class="card" style="margin-bottom: 0;">
+        <h2 class="section-heading">
+            <span>Authoritative Academic References & Standards</span>
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div th:each="res : ${resources}" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="badge"
+                          th:classappend="${res.resourceType.name() == 'PDF' ? 'badge-hard' : (res.resourceType.name() == 'VIDEO' ? 'badge-purple' : 'badge-primary')}"
+                          th:text="${res.resourceType}">ARTICLE</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--bf-navy-900); font-size: 0.9375rem;" th:text="${res.title}">Resource Title</div>
+                        <div style="font-size: 0.8125rem; color: var(--bf-slate-500);" th:text="${res.description}">Description</div>
+                    </div>
+                </div>
+                <a th:href="${res.url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+                    Open Source ↗
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Up next section (Requirement 5) -->
+    <div th:if="${nextConcept != null}" class="card mb-6" style="border-left: 4px solid var(--primary); background: var(--surface-elevated); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <span class="badge badge-accent mb-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Up next</span>
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" th:text="${nextConcept.title}">Sliding Window</h3>
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;" th:if="${topic != null}" th:text="${topic.name}">Arrays & Two Pointers</p>
+            </div>
+            <div>
+                <a th:href="@{/learn/concept/{id}(id=${nextConcept.id})}" class="btn btn-primary">
+                    Start learning →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sibling Sequential Navigation (Previous / Next Concept) -->
+    <nav class="concept-pagination" aria-label="Concept Navigation">
+        <a th:if="${prevConcept != null}" th:href="@{/learn/concept/{id}(id=${prevConcept.id})}" class="pagination-nav-card" style="text-align: left;">
+            <span class="pagination-dir">← Previous Concept</span>
+            <span class="pagination-title" th:text="${prevConcept.title}">Previous Concept Title</span>
+        </a>
+        <div th:if="${prevConcept == null}" style="flex: 1;"></div>
+
+        <a th:if="${topic != null}" th:href="@{/learn/topic/{id}(id=${topic.id})}" class="btn btn-ghost btn-sm" style="align-self: center;">
+            All <span th:text="${topic.name}">Topic</span> Concepts
+        </a>
+
+        <a th:if="${nextConcept != null}" th:href="@{/learn/concept/{id}(id=${nextConcept.id})}" class="pagination-nav-card" style="text-align: right;">
+            <span class="pagination-dir">Next Concept →</span>
+            <span class="pagination-title" th:text="${nextConcept.title}">Next Concept Title</span>
+        </a>
+        <div th:if="${nextConcept == null}" style="flex: 1;"></div>
+    </nav>
+</div>
+
+<!-- Inline Interactive Script for Code Copying -->
+<script>
+function copyCodeSnippet(button) {
+    const codeElem = document.getElementById('conceptCodeSnippet');
+    if (!codeElem) return;
+    navigator.clipboard.writeText(codeElem.innerText).then(() => {
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<span>✓</span> <span>Copied!</span>';
+        button.style.borderColor = 'var(--bf-success)';
+        button.style.color = 'var(--bf-success)';
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+            button.style.borderColor = '';
+            button.style.color = '';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy code snippet: ', err);
+    });
+}
+</script>
+
+</body>
+</html>

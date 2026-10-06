@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${assessment.title} + ' — Test in Progress')}"></head>
+<body style="background-color: var(--bf-slate-50);">
+
+<!-- Clean Focused Test Topbar -->
+<header style="background-color: var(--bf-navy-900); color: var(--bf-white); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: var(--bf-shadow-md);">
+        <div style="background: #ffffff; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center;">
+            <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce" style="height: 28px; width: auto; display: block;" />
+        </div>
+        <span style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 14px; font-weight: 700; font-size: 1.0625rem;" th:text="${assessment.title}">
+            Mock Assessment
+        </span>
+    </div>
+
+    <!-- Countdown Timer -->
+    <div>
+        <div id="test-timer" class="timer-pill"
+             th:attr="data-duration-seconds=${durationMinutes * 60}"
+             style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg th:replace="~{fragments/icons :: clock}"></svg>
+            <span id="test-timer-text">Loading Timer...</span>
+        </div>
+    </div>
+</header>
+
+<main class="public-container" style="max-width: 1040px; margin: 28px auto; padding: 0 20px;">
+    <!-- Question Palette -->
+    <div class="card" style="margin-bottom: 20px; padding: 16px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: var(--bf-slate-500); letter-spacing: 0.05em;">
+                Question Palette
+            </div>
+            <div style="font-size: 0.8125rem; color: var(--bf-slate-500);">
+                Total: <strong th:text="${questions.size()}">5</strong> Questions
+            </div>
+        </div>
+
+        <div class="q-palette">
+            <button type="button"
+                    th:each="q, iterStat : ${questions}"
+                    class="q-btn"
+                    th:classappend="${iterStat.index == 0 ? 'active' : ''}"
+                    th:attr="data-index=${iterStat.index}"
+                    th:text="${iterStat.index + 1}">
+                1
+            </button>
+        </div>
+    </div>
+
+    <!-- Multi-question Form -->
+    <form id="assessment-form" th:action="@{/assessments/submit/{id}(id=${attempt.id})}" method="post">
+        <!-- Render each question container -->
+        <div th:each="q, iterStat : ${questions}"
+             class="card test-question-card"
+             th:attr="data-index=${iterStat.index}"
+             th:style="${iterStat.index == 0 ? 'display: block;' : 'display: none;'}"
+             style="padding: 32px; margin-bottom: 24px;">
+
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; gap: 8px;">
+                    <span class="badge badge-neutral" th:text="${'Question ' + (iterStat.index + 1) + ' of ' + questions.size()}">Q1 of 5</span>
+                    <span class="badge"
+                          th:classappend="${q.difficulty.name() == 'EASY' ? 'badge-easy' : (q.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                          th:text="${q.difficulty}">EASY</span>
+                    <span class="badge badge-purple" th:text="${q.questionType}">CODING</span>
+                </div>
+                <div style="font-size: 0.875rem; font-weight: 700; color: var(--bf-primary);" th:text="${marksMap.getOrDefault(q.id, 1)} + ' Marks'">
+                    10 Marks
+                </div>
+            </div>
+
+            <!-- Question Title -->
+            <h2 style="font-size: 1.375rem; margin-bottom: 12px; color: var(--bf-navy-900);" th:text="${q.title}">Question Title</h2>
+
+            <!-- Question Description -->
+            <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 18px 20px; font-size: 0.9375rem; color: var(--bf-navy-800); white-space: pre-wrap; line-height: 1.6; margin-bottom: 24px;"
+                 th:text="${q.description}">
+                Problem statement details...
+            </div>
+
+            <!-- Answer Section -->
+            <div class="form-group">
+                <label class="form-label" style="font-size: 0.9375rem; margin-bottom: 10px;">Enter Your Response</label>
+
+                <!-- If MCQ -->
+                <div th:if="${q.questionType.name() == 'MCQ'}" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); cursor: pointer;">
+                        <input type="radio" th:name="${'answer_' + q.id}" value="A" />
+                        <span>A</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); cursor: pointer;">
+                        <input type="radio" th:name="${'answer_' + q.id}" value="B" />
+                        <span>B</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); cursor: pointer;">
+                        <input type="radio" th:name="${'answer_' + q.id}" value="C" />
+                        <span>C</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); cursor: pointer;">
+                        <input type="radio" th:name="${'answer_' + q.id}" value="D" />
+                        <span>D</span>
+                    </label>
+                </div>
+
+                <!-- If CODING / SQL / CONCEPTUAL -->
+                <div th:if="${q.questionType.name() != 'MCQ'}">
+                    <textarea th:name="${'answer_' + q.id}"
+                              class="form-control"
+                              rows="8"
+                              placeholder="Write your code or answer here..."
+                              style="font-family: var(--bf-font-mono); font-size: 0.875rem;"></textarea>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons inside card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--bf-slate-100);">
+                <button type="button" class="btn btn-secondary" data-q-nav="-1">
+                    ← Previous Question
+                </button>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-secondary" data-q-nav="1">
+                        Next Question →
+                    </button>
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you ready to submit your assessment? Unanswered questions will be marked as skipped.');">
+                        Submit Test Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+</body>
+</html>

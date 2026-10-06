@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="searchContent" class="search-content-root">
+
+    <!-- Breadcrumb Hierarchy -->
+    <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+        <a th:href="@{/learn}">Learn</a>
+        <span class="separator">/</span>
+        <span class="current">Search</span>
+    </nav>
+
+    <!-- Search Form Bar -->
+    <div class="card mb-6" style="background: var(--surface);">
+        <form th:action="@{/learn/search}" method="get" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <input type="text" name="q" th:value="${query}" placeholder="Search concepts, topics and subjects..." class="form-control" style="flex: 1; min-width: 240px;" required />
+            <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg th:replace="~{fragments/icons :: search}"></svg>
+                <span>Search</span>
+            </button>
+            <a th:if="${query != null && !query.isBlank()}" th:href="@{/learn}" class="btn btn-ghost">
+                Clear
+            </a>
+        </form>
+    </div>
+
+    <!-- Results Header -->
+    <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.25rem;">
+            Search Results for "<span th:text="${query}">query</span>"
+            <span style="font-size: 0.9375rem; color: var(--text-muted); font-weight: normal;">
+                (<span th:text="${resultCount}">0</span> found)
+            </span>
+        </h2>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${resultCount == 0}" class="empty-state">
+        <div class="empty-state-icon">
+            <svg th:replace="~{fragments/icons :: search}"></svg>
+        </div>
+        <h3 class="empty-state-title">No matching subjects, topics, or concepts found</h3>
+        <p class="empty-state-desc">Try searching with terms like Array, Tree, Binary Search, SQL, Concurrency, or Deadlock.</p>
+        <a th:href="@{/learn}" class="btn btn-secondary btn-sm mt-3">Return to All Subjects</a>
+    </div>
+
+    <!-- Results Grouped by Category -->
+    <div th:if="${resultCount > 0}" style="display: flex; flex-direction: column; gap: 28px;">
+
+        <!-- 1. Matching Subjects -->
+        <div th:if="${matchingSubjects != null && !matchingSubjects.isEmpty()}">
+            <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">
+                Subjects (<span th:text="${matchingSubjects.size()}">0</span>)
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div th:each="sub : ${matchingSubjects}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 20px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="badge badge-accent">Subject</span>
+                            <h4 style="font-size: 1.125rem; font-weight: 700; margin: 0;" th:text="${sub.name}">Operating Systems</h4>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;" th:text="${sub.description}">Subject description</p>
+                    </div>
+                    <a th:href="@{/learn/subject/{id}(id=${sub.id})}" class="btn btn-outline btn-sm">
+                        View Subject →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Matching Topics -->
+        <div th:if="${matchingTopics != null && !matchingTopics.isEmpty()}">
+            <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">
+                Topics (<span th:text="${matchingTopics.size()}">0</span>)
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div th:each="top : ${matchingTopics}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 20px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="badge badge-primary">Topic</span>
+                            <h4 style="font-size: 1.125rem; font-weight: 700; margin: 0;" th:text="${top.name}">Concurrency</h4>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;" th:text="${top.description}">Topic description</p>
+                    </div>
+                    <a th:href="@{/learn/topic/{id}(id=${top.id})}" class="btn btn-outline btn-sm">
+                        Explore Topic →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Matching Concepts -->
+        <div th:if="${matchingConcepts != null && !matchingConcepts.isEmpty()}">
+            <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">
+                Concepts (<span th:text="${matchingConcepts.size()}">0</span>)
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div th:each="con : ${matchingConcepts}" class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px 20px;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                            <span class="badge badge-purple">Concept</span>
+                            <span class="badge badge-neutral" th:text="${con.topicName}">Topic</span>
+                            <h4 style="font-size: 1.125rem; font-weight: 700; margin: 0;" th:text="${con.title}">Deadlocks</h4>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;" th:text="${con.shortExplanation}">Concept explanation</p>
+                    </div>
+                    <a th:href="@{/learn/concept/{id}(id=${con.id})}" class="btn btn-primary btn-sm">
+                        Study Concept →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

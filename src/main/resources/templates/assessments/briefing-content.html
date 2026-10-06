@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="briefingContent" class="briefing-content-root">
+    <div style="max-width: 680px; margin: 0 auto;">
+        <!-- Breadcrumb Hierarchy -->
+        <nav class="concept-breadcrumbs mb-4" aria-label="Breadcrumb">
+            <a th:href="@{/assessments}">Assess</a>
+            <span class="separator">/</span>
+            <span class="current" th:text="${assessment.title}">DSA Fundamentals</span>
+        </nav>
+
+        <div style="margin-bottom: 20px;">
+            <a th:href="@{/assessments}" class="btn btn-secondary btn-sm">← Back to Assessments Catalog</a>
+        </div>
+
+        <div class="card" style="padding: 36px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <span class="badge"
+                      th:classappend="${assessment.difficulty.name() == 'EASY' ? 'badge-easy' : (assessment.difficulty.name() == 'MEDIUM' ? 'badge-medium' : 'badge-hard')}"
+                      th:text="${assessment.difficulty}">MEDIUM</span>
+                <span class="badge badge-primary">TIMED MOCK TEST</span>
+            </div>
+
+            <h1 style="font-size: 1.875rem; margin-bottom: 12px;" th:text="${assessment.title}">Assessment Title</h1>
+            <p style="color: var(--bf-slate-600); font-size: 1rem; line-height: 1.6; margin-bottom: 24px;" th:text="${assessment.description}">
+                Assessment description
+            </p>
+
+            <!-- Test Stats Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px;">
+                <div class="stat-card" style="background-color: var(--bf-slate-50);">
+                    <div class="stat-label">Duration</div>
+                    <div class="stat-value val-primary" style="font-size: 1.375rem;" th:text="${assessment.durationMinutes + ' mins'}">60 mins</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-slate-50);">
+                    <div class="stat-label">Total Marks</div>
+                    <div class="stat-value val-success" style="font-size: 1.375rem;" th:text="${assessment.totalMarks}">100</div>
+                </div>
+                <div class="stat-card" style="background-color: var(--bf-slate-50);">
+                    <div class="stat-label">Questions</div>
+                    <div class="stat-value" style="font-size: 1.375rem;" th:text="${questionCount}">5</div>
+                </div>
+            </div>
+
+            <!-- Guidelines -->
+            <div style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); border-radius: var(--bf-radius-md); padding: 18px 20px; margin-bottom: 28px;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 10px;">Test Guidelines</h3>
+                <ul style="padding-left: 20px; font-size: 0.875rem; color: var(--bf-slate-600); line-height: 1.6;">
+                    <li>The countdown timer starts as soon as you click <strong>Start Test</strong>.</li>
+                    <li>You can freely navigate between questions using the question palette or Previous / Next buttons.</li>
+                    <li>Answers are preserved automatically as you navigate between questions.</li>
+                    <li>Unanswered questions will be recorded as Skipped upon submission.</li>
+                    <li>When the timer expires, the test will submit automatically.</li>
+                </ul>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a th:href="@{/assessments/test/{id}(id=${assessment.id})}" class="btn btn-primary btn-lg" style="flex: 1;">
+                    Start Test (Begin Timer) →
+                </a>
+                <a th:href="@{/assessments}" class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

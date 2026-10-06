@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${subject.name} + ' — Placement Curriculum')}"></head>
+<body>
+
+<!-- Authenticated Application Shell -->
+<div th:if="${currentUser != null}" class="app-layout">
+    <aside th:replace="~{fragments/layout :: appSidebar('learn')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar(${subject.name})}"></header>
+        <main class="app-content">
+            <div th:replace="~{learn/subject :: subjectMain}"></div>
+        </main>
+    </div>
+</div>
+
+<!-- Public Visitor Shell -->
+<div th:if="${currentUser == null}">
+    <nav th:replace="~{fragments/layout :: publicNav('learn')}"></nav>
+    <main class="public-container" style="padding-top: 36px; padding-bottom: 60px;">
+        <div th:replace="~{learn/subject :: subjectMain}"></div>
+    </main>
+    <footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+</div>
+
+<!-- Reusable Subject Main Fragment -->
+<div th:fragment="subjectMain" style="max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+    <!-- Breadcrumb -->
+    <nav class="concept-breadcrumbs" aria-label="Breadcrumb">
+        <a th:href="@{/learn}">Learn</a>
+        <span class="separator">/</span>
+        <span class="current" th:text="${subject.name}">Subject Name</span>
+    </nav>
+
+    <!-- Subject Hero Card -->
+    <div class="card" style="padding: 32px 36px; border-radius: var(--bf-radius-lg);">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;">
+            <span class="subject-order-badge" th:text="'SUBJECT ' + ${subject.displayOrder}">SUBJECT 01</span>
+            <span class="badge badge-primary" th:text="${topics.size() + ' Topic(s)'}">Topics</span>
+            <span th:if="${currentUser != null && totalSubjectConcepts > 0}" class="badge badge-success">
+                <span th:text="${(subjectCompletedCount != null ? subjectCompletedCount : 0) + ' / ' + totalSubjectConcepts + ' concepts completed'}">18 / 42 concepts completed</span>
+            </span>
+        </div>
+        <h1 style="font-size: 2.25rem; font-weight: 700; color: var(--bf-navy-950); margin-bottom: 10px;" th:text="${subject.name}">Subject Name</h1>
+        <p style="color: var(--bf-slate-600); font-size: 1.0625rem; line-height: 1.6; max-width: 800px;" th:text="${subject.description}">Description</p>
+    </div>
+
+    <!-- Topics & Concepts Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--bf-navy-950);">Topics in this Subject</h2>
+        <span style="font-size: 0.875rem; color: var(--bf-slate-500);" th:text="${topics.size() + ' topics covered'}">Topics covered</span>
+    </div>
+
+    <div th:if="${topics.isEmpty()}" class="empty-state card" style="padding: 40px; text-align: center;">
+        <p style="color: var(--bf-slate-500);">Topics for this subject are being added to the curriculum.</p>
+    </div>
+
+    <div th:if="${!topics.isEmpty()}" style="display: flex; flex-direction: column; gap: 18px;">
+        <div th:each="topic : ${topics}" class="card" style="padding: 24px 28px; border-radius: var(--bf-radius-lg); transition: all 0.2s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 14px;">
+                <div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--bf-navy-950); margin-bottom: 6px;">
+                        <a th:href="@{/learn/topic/{id}(id=${topic.id})}" style="color: inherit; text-decoration: none;" th:text="${topic.name}">Topic Name</a>
+                    </h3>
+                    <p style="color: var(--bf-slate-600); font-size: 0.9375rem; line-height: 1.5;" th:text="${topic.description}">Topic Description</p>
+                </div>
+                <a th:href="@{/learn/topic/{id}(id=${topic.id})}" class="btn btn-primary btn-sm" style="align-self: flex-start;">
+                    Explore Topic Concepts →
+                </a>
+            </div>
+
+            <!-- Concepts preview pills if available -->
+            <div th:if="${topicConceptsMap != null && topicConceptsMap.get(topic.id) != null && !topicConceptsMap.get(topic.id).isEmpty()}"
+                 style="border-top: 1px solid var(--bf-slate-100); padding-top: 12px; margin-top: 12px;">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bf-slate-400); margin-bottom: 8px;">
+                    Concepts (<span th:text="${topicConceptsMap.get(topic.id).size()}">2</span>)
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <a th:each="c : ${topicConceptsMap.get(topic.id)}"
+                       th:href="@{/learn/concept/{id}(id=${c.id})}"
+                       class="topic-pill">
+                        <span th:text="${c.title}">Concept Title</span>
+                        <span style="color: var(--primary); font-size: 0.75rem;">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

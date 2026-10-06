@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Unified Avatar Renderer (Uploaded Photo > Clean ByteForce Default Avatar) -->
+<div th:fragment="renderAvatar(profile, sizeClass)" class="bf-avatar-container" th:classappend="${sizeClass}">
+    <!-- 1. Custom Uploaded Avatar Image -->
+    <img th:if="${profile != null && profile.avatarUrl != null && !profile.avatarUrl.isBlank()}"
+         th:src="${profile.avatarUrl}"
+         alt="Profile Avatar"
+         class="bf-avatar-img" />
+
+    <!-- 2. Clean Fallback Default Avatar -->
+    <div th:if="${profile == null || profile.avatarUrl == null || profile.avatarUrl.isBlank()}"
+         class="bf-avatar-default">
+        <svg th:replace="~{fragments/icons :: user}"></svg>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign In')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: publicNav('login')}"></nav>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <!-- Official ByteForce Logo -->
+            <div class="auth-logo">
+                <a th:href="@{/}" class="bf-brand-logo">
+                    <img th:src="@{/images/byteforce-logo-cropped.png}" alt="ByteForce — Practice. Prepare. Get Placed." />
+                </a>
+            </div>
+            <p style="font-size: 0.8125rem; font-weight: 700; color: var(--bf-primary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px;">Practice. Prepare. Get Placed.</p>
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Sign in to resume your placement preparation journey.</p>
+        </div>
+
+        <!-- Success Message (e.g. from registration) -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}">Account created successfully!</span>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Invalid credentials. Please try again.</span>
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <input type="hidden" name="returnUrl" th:value="${returnUrl}" />
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" th:value="${email}" placeholder="student@example.com" required autofocus />
+            </div>
+
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="password" class="form-label" style="margin-bottom: 0;">Password</label>
+                    <span style="font-size: 0.75rem; color: var(--bf-slate-400);" title="Password recovery is planned for an upcoming release">Forgot password?</span>
+                </div>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <div>
+                Don't have an account?
+                <a th:href="@{/register(returnUrl=${returnUrl})}" style="font-weight: 700; color: var(--bf-primary);">
+                    Create an account
+                </a>
+            </div>
+            <div style="margin-top: 12px;">
+                <a th:href="@{/}" class="back-to-home-link">
+                    ← Back to ByteForce
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: publicFooter}"></footer>
+
+</body>
+</html>

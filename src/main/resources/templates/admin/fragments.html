@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Admin Topbar Fragment -->
+<header th:fragment="adminTopbar(pageTitle)" class="app-topbar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <button type="button" class="mobile-nav-toggle" aria-label="Toggle navigation menu">
+            <svg th:replace="~{fragments/icons :: menu}"></svg>
+        </button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <h1 class="topbar-title" th:text="${pageTitle}">Admin Console</h1>
+            <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px;">
+                Admin Mode
+            </span>
+        </div>
+    </div>
+    <div class="topbar-actions" style="display: flex; align-items: center; gap: 16px;">
+        <a th:href="@{/dashboard}" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem;">
+            <svg style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Exit to Student View</span>
+        </a>
+        <a th:if="${currentUser != null}" th:href="@{/profile}" class="topbar-profile-link" title="My Account">
+            <div th:replace="~{fragments/avatar :: renderAvatar(${currentProfile}, 'avatar-xs')}"></div>
+            <span class="topbar-user-name" th:text="${currentUser.fullName}">Admin</span>
+        </a>
+    </div>
+</header>
+
+<!-- Admin Flash Alerts Fragment -->
+<div th:fragment="alerts">
+    <div th:if="${successMessage != null}" style="margin-bottom: 20px; padding: 12px 16px; background-color: var(--bf-success-bg, #f0fdf4); color: var(--bf-success, #16a34a); border: 1px solid var(--bf-success-border, #bbf7d0); border-radius: var(--bf-radius-md, 8px); display: flex; align-items: center; gap: 10px; font-size: 0.875rem;">
+        <svg style="width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span th:text="${successMessage}">Operation completed successfully.</span>
+    </div>
+
+    <div th:if="${errorMessage != null}" style="margin-bottom: 20px; padding: 12px 16px; background-color: var(--bf-danger-bg, #fef2f2); color: var(--bf-danger, #dc2626); border: 1px solid var(--bf-danger-border, #fecaca); border-radius: var(--bf-radius-md, 8px); display: flex; align-items: center; gap: 10px; font-size: 0.875rem;">
+        <svg style="width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <span th:text="${errorMessage}">An error occurred.</span>
+    </div>
+</div>
+
+<!-- Admin Section Header Fragment -->
+<div th:fragment="adminHeader(title, subtitle, actionUrl, actionText)" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+    <div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--bf-navy-900); margin-bottom: 4px;" th:text="${title}">Section Title</h2>
+        <p style="color: var(--bf-slate-500); font-size: 0.875rem;" th:text="${subtitle}">Section description</p>
+    </div>
+    <div th:if="${actionUrl != null}">
+        <a th:href="@{${actionUrl}}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5;" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span th:text="${actionText}">Add New</span>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Retrieval Practice — ByteForce Memory')}"></head>
+<body>
+
+<div class="app-layout" th:if="${currentUser != null}">
+    <aside th:replace="~{fragments/layout :: appSidebar('remember')}"></aside>
+    <div class="app-main">
+        <header th:replace="~{fragments/layout :: appTopbar('ByteForce Memory — Retrieval Practice')}"></header>
+        <main class="app-content" style="max-width: 840px; margin: 0 auto; padding-top: 32px;">
+
+            <!-- Back to Memory Home -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <a th:href="@{/remember}" class="btn btn-ghost btn-sm" style="color: var(--bf-slate-600);">
+                    ← Return to Memory
+                </a>
+                <div th:if="${!queueComplete}" style="font-size: 0.875rem; color: var(--bf-slate-500);">
+                    Remaining due: <strong style="color: var(--bf-navy-900);" th:text="${totalDue}">1</strong>
+                </div>
+            </div>
+
+            <!-- Feedback Toast on Previous Review -->
+            <div th:if="${feedbackRating != null}" class="card" style="padding: 12px 18px; margin-bottom: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-size: 0.875rem; color: #166534;">
+                    Recorded rating: <strong th:text="${feedbackRating}">Good</strong>.
+                    Updated state: <span th:text="${feedbackNextState}">Review</span>.
+                </div>
+                <span style="font-size: 0.8125rem; color: #15803d;">Next item queued</span>
+            </div>
+
+            <!-- QUEUE COMPLETE STATE -->
+            <div th:if="${queueComplete}" class="card" style="text-align: center; padding: 56px 32px; background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); box-shadow: var(--bf-shadow-sm);">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background-color: #f0fdf4; border: 2px solid #bbf7d0; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #16a34a;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <h2 style="font-size: 1.75rem; font-weight: 700; color: var(--bf-navy-900); margin: 0 0 10px 0;">
+                    Memory Queue Clear
+                </h2>
+                <p style="color: var(--bf-slate-600); font-size: 1rem; max-width: 480px; margin: 0 auto 28px auto; line-height: 1.6;">
+                    You are completely caught up on scheduled reviews for today. ByteForce will notify you when concepts are due for spaced revision.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                    <a th:href="@{/remember}" class="btn btn-primary" style="padding: 10px 22px;">
+                        Memory Overview
+                    </a>
+                    <a th:href="@{/brain-maps}" class="btn btn-outline" style="padding: 10px 22px;">
+                        Explore Brain Maps
+                    </a>
+                    <a th:href="@{/learn}" class="btn btn-ghost" style="padding: 10px 22px;">
+                        Study New Concepts
+                    </a>
+                </div>
+            </div>
+
+            <!-- ACTIVE RETRIEVAL PRACTICE ITEM -->
+            <div th:if="${!queueComplete && item != null}">
+                <!-- Item Card Header -->
+                <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); box-shadow: var(--bf-shadow-sm); padding: 28px; margin-bottom: 24px;">
+                    <!-- Metadata Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--bf-slate-100); padding-bottom: 14px;">
+                        <div>
+                            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin-bottom: 4px;">
+                                <span th:text="${item.subjectName}">Operating Systems</span>
+                                <span> › </span>
+                                <span th:text="${item.topicName}">Concurrency</span>
+                            </div>
+                            <h2 style="font-size: 1.375rem; font-weight: 700; color: var(--bf-navy-900); margin: 0;" th:text="${item.concept.title}">
+                                Deadlock
+                            </h2>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="badge"
+                                  style="font-size: 0.75rem; padding: 4px 10px; border-radius: 9999px; font-weight: 600;"
+                                  th:classappend="${item.rememberItem.type.badgeClass}"
+                                  th:text="${item.rememberItem.type.displayName}">
+                                Key Fact
+                            </span>
+                            <span th:if="${item.review != null && item.review.reviewCount > 0}"
+                                  style="font-size: 0.75rem; color: var(--bf-slate-500); background-color: var(--bf-slate-100); padding: 4px 8px; border-radius: 4px;">
+                                Retrievability: <strong th:text="${item.formattedRetrievability}">90%</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Instruction -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
+                            Retrieval Challenge
+                        </div>
+                        <p style="font-size: 1.0625rem; color: var(--bf-navy-900); line-height: 1.6; margin: 0;">
+                            What is the key insight, rule, or formula for this concept? Attempt to recall the details before revealing the solution.
+                        </p>
+                    </div>
+
+                    <!-- UNREVEALED RECALL STATE -->
+                    <div id="recallPromptState" style="text-align: center; padding: 36px 20px; background-color: var(--bf-slate-50); border: 2px dashed var(--bf-slate-200); border-radius: var(--bf-radius-md); margin-bottom: 12px;">
+                        <p style="color: var(--bf-slate-500); font-size: 0.9375rem; margin: 0 0 18px 0;">
+                            Think first. Test your memory retrieval before looking.
+                        </p>
+                        <button id="revealAnswerBtn" type="button" class="btn btn-primary" onclick="revealAnswer()" style="padding: 10px 32px; font-size: 1rem; font-weight: 600;">
+                            Reveal Answer &nbsp;<kbd style="font-size: 0.75rem; opacity: 0.8; background: rgba(255,255,255,0.25); padding: 2px 6px; border-radius: 4px;">Space</kbd>
+                        </button>
+                    </div>
+
+                    <!-- REVEALED CONTENT & RATING STATE -->
+                    <div id="revealedContentState" style="display: none;">
+                        <!-- Content Card -->
+                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--bf-radius-md); padding: 22px; margin-bottom: 24px;">
+                            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-slate-400); margin-bottom: 8px;">
+                                Verified Curriculum Content
+                            </div>
+                            <div style="font-size: 1.0625rem; color: var(--bf-navy-900); line-height: 1.7; white-space: pre-wrap;" th:text="${item.rememberItem.content}">
+                                Content explanation
+                            </div>
+                        </div>
+
+                        <!-- Spaced Repetition Rating Panel -->
+                        <div style="border-top: 1px solid var(--bf-slate-200); padding-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                                <div style="font-size: 0.875rem; font-weight: 700; color: var(--bf-navy-900);">
+                                    Rate your recall effort:
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--bf-slate-500);">
+                                    Keys <kbd style="background: var(--bf-slate-100); padding: 1px 5px; border-radius: 3px;">1</kbd> - <kbd style="background: var(--bf-slate-100); padding: 1px 5px; border-radius: 3px;">4</kbd>
+                                </div>
+                            </div>
+
+                            <form id="ratingForm" method="post" th:action="@{/remember/review}">
+                                <input type="hidden" name="itemId" th:value="${item.rememberItem.id}" />
+
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                                    <!-- AGAIN -->
+                                    <button id="rateAgainBtn" type="submit" name="rating" value="AGAIN" class="btn"
+                                            style="display: flex; flex-direction: column; align-items: center; padding: 12px 6px; background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 6px;">
+                                        <span style="font-weight: 700; font-size: 0.9375rem;">Again (1)</span>
+                                        <small style="font-size: 0.75rem; opacity: 0.85;"
+                                               th:text="${previews[T(com.byteforce.domain.ReviewRating).AGAIN] != null ? previews[T(com.byteforce.domain.ReviewRating).AGAIN].intervalLabel : '<1d'}">
+                                            &lt;1d
+                                        </small>
+                                    </button>
+
+                                    <!-- HARD -->
+                                    <button id="rateHardBtn" type="submit" name="rating" value="HARD" class="btn"
+                                            style="display: flex; flex-direction: column; align-items: center; padding: 12px 6px; background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 6px;">
+                                        <span style="font-weight: 700; font-size: 0.9375rem;">Hard (2)</span>
+                                        <small style="font-size: 0.75rem; opacity: 0.85;"
+                                               th:text="${previews[T(com.byteforce.domain.ReviewRating).HARD] != null ? previews[T(com.byteforce.domain.ReviewRating).HARD].intervalLabel : '1d'}">
+                                            1d
+                                        </small>
+                                    </button>
+
+                                    <!-- GOOD -->
+                                    <button id="rateGoodBtn" type="submit" name="rating" value="GOOD" class="btn"
+                                            style="display: flex; flex-direction: column; align-items: center; padding: 12px 6px; background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; border-radius: 6px;">
+                                        <span style="font-weight: 700; font-size: 0.9375rem;">Good (3)</span>
+                                        <small style="font-size: 0.75rem; opacity: 0.85;"
+                                               th:text="${previews[T(com.byteforce.domain.ReviewRating).GOOD] != null ? previews[T(com.byteforce.domain.ReviewRating).GOOD].intervalLabel : '3d'}">
+                                            3d
+                                        </small>
+                                    </button>
+
+                                    <!-- EASY -->
+                                    <button id="rateEasyBtn" type="submit" name="rating" value="EASY" class="btn"
+                                            style="display: flex; flex-direction: column; align-items: center; padding: 12px 6px; background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; border-radius: 6px;">
+                                        <span style="font-weight: 700; font-size: 0.9375rem;">Easy (4)</span>
+                                        <small style="font-size: 0.75rem; opacity: 0.85;"
+                                               th:text="${previews[T(com.byteforce.domain.ReviewRating).EASY] != null ? previews[T(com.byteforce.domain.ReviewRating).EASY].intervalLabel : '6d'}">
+                                            6d
+                                        </small>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Additional Concept Links Footer -->
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; font-size: 0.8125rem;">
+                        <a th:href="@{/remember/concept/{id}(id=${item.concept.id})}" target="_blank" style="color: var(--bf-slate-500); text-decoration: none;">
+                            Concept Memory ↗
+                        </a>
+                        <a th:href="@{/brain-maps(conceptId=${item.concept.id})}" target="_blank" style="color: var(--bf-slate-500); text-decoration: none;">
+                            Brain Map ↗
+                        </a>
+                        <a th:href="@{/learn/concept/{id}(id=${item.concept.id})}" target="_blank" style="color: var(--bf-slate-500); text-decoration: none;">
+                            Full Concept ↗
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    let isRevealed = false;
+
+    function revealAnswer() {
+        if (isRevealed) return;
+        isRevealed = true;
+        document.getElementById('recallPromptState').style.display = 'none';
+        document.getElementById('revealedContentState').style.display = 'block';
+    }
+
+    // Keyboard navigation (Space to reveal, 1-4 to rate)
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.code === 'Space' && !isRevealed) {
+            e.preventDefault();
+            revealAnswer();
+        } else if (isRevealed) {
+            if (e.key === '1') {
+                submitRating('AGAIN');
+            } else if (e.key === '2') {
+                submitRating('HARD');
+            } else if (e.key === '3') {
+                submitRating('GOOD');
+            } else if (e.key === '4') {
+                submitRating('EASY');
+            }
+        }
+    });
+
+    function submitRating(val) {
+        const form = document.getElementById('ratingForm');
+        if (!form) return;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rating';
+        input.value = val;
+        form.appendChild(input);
+        form.submit();
+    }
+</script>
+
+</body>
+</html>

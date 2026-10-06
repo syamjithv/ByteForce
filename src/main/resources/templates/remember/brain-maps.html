@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Brain Maps View Fragment -->
+<div th:fragment="brainMapsContent" class="remember-brain-maps-view">
+    <!-- Sub-header & Back link -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--bf-navy-900); margin: 0 0 4px 0;">
+                Brain Maps — Knowledge Network
+            </h2>
+            <p style="color: var(--bf-slate-500); font-size: 0.875rem; margin: 0;">
+                Navigate curriculum relationships: prerequisites, unlocked concepts, related topics, and interview traps.
+            </p>
+        </div>
+        <a th:href="@{/remember(view='cards')}" class="btn btn-outline btn-sm">
+            ← Back to Revision Cards
+        </a>
+    </div>
+
+    <!-- Explorer Grid: Concept Navigator (Left) + Brain Map View (Right) -->
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start;">
+
+        <!-- Left Column: Curriculum Hierarchy Navigator -->
+        <div class="card" style="padding: 16px; max-height: 800px; overflow-y: auto; background-color: var(--bf-white);">
+            <h3 style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-navy-900); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Curriculum Nodes</span>
+            </h3>
+
+            <div th:if="${curriculumHierarchy == null || curriculumHierarchy.isEmpty()}" style="color: var(--bf-slate-400); font-size: 0.875rem;">
+                No curriculum concepts available.
+            </div>
+
+            <div th:each="entry : ${curriculumHierarchy}" style="margin-bottom: 16px;">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--bf-primary); letter-spacing: 0.04em; margin-bottom: 6px;"
+                     th:text="${entry.key}">
+                    Subject
+                </div>
+
+                <div th:each="topicEntry : ${entry.value}" style="margin-left: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 0.8125rem; font-weight: 600; color: var(--bf-slate-700); margin-bottom: 4px;"
+                         th:text="${topicEntry.key.name}">
+                        Topic Name
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 3px; margin-left: 8px;">
+                        <a th:each="c : ${topicEntry.value}"
+                           th:href="@{/remember(view='brain-maps', conceptId=${c.id})}"
+                           style="font-size: 0.8125rem; padding: 5px 8px; border-radius: 4px; text-decoration: none; display: block;"
+                           th:styleappend="${selectedConcept != null && selectedConcept.id == c.id ? 'background-color: var(--bf-primary); color: white; font-weight: 600;' : 'color: var(--bf-slate-600);'}"
+                           th:text="${c.title}">
+                            Concept Title
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Brain Map Visualizer -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- Empty State if no concept selected -->
+            <div th:if="${selectedConcept == null}" class="card" style="text-align: center; padding: 48px 24px; background-color: var(--bf-white);">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background-color: rgba(37, 99, 235, 0.1); color: var(--bf-primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; font-weight: 700;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                </div>
+                <h3 style="font-size: 1.25rem; color: var(--bf-navy-900); margin-bottom: 6px;">Select a concept to explore</h3>
+                <p style="color: var(--bf-slate-500); font-size: 0.9375rem;">
+                    Choose any concept from the curriculum navigator on the left to see its prerequisites, dependent topics, and knowledge connections.
+                </p>
+            </div>
+
+            <!-- Active Concept & Brain Map Visualizer -->
+            <div th:if="${selectedConcept != null}" style="display: flex; flex-direction: column; gap: 18px;">
+
+                <!-- 1. Canvas Toolbar & Concept Showcase Header -->
+                <div class="card" style="background-color: var(--bf-white); border: 1px solid var(--bf-slate-200); padding: 18px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span class="badge badge-primary" style="font-weight: 700; letter-spacing: 0.04em;">ACTIVE NODE</span>
+                                <span style="font-size: 0.8125rem; color: var(--bf-slate-500);" th:if="${selectedSubject != null}" th:text="${selectedSubject.name + ' › ' + (selectedTopic != null ? selectedTopic.name : '')}">Breadcrumb</span>
+                            </div>
+                            <h2 style="font-size: 1.375rem; color: var(--bf-navy-900); margin: 0 0 6px 0;" th:text="${selectedConcept.title}">
+                                Active Concept Title
+                            </h2>
+                            <p style="color: var(--bf-slate-600); font-size: 0.875rem; line-height: 1.45; margin: 0; max-width: 680px;" th:text="${selectedConcept.shortExplanation}">
+                                Short explanation of the currently selected concept.
+                            </p>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <!-- PDF Export Button -->
+                            <a th:href="@{/brain-maps/export/pdf(conceptId=${selectedConcept.id})}"
+                               class="btn btn-outline btn-sm"
+                               style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border-color: var(--bf-slate-300);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Download PDF Map</span>
+                            </a>
+                            <!-- Open in Learn -->
+                            <a th:href="@{/learn/concept/{id}(id=${selectedConcept.id})}" class="btn btn-outline btn-sm">
+                                Open in Learn
+                            </a>
+                            <!-- Memory Revision -->
+                            <a th:href="@{/remember/concept/{id}(id=${selectedConcept.id})}" class="btn btn-primary btn-sm">
+                                Concept Memory
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Interactive SVG Brain Map Canvas -->
+                <div class="card" style="padding: 0; overflow: hidden; background-color: #0b1120; border: 1px solid #1e293b; border-radius: var(--bf-radius-lg); position: relative;">
+
+                    <!-- Top Floating Zoom & Pan Controls -->
+                    <div style="position: absolute; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px; background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); padding: 5px 8px; border-radius: 6px; border: 1px solid #334155;">
+                        <button type="button" onclick="bmZoomIn()" title="Zoom In (+)" style="background: none; border: none; color: #f8fafc; font-size: 1rem; width: 28px; height: 28px; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">+</button>
+                        <button type="button" onclick="bmZoomOut()" title="Zoom Out (-)" style="background: none; border: none; color: #f8fafc; font-size: 1.1rem; width: 28px; height: 28px; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">−</button>
+                        <div style="width: 1px; height: 18px; background-color: #334155; margin: 5px 2px;"></div>
+                        <button type="button" onclick="bmReset()" title="Reset Canvas View" style="background: none; border: none; color: #94a3b8; font-size: 0.8125rem; padding: 0 6px; cursor: pointer; border-radius: 4px; font-weight: 600;">Reset</button>
+                        <button type="button" onclick="bmFit()" title="Fit View" style="background: none; border: none; color: #94a3b8; font-size: 0.8125rem; padding: 0 6px; cursor: pointer; border-radius: 4px; font-weight: 600;">Fit</button>
+                    </div>
+
+                    <!-- Top Left Canvas State Badge -->
+                    <div style="position: absolute; top: 14px; left: 14px; z-index: 10; pointer-events: none; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background-color: rgba(30, 41, 59, 0.8); color: #cbd5e1; padding: 4px 8px; border-radius: 4px; border: 1px solid #334155;">
+                            Interactive Graph Canvas
+                        </span>
+                        <span style="font-size: 0.6875rem; color: #64748b;">
+                            Drag to pan · Scroll to zoom · Click node to inspect
+                        </span>
+                    </div>
+
+                    <!-- Canvas Viewport Container -->
+                    <div id="canvasContainer" style="width: 100%; height: 500px; cursor: grab; user-select: none; position: relative;">
+                        <svg id="brainMapSvg"
+                             width="100%"
+                             height="100%"
+                             style="width: 100%; height: 100%; display: block;"
+                             preserveAspectRatio="xMidYMid meet"
+                             th:attr="viewBox=${graph != null ? graph.viewBox : '0 0 960 620'}"
+                             xmlns="http://www.w3.org/2000/svg">
+
+                            <defs>
+                                 <!-- Arrowhead Markers for Edge Differentiation -->
+                                 <marker id="arrowhead-prereq" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                                     <polygon points="0 1, 8 4.5, 0 8" fill="#818cf8" />
+                                 </marker>
+                                 <marker id="arrowhead-parent" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                                     <polygon points="0 1, 8 4.5, 0 8" fill="#3b82f6" />
+                                 </marker>
+                                 <marker id="arrowhead-child" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                                     <polygon points="0 1, 8 4.5, 0 8" fill="#38bdf8" />
+                                 </marker>
+                                 <marker id="arrowhead-confused" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                                     <polygon points="0 1, 8 4.5, 0 8" fill="#f59e0b" />
+                                 </marker>
+
+                                 <!-- Canvas Dot Grid Pattern -->
+                                 <pattern id="bmDotGrid" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                                     <circle cx="2" cy="2" r="1.2" fill="#1e293b" />
+                                 </pattern>
+                             </defs>
+
+                             <!-- Transformable Viewport Group for Smooth Pan / Zoom -->
+                             <g id="bmViewport">
+                                 <!-- Background Rect with Grid Pattern -->
+                                 <rect th:if="${graph != null}"
+                                       th:attr="x=${graph.minX - 400}, y=${graph.minY - 400}, width=${graph.viewBoxWidth + 800}, height=${graph.viewBoxHeight + 800}"
+                                       fill="url(#bmDotGrid)" />
+
+                                 <!-- Layer 1: Edges (Connections) -->
+                                 <g id="edgesLayer" th:if="${graph != null}">
+                                     <g th:each="edge : ${graph.edges}">
+                                         <!-- Directional Line -->
+                                         <line th:attr="x1=${edge.x1}, y1=${edge.y1}, x2=${edge.x2}, y2=${edge.y2}"
+                                               th:style="${edge.strokeStyle}"
+                                               stroke-linecap="round" />
+
+                                         <!-- Midpoint Label Pill -->
+                                         <g th:attr="transform='translate(' + ${edge.midX} + ',' + ${edge.midY} + ')'" style="pointer-events: none;">
+                                             <rect x="-38" y="-9" width="76" height="18" rx="4"
+                                                   fill="#0f172a" stroke="#334155" stroke-width="1" />
+                                             <text x="0" y="3.5" text-anchor="middle"
+                                                   fill="#cbd5e1" font-size="8.5" font-family="system-ui, sans-serif" font-weight="700" letter-spacing="0.04em"
+                                                   th:text="${edge.type.displayName}">RELATION</text>
+                                         </g>
+                                     </g>
+                                 </g>
+
+                                 <!-- Layer 2: Concept Nodes -->
+                                 <g id="nodesLayer" th:if="${graph != null}">
+                                     <g th:each="node : ${graph.nodes}"
+                                        class="bm-node-element"
+                                        th:attr="data-id=${node.id}, data-title=${node.title}, data-role=${node.relationshipRole}, data-status=${node.memoryStatus}, data-explanation=${node.shortExplanation}, transform='translate(' + ${node.x} + ',' + ${node.y} + ')'"
+                                        style="cursor: pointer;"
+                                        tabindex="0"
+                                        role="button">
+
+                                         <!-- Card Box Rect (High contrast surface & role border) -->
+                                         <rect x="0" y="0"
+                                               th:attr="width=${node.width}, height=${node.height}"
+                                               rx="8" ry="8"
+                                               th:style="${node.center ? 'fill: #1e293b; stroke: #2563eb; stroke-width: 2.6;' : (node.relationshipRole == 'PREREQUISITE' ? 'fill: #1e293b; stroke: #818cf8; stroke-width: 1.8;' : (node.relationshipRole == 'COMMONLY_CONFUSED' ? 'fill: #1e293b; stroke: #f59e0b; stroke-width: 1.8;' : (node.relationshipRole == 'CHILD' ? 'fill: #1e293b; stroke: #38bdf8; stroke-width: 1.8;' : 'fill: #1e293b; stroke: #64748b; stroke-width: 1.6;')))}" />
+
+                                         <!-- Top Left Role Tag -->
+                                         <text x="12" y="18"
+                                               font-size="8.5" font-family="system-ui, sans-serif" font-weight="700" letter-spacing="0.05em"
+                                               th:style="${node.center ? 'fill: #60a5fa;' : (node.relationshipRole == 'PREREQUISITE' ? 'fill: #a5b4fc;' : (node.relationshipRole == 'COMMONLY_CONFUSED' ? 'fill: #fcd34d;' : (node.relationshipRole == 'CHILD' ? 'fill: #7dd3fc;' : 'fill: #94a3b8;')))}"
+                                               th:text="${node.center ? 'ACTIVE CONCEPT' : node.relationshipRole}">
+                                             ROLE
+                                         </text>
+
+                                         <!-- Top Right Memory Status Indicator -->
+                                         <g th:if="${node.memoryStatus == 'DUE'}" style="pointer-events: none;">
+                                             <circle th:attr="cx=${node.width - 14}, cy=14" r="4" fill="#ef4444" />
+                                             <text th:attr="x=${node.width - 22}, y=17" text-anchor="end" font-size="8.5" font-family="system-ui, sans-serif" font-weight="600" fill="#fca5a5">Due</text>
+                                         </g>
+                                         <g th:if="${node.memoryStatus == 'REVIEWED'}" style="pointer-events: none;">
+                                             <circle th:attr="cx=${node.width - 14}, cy=14" r="4" fill="#10b981" />
+                                             <text th:attr="x=${node.width - 22}, y=17" text-anchor="end" font-size="8.5" font-family="system-ui, sans-serif" font-weight="600" fill="#6ee7b7">Stable</text>
+                                         </g>
+                                         <g th:if="${node.memoryStatus == 'NEW'}" style="pointer-events: none;">
+                                             <circle th:attr="cx=${node.width - 14}, cy=14" r="4" fill="#38bdf8" />
+                                             <text th:attr="x=${node.width - 22}, y=17" text-anchor="end" font-size="8.5" font-family="system-ui, sans-serif" font-weight="600" fill="#7dd3fc">Queue</text>
+                                         </g>
+                                         <g th:if="${node.memoryStatus == 'NONE'}" style="pointer-events: none;">
+                                             <circle th:attr="cx=${node.width - 14}, cy=14" r="3.5" fill="none" stroke="#64748b" stroke-width="1.2" />
+                                         </g>
+
+                                         <!-- Concept Title (Clear white font) -->
+                                         <text x="12" y="38"
+                                               font-size="12" font-family="system-ui, sans-serif" font-weight="700" fill="#ffffff"
+                                               th:text="${#strings.length(node.title) > 22 ? #strings.substring(node.title, 0, 20) + '…' : node.title}">
+                                             Concept Title
+                                         </text>
+
+                                         <!-- Concept Brief Explanation Preview -->
+                                         <text x="12" y="53"
+                                               font-size="9" font-family="system-ui, sans-serif" fill="#cbd5e1"
+                                               th:text="${#strings.length(node.shortExplanation) > 28 ? #strings.substring(node.shortExplanation, 0, 26) + '…' : node.shortExplanation}">
+                                             Short summary
+                                         </text>
+                                     </g>
+                                 </g>
+                             </g>
+                         </svg>
+
+                         <!-- Honest Standalone Concept Overlay when 0 relationships mapped -->
+                         <div th:if="${graph != null && graph.edges.isEmpty()}"
+                              style="position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.92); border: 1px solid #334155; padding: 7px 16px; border-radius: 9999px; font-size: 0.8125rem; color: #cbd5e1; display: flex; align-items: center; gap: 8px; z-index: 5; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
+                             <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #38bdf8;"></span>
+                             <span>Standalone concept — no mapped relationships yet for this curriculum node.</span>
+                         </div>
+
+                         <!-- Honest Empty Graph Overlay if graph is null -->
+                         <div th:if="${graph == null}"
+                              style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #94a3b8; pointer-events: none;">
+                             <div style="font-size: 0.9375rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Concept Graph Unavailable</div>
+                             <div style="font-size: 0.8125rem; max-width: 420px; line-height: 1.5;">No knowledge map is currently available for this concept.</div>
+                         </div>
+                     </div>
+
+                    <!-- 3. Node Selection Inspector Drawer (Shows when a node is clicked) -->
+                    <div id="nodeInspector" style="display: none; background-color: #0f172a; border-top: 1px solid #1e293b; padding: 14px 18px; color: #f8fafc;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span id="inspRoleBadge" class="badge badge-primary" style="font-size: 0.6875rem;">ROLE</span>
+                                    <span id="inspStatusBadge" class="badge badge-secondary" style="font-size: 0.6875rem;">STATUS</span>
+                                </div>
+                                <h4 id="inspTitle" style="font-size: 1.0625rem; font-weight: 700; color: #f8fafc; margin: 0 0 4px 0;">Selected Node</h4>
+                                <p id="inspDesc" style="font-size: 0.8125rem; color: #94a3b8; margin: 0; max-width: 600px; line-height: 1.4;">Node explanation</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <a id="inspFocusBtn" href="#" class="btn btn-primary btn-sm" style="font-size: 0.8125rem; padding: 4px 10px;">
+                                    Focus in Map
+                                </a>
+                                <a id="inspLearnBtn" href="#" class="btn btn-outline btn-sm" style="font-size: 0.8125rem; padding: 4px 10px; color: #f8fafc; border-color: #334155;">
+                                    Study in Learn
+                                </a>
+                                <a id="inspMemoryBtn" href="#" class="btn btn-ghost btn-sm" style="font-size: 0.8125rem; padding: 4px 10px; color: #cbd5e1;">
+                                    Memory
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Visual Legend Bar -->
+                    <div style="background-color: #090e17; border-top: 1px solid #1e293b; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.75rem; color: #94a3b8;">
+                        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Relationships:</span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="display: inline-block; width: 14px; height: 2.5px; background-color: #818cf8;"></span>
+                                <span style="color: #cbd5e1;">Prerequisite</span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="display: inline-block; width: 14px; height: 2px; background-color: #38bdf8;"></span>
+                                <span style="color: #cbd5e1;">Next Concept</span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="display: inline-block; width: 14px; height: 2px; border-bottom: 2px dashed #94a3b8;"></span>
+                                <span style="color: #cbd5e1;">Related</span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span style="display: inline-block; width: 14px; height: 2px; border-bottom: 2px dashed #f59e0b;"></span>
+                                <span style="color: #fbbf24;">Confused With</span>
+                            </span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Memory Status:</span>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #fca5a5;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: #ef4444;"></span> Due
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #6ee7b7;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: #10b981;"></span> Stable
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #7dd3fc;">
+                                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: #38bdf8;"></span> In Queue
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 5. Accessible Non-Visual Relationships List (Semantic Alternative) -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; color: var(--bf-navy-900); margin: 0;">
+                            Structured Knowledge Connections (Accessible List)
+                        </h3>
+                        <span style="font-size: 0.8125rem; color: var(--bf-slate-500);">
+                            Curriculum relationships for screen readers and keyboard navigation
+                        </span>
+                    </div>
+
+                    <!-- Clean Empty State if no relationships -->
+                    <div th:if="${relatedConcepts.isEmpty()}" class="card" style="text-align: center; padding: 32px 20px; background-color: var(--bf-white);">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background-color: rgba(37, 99, 235, 0.1); color: var(--bf-primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <h4 style="font-size: 1rem; color: var(--bf-navy-900); margin-bottom: 4px;">Standalone curriculum concept</h4>
+                        <p style="color: var(--bf-slate-500); font-size: 0.875rem; margin: 0 0 14px 0;">
+                            No relationships mapped yet for this node. More connections will appear as the curriculum develops.
+                        </p>
+                        <a th:href="@{/learn/concept/{id}(id=${selectedConcept.id})}" class="btn btn-outline btn-sm">
+                            Review Concept Content
+                        </a>
+                    </div>
+
+                    <!-- Structured Relationship Cards -->
+                    <div th:if="${!relatedConcepts.isEmpty()}" style="display: flex; flex-direction: column; gap: 16px;">
+
+                        <!-- 1. Prerequisites (Learn First) -->
+                        <div th:if="${prerequisites != null && !prerequisites.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="badge badge-hard">PREREQUISITES</span>
+                                <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Required Foundation Before This Concept</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                                <div th:each="rel : ${prerequisites}" class="card" style="padding: 12px; background-color: var(--bf-white);">
+                                    <h5 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Prerequisite Concept</h5>
+                                    <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 6px;" th:text="${rel.description}">Note</p>
+                                    <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 10px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a th:href="@{/brain-maps(conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            View Map
+                                        </a>
+                                        <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            Study →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Successors / Unlocked Concepts (What comes next) -->
+                        <div th:if="${successors != null && !successors.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="badge badge-primary">NEXT CONCEPTS</span>
+                                <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Topics Unlocked by Mastering This Concept</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                                <div th:each="rel : ${successors}" class="card" style="padding: 12px; background-color: var(--bf-white);">
+                                    <h5 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Next Concept</h5>
+                                    <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 6px;" th:text="${rel.description}">Note</p>
+                                    <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 10px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a th:href="@{/brain-maps(conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            View Map
+                                        </a>
+                                        <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            Study →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Related Concepts (Adjacent Knowledge) -->
+                        <div th:if="${relatedNodes != null && !relatedNodes.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="badge badge-easy">RELATED</span>
+                                <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Adjacent &amp; Complementary Knowledge</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                                <div th:each="rel : ${relatedNodes}" class="card" style="padding: 12px; background-color: var(--bf-white);">
+                                    <h5 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Related Concept</h5>
+                                    <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: var(--bf-slate-600); margin-bottom: 6px;" th:text="${rel.description}">Note</p>
+                                    <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 10px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a th:href="@{/brain-maps(conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            View Map
+                                        </a>
+                                        <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            Study →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Commonly Confused Concepts -->
+                        <div th:if="${confusedNodes != null && !confusedNodes.isEmpty()}" class="card" style="background-color: var(--bf-slate-50); border: 1px solid var(--bf-slate-200); padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="badge badge-purple">COMMONLY CONFUSED</span>
+                                <span style="font-size: 0.875rem; font-weight: 600; color: var(--bf-navy-900);">Common Interview Traps &amp; Distinctions</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                                <div th:each="rel : ${confusedNodes}" class="card" style="padding: 12px; background-color: var(--bf-white); border-left: 3px solid #8b5cf6;">
+                                    <h5 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; color: var(--bf-navy-900);" th:text="${rel.connectedConcept.title}">Confused Concept</h5>
+                                    <p th:if="${rel.description != null && !rel.description.isBlank()}" style="font-size: 0.8125rem; color: #6d28d9; font-weight: 500; margin-bottom: 6px;" th:text="${rel.description}">Distinction Note</p>
+                                    <p style="font-size: 0.8125rem; color: var(--bf-slate-500); margin-bottom: 10px; line-height: 1.4;" th:text="${rel.connectedConcept.shortExplanation}">Explanation</p>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a th:href="@{/brain-maps(conceptId=${rel.connectedConcept.id})}" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            View Map
+                                        </a>
+                                        <a th:href="@{/learn/concept/{id}(id=${rel.connectedConcept.id})}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                                            Study →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Client-side Interactive Zoom, Pan, and Node Inspector Script -->
+    <script>
+    (function() {
+        const svg = document.getElementById('brainMapSvg');
+        const viewport = document.getElementById('bmViewport');
+        const container = document.getElementById('canvasContainer');
+        if (!svg || !viewport || !container) return;
+
+        let zoom = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        function updateTransform() {
+            viewport.setAttribute('transform', 'translate(' + panX + ',' + panY + ') scale(' + zoom + ')');
+        }
+
+        window.bmZoomIn = function() {
+            zoom = Math.min(3.0, zoom * 1.25);
+            updateTransform();
+        };
+
+        window.bmZoomOut = function() {
+            zoom = Math.max(0.35, zoom / 1.25);
+            updateTransform();
+        };
+
+        window.bmReset = function() {
+            zoom = 1.0;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        };
+
+        window.bmFit = function() {
+            zoom = 1.0;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        };
+
+        container.addEventListener('pointerdown', function(e) {
+            if (e.target.closest('.bm-node-element')) return;
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            container.style.cursor = 'grabbing';
+            try { container.setPointerCapture(e.pointerId); } catch(err) {}
+        });
+
+        container.addEventListener('pointermove', function(e) {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        });
+
+        const stopDrag = function(e) {
+            if (isDragging) {
+                isDragging = false;
+                container.style.cursor = 'grab';
+                try { container.releasePointerCapture(e.pointerId); } catch(err) {}
+            }
+        };
+
+        container.addEventListener('pointerup', stopDrag);
+        container.addEventListener('pointercancel', stopDrag);
+
+        container.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 1.15 : 0.87;
+            zoom = Math.max(0.35, Math.min(3.0, zoom * delta));
+            updateTransform();
+        }, { passive: false });
+
+        // Node Inspector Selection
+        const nodeElements = document.querySelectorAll('.bm-node-element');
+        const inspector = document.getElementById('nodeInspector');
+        const inspTitle = document.getElementById('inspTitle');
+        const inspRoleBadge = document.getElementById('inspRoleBadge');
+        const inspStatusBadge = document.getElementById('inspStatusBadge');
+        const inspDesc = document.getElementById('inspDesc');
+        const inspFocusBtn = document.getElementById('inspFocusBtn');
+        const inspLearnBtn = document.getElementById('inspLearnBtn');
+        const inspMemoryBtn = document.getElementById('inspMemoryBtn');
+
+        function selectNode(el) {
+            nodeElements.forEach(function(n) {
+                const rect = n.querySelector('rect');
+                if (rect) {
+                    rect.style.filter = 'none';
+                }
+            });
+
+            const activeRect = el.querySelector('rect');
+            if (activeRect) {
+                activeRect.style.filter = 'drop-shadow(0 0 8px rgba(129, 140, 248, 0.6))';
+            }
+
+            const id = el.getAttribute('data-id');
+            const title = el.getAttribute('data-title');
+            const role = el.getAttribute('data-role');
+            const status = el.getAttribute('data-status');
+            const explanation = el.getAttribute('data-explanation');
+
+            if (inspector) {
+                inspector.style.display = 'block';
+                if (inspTitle) inspTitle.textContent = title;
+                if (inspDesc) inspDesc.textContent = explanation || 'No additional summary recorded.';
+                if (inspRoleBadge) {
+                    inspRoleBadge.textContent = role;
+                    inspRoleBadge.className = role === 'PREREQUISITE' ? 'badge badge-hard' : (role === 'COMMONLY_CONFUSED' ? 'badge badge-purple' : 'badge badge-primary');
+                }
+                if (inspStatusBadge) {
+                    if (status === 'DUE') {
+                        inspStatusBadge.textContent = '● Due for Revision';
+                        inspStatusBadge.className = 'badge badge-danger';
+                    } else if (status === 'REVIEWED') {
+                        inspStatusBadge.textContent = '● Retained / Stable';
+                        inspStatusBadge.className = 'badge badge-success';
+                    } else if (status === 'NEW') {
+                        inspStatusBadge.textContent = '● In Queue';
+                        inspStatusBadge.className = 'badge badge-primary';
+                    } else {
+                        inspStatusBadge.textContent = '● Unstudied';
+                        inspStatusBadge.className = 'badge badge-secondary';
+                    }
+                }
+                if (inspFocusBtn) inspFocusBtn.href = '/brain-maps?conceptId=' + id;
+                if (inspLearnBtn) inspLearnBtn.href = '/learn/concept/' + id;
+                if (inspMemoryBtn) inspMemoryBtn.href = '/remember/concept/' + id;
+            }
+        }
+
+        nodeElements.forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectNode(el);
+            });
+
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectNode(el);
+                }
+            });
+
+            el.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                const id = el.getAttribute('data-id');
+                if (id) window.location.href = '/brain-maps?conceptId=' + id;
+            });
+        });
+    })();
+    </script>
+</div>
+</body>
+</html>
